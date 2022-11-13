@@ -1,9 +1,9 @@
 import { Controller, OnInit, OnRender } from "@flamework/core";
 import { Players, SoundService as Sound, Workspace as World } from "@rbxts/services";
-import { WaitFor } from "shared/modules/utility/WaitFor";
-import { CrosshairController } from "./CrosshairController";
-import { FPSController } from "./FPSController";
-import { UIController } from "./UIController";
+import { Events } from "client/network";
+import { Crosshair } from "./Crosshair";
+import { FPS } from "./FPS";
+import { UI } from "./UI";
 
 const { rad } = math;
 
@@ -12,7 +12,7 @@ type MenuPage = Folder & {
 };
 
 @Controller({})
-export class MenuController implements OnInit, OnRender {
+export class Menu implements OnInit, OnRender {
     private readonly plr = Players.LocalPlayer;
     private readonly mouse = this.plr.GetMouse();
     private initialCF = new CFrame;
@@ -20,9 +20,9 @@ export class MenuController implements OnInit, OnRender {
     private currentPage?: MenuPage;
 
     public constructor(
-        private readonly fps: FPSController,
-        private readonly ui: UIController,
-        private readonly crosshair: CrosshairController
+        private readonly fps: FPS,
+        private readonly ui: UI,
+        private readonly crosshair: Crosshair
     ) {}
 
     // Toggle visibility of page elements
@@ -56,6 +56,8 @@ export class MenuController implements OnInit, OnRender {
         World.CurrentCamera!.CameraType = Enum.CameraType.Scriptable;
         World.CurrentCamera!.FieldOfView = 60;
         this.active = true;
+
+        Events.discordLog.fire("test", "test log");
     }
 
     // Menu is finished being used (play button is pressed)

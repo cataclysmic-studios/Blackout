@@ -1,13 +1,13 @@
 import { Controller, OnStart } from "@flamework/core";
 import { Players, UserInputService as UIS } from "@rbxts/services";
-import { FPSController } from "./FPSController";
+import { FPS } from "./FPS";
 
 @Controller({})
 export class InputController implements OnStart {
     public mouseDown = false;
 
     public constructor(
-        private readonly fps: FPSController
+        private readonly fps: FPS
     ) {}
 
 

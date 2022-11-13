@@ -5,7 +5,7 @@ import { WaitFor } from "shared/modules/utility/WaitFor";
 import { HUD } from "client/components/HUD";
 
 @Controller({})
-export class UIController {
+export class UI {
     private readonly playerUI = WaitFor<PlayerGui>(Players.LocalPlayer, "PlayerGui");
     
     public getHUD(): HUD {

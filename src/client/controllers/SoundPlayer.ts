@@ -2,7 +2,7 @@ import { Controller, OnInit } from "@flamework/core";
 import { SoundService } from "@rbxts/services";
 
 @Controller({})
-export class SoundController implements OnInit {
+export class SoundPlayer implements OnInit {
     private readonly registered = new Map<string, number[]>();
 
     private register(name: string, ids: number[]): void {

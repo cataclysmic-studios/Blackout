@@ -1,12 +1,12 @@
 import { Controller } from "@flamework/core";
 import { UserInputService as UIS } from "@rbxts/services";
-import { UIController } from "./UIController";
+import { UI } from "./UI";
 import { WaitFor } from "shared/modules/utility/WaitFor";
 import { WeaponData } from "client/classes/WeaponData";
 import Tween from "shared/modules/utility/Tween";
 
 @Controller({})
-export class CrosshairController {
+export class Crosshair {
     private enabled = false;
     private size = 1;
     private tweenSpeed = .15;
@@ -14,7 +14,7 @@ export class CrosshairController {
     public maxSize = 10;
 
     public constructor(
-        private readonly ui: UIController
+        private readonly ui: UI
     ) {}
 
     // Add onto current size

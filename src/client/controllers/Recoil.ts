@@ -4,7 +4,7 @@ import ViewModel from "client/classes/ViewModel";
 import { WeaponData } from "client/classes/WeaponData";
 
 @Controller({})
-export class RecoilController implements OnRender {
+export class Recoil implements OnRender {
 	private readonly attached: (Camera | ViewModel)[] = []; 
     private readonly springDefaults = {
         camera: [25, 75, 4, 5.5],

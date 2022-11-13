@@ -1,6 +1,8 @@
 import { Networking } from "@flamework/networking";
 
-interface ServerEvents {}
+interface ServerEvents {
+    discordLog(message: string, logType: string): void;
+}
 
 interface ClientEvents {}
 

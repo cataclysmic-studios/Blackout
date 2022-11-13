@@ -1,13 +1,13 @@
 import { OnStart } from "@flamework/core";
 import { Component, BaseComponent } from "@flamework/components";
-import { MenuController } from "client/controllers/MenuController";
+import { Menu } from "client/controllers/Menu";
 
 interface Attributes {}
 
 @Component({ tag: "DefaultMenuPage" })
 export class DefaultMenuPage extends BaseComponent<Attributes, Folder & { Cam: CFrameValue }> implements OnStart {
     public constructor(
-        private readonly menu: MenuController
+        private readonly menu: Menu
     ) {
         super();
     }

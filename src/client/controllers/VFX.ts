@@ -5,7 +5,7 @@ import { WeaponModel } from "client/classes/WeaponModel";
 
 
 @Controller({})
-export class VFXController {
+export class VFX {
     public createMuzzleFlash(model: WeaponModel): void {
         const muzzleFlash = model.Trigger.Muzzle.Clone();
         muzzleFlash.Parent = model.Trigger;

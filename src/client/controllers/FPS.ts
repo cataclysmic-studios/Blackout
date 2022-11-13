@@ -6,17 +6,18 @@ import { WeaponData } from "client/classes/WeaponData";
 import { WeaponModel } from "client/classes/WeaponModel";
 import { AmmoHUD } from "client/components/AmmoHUD";
 import { MenuButton } from "client/components/MenuButton";
-import { RecoilController } from "./RecoilController";
-import { CrosshairController } from "./CrosshairController";
-import { SoundController } from "./SoundController";
-import { VFXController } from "./VFXController";
+import { Recoil } from "./Recoil";
+import { Crosshair } from "./Crosshair";
+import { SoundPlayer } from "./SoundPlayer";
+import { VFX as VFX } from "./VFX";
 import { Firemode } from "client/classes/Enums";
 import Signal from "@rbxts/signal";
 import Tween from "shared/modules/utility/Tween";
 import ViewModel from "client/classes/ViewModel";
+import { HUD } from "client/components/HUD";
 
 @Controller({})
-export class FPSController {
+export class FPS {
     private readonly janitor = new Janitor;
     private viewModel: ViewModel;
     private weaponData?: WeaponData;
@@ -48,10 +49,10 @@ export class FPSController {
     }
 
     public constructor(
-        private readonly crosshair: CrosshairController,
-        private readonly sounds: SoundController,
-        private readonly recoil: RecoilController,
-        private readonly vfx: VFXController
+        private readonly crosshair: Crosshair,
+        private readonly sounds: SoundPlayer,
+        private readonly recoil: Recoil,
+        private readonly vfx: VFX
     ) {
         this.viewModel = new ViewModel(WaitFor<Model>(Replicated.WaitForChild("Character"), "ViewModel"));
         recoil.attach(this.viewModel);
@@ -63,8 +64,10 @@ export class FPSController {
 
             const menuButtons = Dependency<MenuButton>();
             const ammoHUD = Dependency<AmmoHUD>();
+            const hud = Dependency<HUD>();
             menuButtons.destroy();
             ammoHUD.destroy();
+            hud.destroy();
         });
     }
 
