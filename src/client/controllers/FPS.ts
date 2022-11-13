@@ -1,4 +1,4 @@
-import { Controller, Dependency } from "@flamework/core";
+import { Controller, Dependency, OnRender } from "@flamework/core";
 import { ReplicatedStorage as Replicated, Workspace as World } from "@rbxts/services";
 import { Janitor } from "@rbxts/janitor";
 import { WaitFor } from "shared/modules/utility/WaitFor";
@@ -9,15 +9,15 @@ import { MenuButton } from "client/components/MenuButton";
 import { Recoil } from "./Recoil";
 import { Crosshair } from "./Crosshair";
 import { SoundPlayer } from "./SoundPlayer";
-import { VFX as VFX } from "./VFX";
+import { VFX } from "./VFX";
 import { Firemode } from "client/classes/Enums";
+import { HUD } from "client/components/HUD";
 import Signal from "@rbxts/signal";
 import Tween from "shared/modules/utility/Tween";
 import ViewModel from "client/classes/ViewModel";
-import { HUD } from "client/components/HUD";
 
 @Controller({})
-export class FPS {
+export class FPS implements OnRender {
     private readonly janitor = new Janitor;
     private viewModel: ViewModel;
     private weaponData?: WeaponData;
@@ -54,13 +54,18 @@ export class FPS {
         private readonly recoil: Recoil,
         private readonly vfx: VFX
     ) {
+        const cam = World.CurrentCamera!;
         this.viewModel = new ViewModel(WaitFor<Model>(Replicated.WaitForChild("Character"), "ViewModel"));
         recoil.attach(this.viewModel);
-        recoil.attach(World.CurrentCamera!);
+        recoil.attach(cam);
+
+        // proceduralAnims.attach(this.viewModel);
+        // proceduralAnims.attach(cam);
         
         this.janitor.Add(() => {
-            this.recoil.destroy();
             this.viewModel.destroy();
+            recoil.destroy();
+            // proceduralAnims.destroy();
 
             const menuButtons = Dependency<MenuButton>();
             const ammoHUD = Dependency<AmmoHUD>();
@@ -69,6 +74,10 @@ export class FPS {
             ammoHUD.destroy();
             hud.destroy();
         });
+    }
+
+    public onRender(dt: number): void {
+        this.recoil.update(dt, this.state.aimed);
     }
 
     public cancelInspect(): void {
@@ -312,7 +321,7 @@ export class FPS {
 
         let stabilization = 1;
         if (this.state.aimed)
-            stabilization += 0.5;
+            stabilization += 0.8;
 
         this.recoil.kick(this.weaponData, cforce, "Camera", stabilization);
         this.recoil.kick(this.weaponData, mforce, "Model", stabilization);

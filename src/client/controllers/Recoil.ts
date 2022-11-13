@@ -4,7 +4,7 @@ import ViewModel from "client/classes/ViewModel";
 import { WeaponData } from "client/classes/WeaponData";
 
 @Controller({})
-export class Recoil implements OnRender {
+export class Recoil {
 	private readonly attached: (Camera | ViewModel)[] = []; 
     private readonly springDefaults = {
         camera: [25, 75, 4, 5.5],
@@ -19,7 +19,7 @@ export class Recoil implements OnRender {
         modelTorque: new Spring(...this.springDefaults.modelTorque),
     };
 
-	public onRender(dt: number): void {
+	public update(dt: number, aimed: boolean): void {
         const torqueMult = 14;
         const springDamp = 80;
         const ocf = this.springs.camera.update(dt).div(springDamp);
@@ -44,7 +44,7 @@ export class Recoil implements OnRender {
                 } else {
                     obj = <ViewModel>obj;
                     obj.syncCameraBone();
-                    obj.setCFrame(obj.getCFrame().mul(mrecoil));
+                    obj.setCFrame(obj.getCFrame(dt, aimed).mul(mrecoil));
                 }
     }
 

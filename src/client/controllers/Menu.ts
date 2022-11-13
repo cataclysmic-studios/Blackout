@@ -56,8 +56,6 @@ export class Menu implements OnInit, OnRender {
         World.CurrentCamera!.CameraType = Enum.CameraType.Scriptable;
         World.CurrentCamera!.FieldOfView = 60;
         this.active = true;
-
-        Events.discordLog.fire("test", "test log");
     }
 
     // Menu is finished being used (play button is pressed)

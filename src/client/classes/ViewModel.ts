@@ -1,16 +1,17 @@
+import { UserInputService as UIS, Workspace as World } from "@rbxts/services";
 import { Janitor } from "@rbxts/janitor";
-import { Workspace as World } from "@rbxts/services";
 import { WaitFor } from "shared/modules/utility/WaitFor";
 import { WeaponData } from "./WeaponData";
 import { WeaponModel } from "./WeaponModel";
+import Spring from "shared/modules/utility/Spring";
 
 const camera = World.CurrentCamera!;
 export default class ViewModel {
     private readonly janitor = new Janitor;
     private oldCamCF?: CFrame;
-    private offsets = {
-        walkCycle: new CFrame
-    }
+    private springs = {
+        mouseSway: new Spring
+    };
     
     public readonly model: Model;
     public readonly root: BasePart;
@@ -23,11 +24,6 @@ export default class ViewModel {
         this.root = this.model.PrimaryPart!;
 
         this.janitor.Add(this.model);
-    }
-
-    // Camera offset for walk cycle
-    public setWalkCycleCFrame(cf: CFrame): void {
-        this.offsets.walkCycle = cf;
     }
 
     // Set rig CFrame
@@ -54,12 +50,19 @@ export default class ViewModel {
     }
 
     // Returns a CFrame of where the rig should be
-    public getCFrame(): CFrame {
+    public getCFrame(dt: number, aiming: boolean): CFrame {
         if (!this.weapon || !this.data) return new CFrame();
+
+        const { X: dx, Y: dy } = UIS.GetMouseDelta().div(600);
+        const limit = aiming ? .01 : .1;
+        this.springs.mouseSway.shove(new Vector3(math.clamp(dx, -limit, limit), math.clamp(dy, -limit, limit), 0));
+
+        const sway = this.springs.mouseSway.update(dt).div(aiming ? 3 : 1);
+        const swayCF = new CFrame(sway.X, sway.Y / 8, 0).mul(CFrame.Angles(sway.Y / 1.25, sway.X, 0));
         return World.CurrentCamera!.CFrame
             .mul(this.data.vmOffset)
-            .mul(this.offsets.walkCycle)
-            .mul(this.getManipulator("Aim").Value);
+            .mul(this.getManipulator("Aim").Value)
+            .mul(swayCF);
     }
 
     // Update weapon
