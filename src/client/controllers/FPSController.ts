@@ -5,22 +5,11 @@ import { RecoilController } from "./RecoilController";
 import { Janitor } from "@rbxts/janitor";
 import { WaitFor } from "shared/modules/utility/WaitFor";
 import { WeaponData } from "client/classes/WeaponData";
+import { WeaponModel } from "client/classes/WeaponModel";
 import { SoundController } from "./SoundController";
-import ViewModel from "client/classes/ViewModel";
 import { VFXController } from "./VFXController";
-
-interface WeaponModel extends Folder {
-    Sounds: Folder & {
-        Fire: Sound;
-    };
-    Trigger: Part & {
-        ViewModel: Motor6D;
-    };
-    Chamber: Part;
-    Mag: Part;
-    Bolt: Part;
-    CharingHandle?: Part;
-}
+import ViewModel from "client/classes/ViewModel";
+import Tween from "shared/modules/utility/Tween";
 
 const cam = World.CurrentCamera!;
 
@@ -36,7 +25,15 @@ export class FPSController {
         equipped: false,
         shooting: false,
         reloading: false,
-        aiming: false
+        aiming: false,
+        sprinting: false,
+        crouched: false,
+        proned: false,
+        lean: 0,
+        ammo: {
+            mag: 0,
+            reserve: 0
+        }
     }
 
     public constructor(
@@ -68,15 +65,57 @@ export class FPSController {
         const model = WaitFor<WeaponModel>(Replicated.WaitForChild("Weapons"), weaponName).Clone();
         
         this.attachMotors(model);
-        task.wait(2);
+        task.wait(1);
         model.Parent = this.viewModel.model;
         
         this.viewModel.setEquipped(model);
         this.viewModel.playAnimation("Idle");
-        this.weaponData = this.viewModel.data;
+        this.weaponData = this.viewModel.data!;
         this.weaponModel = model;
 
+        for (const offset of model.Offsets.GetChildren()) {
+            const cfm = <CFrameValue>offset.Clone();
+            cfm.Value = new CFrame;
+            cfm.Parent = model.CFrameManipulators;
+        }
+
+        this.state.ammo.mag = this.weaponData.magSize;
+        this.state.ammo.reserve = this.weaponData.reserve;
         this.state.equipped = true;
+    }
+
+    public reload(): void {
+        if (!this.state.equipped) return;
+        if (!this.weaponModel || !this.weaponData) return;
+        if (this.state.reloading) return;
+        if (this.state.aiming) return;
+        if (this.state.shooting) return;
+        if (this.state.ammo.mag >= this.weaponData.magSize) return;
+        if (this.state.ammo.reserve === 0) return;
+        this.state.reloading = true;
+
+        const magBeforeReload = this.state.ammo.mag;
+        this.state.ammo.mag = this.weaponData.magSize;
+        if (magBeforeReload > 0)
+            this.state.ammo.mag += this.weaponData.chamber;
+
+        const ammoUsed = this.state.ammo.mag - magBeforeReload;
+        this.state.ammo.reserve -= ammoUsed;
+        this.state.reloading = false;
+    }
+
+    public aim(on: boolean): void {
+        if (!this.state.equipped) return;
+        if (this.state.aiming === on) return;
+        if (!this.weaponModel || !this.weaponData) return;
+        this.state.aiming = on;
+
+        this.weaponModel.Sounds[on ? "AimDown" : "AimUp"].Play();
+
+        const info = new TweenInfo(.3, Enum.EasingStyle.Quad)
+        Tween(this.viewModel.getManipulator("Aim"), info, {
+            Value: on ? this.weaponModel.Offsets.Aim.Value : new CFrame
+        });
     }
 
     public toggleTriggerPull(on: boolean): void {
@@ -96,7 +135,14 @@ export class FPSController {
     public shoot(): void {
         if (!this.state.equipped) return;
         if (!this.weaponModel || !this.weaponData) return;
+        if (this.state.ammo.mag === 0) {
+            this.weaponModel.Sounds.EmptyClick.Play();
+            this.reload();
+            return;
+        };
+
         this.state.shooting = true;
+        this.state.ammo.mag--;
 
         this.vfx.createMuzzleFlash(this.weaponModel);
         this.sounds.clone(<Sound>this.weaponModel.Sounds.WaitForChild("Fire"));
@@ -123,10 +169,11 @@ export class FPSController {
         
         this.recoil.kick(cforce, "Camera");
         this.recoil.kick(mforce, "Model");
-        task.wait(.12);
-        this.recoil.kick(cforce.mul(-1), "Camera");
-        this.recoil.kick(mforce.mul(-1), "Model");
-
+        task.delay(.12, () => {
+            this.recoil.kick(cforce.mul(-1), "Camera");
+            this.recoil.kick(mforce.mul(-1), "Model");
+        });
+        
         this.state.shooting = false;
     }
 }

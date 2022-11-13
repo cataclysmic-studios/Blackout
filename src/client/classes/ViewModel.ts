@@ -2,15 +2,18 @@ import { Janitor } from "@rbxts/janitor";
 import { Workspace as World } from "@rbxts/services";
 import { WaitFor } from "shared/modules/utility/WaitFor";
 import { WeaponData } from "./WeaponData";
+import { WeaponModel } from "./WeaponModel";
 
 const camera = World.CurrentCamera!;
 export default class ViewModel {
     private readonly janitor = new Janitor;
-    private walkCycleCFrame = new CFrame;
+    private offsets = {
+        walkCycle: new CFrame
+    }
     
     public readonly model: Model;
     public readonly root: BasePart;
-    public weapon?: Folder;
+    public weapon?: WeaponModel;
     public data?: WeaponData;
 
     public constructor(model: Model) {
@@ -22,19 +25,27 @@ export default class ViewModel {
     }
 
     public setWalkCycleCFrame(cf: CFrame): void {
-        this.walkCycleCFrame = cf;
+        this.offsets.walkCycle = cf;
     }
 
     public setCFrame(cf: CFrame): void {
         this.root.CFrame = cf;
     }
 
-    public getCFrame(): CFrame {
-        if (!this.weapon || !this.data) return new CFrame();
-        return World.CurrentCamera!.CFrame.mul(this.data.vmOffset).mul(this.walkCycleCFrame)
+    public getManipulator(name: string): CFrameValue {
+        const value = WaitFor<CFrameValue>(this.weapon!.CFrameManipulators, name);
+        return value;
     }
 
-    public setEquipped(model: Folder): void {
+    public getCFrame(): CFrame {
+        if (!this.weapon || !this.data) return new CFrame();
+        return World.CurrentCamera!.CFrame
+            .mul(this.data.vmOffset)
+            .mul(this.offsets.walkCycle)
+            .mul(this.getManipulator("Aim").Value);
+    }
+
+    public setEquipped(model: WeaponModel): void {
         this.weapon = model;
         try {
             this.data = <WeaponData>require(WaitFor<ModuleScript>(this.weapon, "Data"));

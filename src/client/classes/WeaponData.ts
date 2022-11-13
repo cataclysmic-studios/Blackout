@@ -10,4 +10,7 @@ export interface WeaponData {
     };
 
     shell: string;
+    magSize: number;
+    reserve: number;
+    chamber: number;
 }

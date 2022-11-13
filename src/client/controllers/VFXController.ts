@@ -7,18 +7,21 @@ import { WaitFor } from "shared/modules/utility/WaitFor";
 export class VFXController {
     public createMuzzleFlash(model: Folder): void {
         const trigger = model.WaitForChild("Trigger");
-        const muzzleFlash = WaitFor<Attachment>(trigger, "Muzzle").Clone();
+        const muzzleAttachment = WaitFor<Attachment>(trigger, "Muzzle");
+        const muzzleFlash = muzzleAttachment.Clone();
+        muzzleFlash.Parent = trigger;
+        
         for (const v of <(ParticleEmitter | Light)[]>muzzleFlash.GetChildren()) {
             v.Enabled = true;
             task.delay(v.Name === "BarrelSmoke" ? .15 : .1, () => {
                 v.Enabled = false
             });
         }
-        task.delay(1.5, () => muzzleFlash.Destroy());
+        task.delay(2.5, () => muzzleFlash.Destroy());
 
         const chamberSmoke = WaitFor<ParticleEmitter>(trigger.WaitForChild("Chamber"), "Smoke");
         chamberSmoke.Enabled = true;
-        task.delay(.18, () => {
+        task.delay(.1, () => {
             chamberSmoke.Enabled = false
         });
     }

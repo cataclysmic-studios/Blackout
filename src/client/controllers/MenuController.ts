@@ -1,6 +1,7 @@
 import { Controller, OnInit, OnRender } from "@flamework/core";
 import { Players, SoundService as Sound, Workspace as World } from "@rbxts/services";
 import { WaitFor } from "shared/modules/utility/WaitFor";
+import { CrosshairController } from "./CrosshairController";
 import { FPSController } from "./FPSController";
 
 const { rad } = math;
@@ -18,7 +19,8 @@ export class MenuController implements OnInit, OnRender {
     private currentPage?: MenuPage;
 
     public constructor(
-        private fps: FPSController
+        private fps: FPSController,
+        private crosshair: CrosshairController
     ) {}
 
     private togglePage(page: MenuPage, on?: boolean): void {
@@ -60,6 +62,8 @@ export class MenuController implements OnInit, OnRender {
 
         this.plr.CameraMode = Enum.CameraMode.LockFirstPerson;
         Sound.Music.Menu.Stop();
+
+        this.crosshair.toggle();
         this.fps.equip("HK416");
     }
 }
