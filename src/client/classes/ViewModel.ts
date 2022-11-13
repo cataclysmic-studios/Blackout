@@ -40,7 +40,6 @@ export default class ViewModel {
 
     public updateCamera(): void {
         const newCF = WaitFor<Part>(this.model, "Camera").CFrame.ToObjectSpace(this.root.CFrame);
-        let cf = new CFrame;
         if (this.oldCamCF) {
             const [_, __, z] = newCF.ToOrientation();
             const [x, y] = newCF.ToObjectSpace(this.oldCamCF).ToEulerAnglesXYZ();
@@ -58,13 +57,14 @@ export default class ViewModel {
             .mul(this.getManipulator("Aim").Value);
     }
 
-    public setEquipped(model: WeaponModel): void {
+    public setEquipped(model?: WeaponModel): void {
         this.weapon = model;
-        try {
-            this.data = <WeaponData>require(WaitFor<ModuleScript>(this.weapon, "Data"));
-        } catch(e) {
-            warn(`Weapon data for "${this.weapon.Name}" failed to load. Stack trace:\n${e}`);
-        }
+        if (this.weapon)
+            try {
+                this.data = <WeaponData>require(WaitFor<ModuleScript>(this.weapon, "Data"));
+            } catch(e) {
+                warn(`Weapon data for "${this.weapon.Name}" failed to load. Stack trace:\n${e}`);
+            }
     }
 
     public playAnimation(name: string, playImmediately = true): AnimationTrack | undefined {

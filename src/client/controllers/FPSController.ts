@@ -4,6 +4,8 @@ import { Janitor } from "@rbxts/janitor";
 import { WaitFor } from "shared/modules/utility/WaitFor";
 import { WeaponData } from "client/classes/WeaponData";
 import { WeaponModel } from "client/classes/WeaponModel";
+import { AmmoHUD } from "client/components/AmmoHUD";
+import { MenuButton } from "client/components/MenuButton";
 import { RecoilController } from "./RecoilController";
 import { CrosshairController } from "./CrosshairController";
 import { SoundController } from "./SoundController";
@@ -11,10 +13,7 @@ import { VFXController } from "./VFXController";
 import ViewModel from "client/classes/ViewModel";
 import Tween from "shared/modules/utility/Tween";
 import Signal from "@rbxts/signal";
-import { AmmoHUD } from "client/components/AmmoHUD";
-import { MenuButton } from "client/components/MenuButton";
-
-const cam = World.CurrentCamera!;
+import { Firemode } from "client/classes/Enums";
 
 @Controller({})
 export class FPSController {
@@ -23,7 +22,9 @@ export class FPSController {
     private weaponData?: WeaponData;
     private weaponModel?: WeaponModel;
     private triggerAnim?: AnimationTrack;
+    private inspectAnim?: AnimationTrack;
 
+    public mouseDown = false;
     public readonly events = {
         ammoChanged: new Signal<(ammo: { mag: number; reserve: number; }) => void>()
     }
@@ -33,6 +34,8 @@ export class FPSController {
         aimed: false,
         shooting: false,
         reloading: false,
+        inspecting: false,
+        firemode: Firemode.Semi,
         ammo: {
             mag: 0,
             reserve: 0
@@ -50,10 +53,9 @@ export class FPSController {
         private readonly recoil: RecoilController,
         private readonly vfx: VFXController
     ) {
-        recoil.attach(cam);
-
         this.viewModel = new ViewModel(WaitFor<Model>(Replicated.WaitForChild("Character"), "ViewModel"));
         recoil.attach(this.viewModel);
+        recoil.attach(World.CurrentCamera!);
         
         this.janitor.Add(() => {
             this.recoil.destroy();
@@ -66,36 +68,84 @@ export class FPSController {
         });
     }
 
+    public cancelInspect(): void {
+        this.inspectAnim?.Stop();
+    }
+
+    public inspect(): void {
+        if (!this.state.equipped) return;
+        if (this.state.inspecting) return;
+        if (this.state.reloading) return;
+        if (this.state.shooting) return;
+
+        this.state.inspecting = true;
+        if (this.state.aimed) {
+            this.aim(false);
+            task.wait(.1);
+        }
+
+        this.inspectAnim = this.viewModel.playAnimation("Inspect", false)!;
+        let conn: RBXScriptConnection;
+        conn = this.inspectAnim.Stopped.Connect(() => {
+            this.state.inspecting = false;
+            conn.Disconnect();
+        });
+        this.inspectAnim.Play();
+    }
+
     private attachMotors(model: WeaponModel): void {
+        const parts = <BasePart[]>model.GetDescendants().filter(d => d.IsA("BasePart"));
+        for (const part of parts)
+            part.Anchored = false;
+
+        const motors = <Motor6D[]>model.GetDescendants().filter(d => d.IsA("Motor6D"));
+        for (const motor of motors)
+            motor.Part0 = model.Trigger;
+
         model.Trigger.ViewModel.Part0 = this.viewModel.root;
         do task.wait(); while (model.Trigger.ViewModel.Part0 !== this.viewModel.root);
     }
 
+    public unequip(): void {
+        this.viewModel.setEquipped(undefined);
+        this.weaponData = undefined;
+
+        this.weaponModel?.Destroy();
+        this.weaponModel = undefined;
+        this.crosshair.toggle();
+
+        // const unequipAnim = this.viewModel.playAnimation("Unequip")!;
+    }
+
     public equip(weaponName: string): void {
         const model = WaitFor<WeaponModel>(Replicated.WaitForChild("Weapons"), weaponName).Clone();
-        
         this.attachMotors(model);
-        model.Parent = this.viewModel.model;
         
         this.viewModel.setEquipped(model);
         this.weaponData = this.viewModel.data!;
         this.weaponModel = model;
-
+        
         for (const offset of model.Offsets.GetChildren()) {
             const cfm = <CFrameValue>offset.Clone();
             cfm.Value = new CFrame;
             cfm.Parent = model.CFrameManipulators;
         }
-
-        this.state.ammo.mag = this.weaponData.magSize;
-        this.state.ammo.reserve = this.weaponData.reserve;
+        
+        this.state.firemode = this.weaponData.stats.firemodes[0];
+        this.state.ammo.mag = this.weaponData.stats.magSize;
+        this.state.ammo.reserve = this.weaponData.stats.reserve;
         this.events.ammoChanged.Fire(this.state.ammo);
-
+        
         this.crosshair.maxSize = this.weaponData.crossExpansion.max;
         this.crosshair.setSize(this.weaponData.crossExpansion.hip);
-
+        
+        model.Parent = this.viewModel.model;
         const equipAnim = this.viewModel.playAnimation("Equip", false)!;
         this.viewModel.playAnimation("Idle");
+
+        equipAnim.GetMarkerReachedSignal("BoltBack").Once(() => this.weaponModel!.Sounds.SlidePull.Play());
+        equipAnim.GetMarkerReachedSignal("BoltClosed").Once(() => this.weaponModel!.Sounds.SlideRelease.Play());
+
         let conn: RBXScriptConnection;
         conn = equipAnim.Stopped.Connect(() => {
             this.state.equipped = true;
@@ -108,21 +158,29 @@ export class FPSController {
         if (!this.state.equipped) return;
         if (!this.weaponModel || !this.weaponData) return;
         if (this.state.reloading) return;
+        if (this.state.inspecting) return;
         if (this.state.aimed) return;
         if (this.state.shooting) return;
-        if (this.state.ammo.mag >= this.weaponData.magSize) return;
+        if (this.state.ammo.mag === this.weaponData.stats.magSize + this.weaponData.stats.chamber) return;
         if (this.state.ammo.reserve === 0) return;
         this.state.reloading = true;
 
         const magBeforeReload = this.state.ammo.mag;
-        this.state.ammo.mag = this.weaponData.magSize;
+        this.state.ammo.mag = this.weaponData.stats.magSize;
         if (magBeforeReload > 0)
-            this.state.ammo.mag += this.weaponData.chamber;
+            this.state.ammo.mag += this.weaponData.stats.chamber;
 
         const ammoUsed = this.state.ammo.mag - magBeforeReload;
         this.state.ammo.reserve -= ammoUsed;
+        
+        if (this.state.ammo.reserve < 0) {
+            this.state.ammo.mag += this.state.ammo.reserve;
+            this.state.ammo.reserve = 0;
+        }
+
         this.events.ammoChanged.Fire(this.state.ammo);
 
+        // this.viewModel.playAnimation("Reload");
         this.state.reloading = false;
     }
 
@@ -130,6 +188,9 @@ export class FPSController {
         if (!this.state.equipped) return;
         if (this.state.aimed === on) return;
         if (!this.weaponModel || !this.weaponData) return;
+        if (this.state.inspecting)
+            this.cancelInspect();
+    
         this.state.aimed = on;
 
         this.weaponModel.Sounds[on ? "AimDown" : "AimUp"].Play();
@@ -158,40 +219,94 @@ export class FPSController {
     
     public shoot(): void {
         if (!this.state.equipped) return;
-        if (!this.weaponModel || !this.weaponData) return;
+        if (this.state.inspecting)
+            this.cancelInspect();
+
         if (this.state.ammo.mag === 0) {
-            this.weaponModel.Sounds.EmptyClick.Play();
+            this.weaponModel!.Sounds.EmptyClick.Play();
             this.reload();
             return;
-        };
+        }
 
+        const pew = () => {
+            if (!this.state.equipped) return;
+            if (!this.weaponModel || !this.weaponData) return;
+            if (this.state.ammo.mag === 0) {
+                this.weaponModel!.Sounds.EmptyClick.Play();
+                this.mouseDown = false;
+                this.state.shooting = false;
+                this.reload();
+                return;
+            }
+            
+            this.state.ammo.mag--;
+            this.events.ammoChanged.Fire(this.state.ammo);
+
+            this.calculateRecoil();
+            this.vfx.createMuzzleFlash(this.weaponModel);
+            this.sounds.clone(<Sound>this.weaponModel.Sounds.WaitForChild("Fire"));
+            
+            const boltAnim = this.viewModel.playAnimation("Shoot", false)!;
+            boltAnim.GetMarkerReachedSignal("SlideBack").Once(() => this.vfx.createEjectedShell(this.weaponData!.shell, this.weaponModel!));
+            boltAnim.Play();
+
+            if (!this.state.aimed)
+                this.crosshair.pulse(this.weaponData);
+        }
+
+        const fireSpeed = 60 / this.weaponData!.stats.rpm;
+        const mag = this.state.ammo.mag;
         this.state.shooting = true;
-        this.state.ammo.mag--;
-        this.events.ammoChanged.Fire(this.state.ammo);
+        switch(this.state.firemode) {
+            case Firemode.Bolt:
+            case Firemode.Semi:
+                pew();
+                task.wait(fireSpeed);
+                break;
+            case Firemode.Auto:
+                print("auto", this.mouseDown)
+                do {
+                    pew(); 
+                    task.wait(fireSpeed);
+                } while (this.mouseDown);
+                break;
+            case Firemode.Burst:
+                for (
+                    let i = 0; 
+                    i <= (this.weaponData!.stats.burstCount ?? 3) && this.mouseDown; 
+                    i++
+                ) {
+                    pew();
+                    task.wait(fireSpeed);
+                }
+                break;
 
-        this.vfx.createMuzzleFlash(this.weaponModel);
-        this.sounds.clone(<Sound>this.weaponModel.Sounds.WaitForChild("Fire"));
-        
-        const slideAnim = this.viewModel.playAnimation("Shoot", false)!;
-        slideAnim.GetMarkerReachedSignal("SlideBack").Once(() => this.vfx.createEjectedShell(this.weaponData!.shell, this.weaponModel!));
-        slideAnim.Play();
+            default:
+                throw error("Invalid firemode: " + tostring(this.state.firemode));
+        }
+
+        this.state.shooting = false;
+    }
+
+    private calculateRecoil(): void {
+        if (!this.weaponData) return;
 
         const r = new Random;
         const torqueDir = (new Random).NextInteger(1, 2) === 1 ? 1 : -1;
-        const crp = this.weaponData.recoil.camera;
+        const [cy, cx, cz] = this.weaponData.recoil.camera;
         const cforce = new Vector3(
-            r.NextNumber(crp[0][0], crp[0][1]), 
-            r.NextNumber(crp[1][0], crp[1][1]) * torqueDir, 
-            r.NextNumber(crp[2][0], crp[2][1])
+            r.NextNumber(cy[0], cy[1]),
+            r.NextNumber(cx[0], cx[1]) * torqueDir,
+            r.NextNumber(cz[0], cz[1])
         );
 
-        const mrp = this.weaponData.recoil.model;
+        const [my, mx, mz] = this.weaponData.recoil.model;
         const mforce = new Vector3(
-            r.NextNumber(mrp[0][0], mrp[0][1]), 
-            r.NextNumber(mrp[1][0], mrp[1][1]) * torqueDir, 
-            r.NextNumber(mrp[2][0], mrp[2][1])
+            r.NextNumber(my[0], my[1]),
+            r.NextNumber(mx[0], mx[1]) * torqueDir,
+            r.NextNumber(mz[0], mz[1])
         );
-        
+
         let stabilization = 1;
         if (this.state.aimed)
             stabilization += 0.5;
@@ -202,10 +317,5 @@ export class FPSController {
             this.recoil.kick(this.weaponData!, cforce.mul(-1), "Camera", stabilization);
             this.recoil.kick(this.weaponData!, mforce.mul(-1), "Model", stabilization);
         });
-
-        if (!this.state.aimed)
-            this.crosshair.pulse(this.weaponData);
-
-        this.state.shooting = false;
     }
 }

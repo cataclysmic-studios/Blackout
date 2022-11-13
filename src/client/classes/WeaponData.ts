@@ -1,6 +1,6 @@
-type RecoilPattern = [
-    [number, number], [number, number], [number, number]
-];
+import { Firemode } from "./Enums";
+
+type RecoilPattern = [ [number, number], [number, number], [number, number] ];
 
 export interface WeaponData {
     vmOffset: CFrame;
@@ -20,9 +20,19 @@ export interface WeaponData {
     }
 
     shell: string;
-    magSize: number;
-    reserve: number;
-    chamber: number;
+    stats: {
+        rpm: number;
+        damage: [number, number];
+        range: [number, number];
+        muzzleVelocity: number;
+        peakVelocity: number;
+
+        firemodes: Firemode[];
+        burstCount?: number;    
+        magSize: number;
+        reserve: number;
+        chamber: number;
+    }
 
     crossExpansion: {
         hip: number;
