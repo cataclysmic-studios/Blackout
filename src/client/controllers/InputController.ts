@@ -6,7 +6,7 @@ import { FPSController } from "./FPSController";
 @Controller({})
 export class InputController implements OnStart {
     public constructor(
-        private fps: FPSController
+        private readonly fps: FPSController
     ) {}
 
     public onStart(): void {

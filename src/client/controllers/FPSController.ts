@@ -1,15 +1,18 @@
-import { Controller } from "@flamework/core";
+import { Controller, Dependency } from "@flamework/core";
 import { ReplicatedStorage as Replicated, Workspace as World } from "@rbxts/services";
-// import { CrosshairController } from "./CrosshairController";
-import { RecoilController } from "./RecoilController";
 import { Janitor } from "@rbxts/janitor";
 import { WaitFor } from "shared/modules/utility/WaitFor";
 import { WeaponData } from "client/classes/WeaponData";
 import { WeaponModel } from "client/classes/WeaponModel";
+import { RecoilController } from "./RecoilController";
+import { CrosshairController } from "./CrosshairController";
 import { SoundController } from "./SoundController";
 import { VFXController } from "./VFXController";
 import ViewModel from "client/classes/ViewModel";
 import Tween from "shared/modules/utility/Tween";
+import Signal from "@rbxts/signal";
+import { AmmoHUD } from "client/components/AmmoHUD";
+import { MenuButton } from "client/components/MenuButton";
 
 const cam = World.CurrentCamera!;
 
@@ -21,55 +24,60 @@ export class FPSController {
     private weaponModel?: WeaponModel;
     private triggerAnim?: AnimationTrack;
 
+    public readonly events = {
+        ammoChanged: new Signal<(ammo: { mag: number; reserve: number; }) => void>()
+    }
+
     public readonly state = {
         equipped: false,
+        aimed: false,
         shooting: false,
         reloading: false,
-        aiming: false,
-        sprinting: false,
-        crouched: false,
-        proned: false,
-        lean: 0,
         ammo: {
             mag: 0,
             reserve: 0
-        }
+        },
+
+        sprinting: false,
+        crouched: false,
+        proned: false,
+        lean: 0
     }
 
     public constructor(
-        // private crosshair: CrosshairController,
-        private sounds: SoundController,
-        private recoil: RecoilController,
-        private vfx: VFXController
+        private readonly crosshair: CrosshairController,
+        private readonly sounds: SoundController,
+        private readonly recoil: RecoilController,
+        private readonly vfx: VFXController
     ) {
         recoil.attach(cam);
 
         this.viewModel = new ViewModel(WaitFor<Model>(Replicated.WaitForChild("Character"), "ViewModel"));
         recoil.attach(this.viewModel);
-        // proceduralAnims.attach(this.viewModel);
         
         this.janitor.Add(() => {
             this.recoil.destroy();
             this.viewModel.destroy();
+
+            const menuButtons = Dependency<MenuButton>();
+            const ammoHUD = Dependency<AmmoHUD>();
+            menuButtons.destroy();
+            ammoHUD.destroy();
         });
     }
 
     private attachMotors(model: WeaponModel): void {
-        // for (const motor of <Motor6D[]>model.GetDescendants().filter(d => d.IsA("Motor6D")))
-        //     motor.Part0 = this.viewModel.root;
-
         model.Trigger.ViewModel.Part0 = this.viewModel.root;
+        do task.wait(); while (model.Trigger.ViewModel.Part0 !== this.viewModel.root);
     }
 
     public equip(weaponName: string): void {
         const model = WaitFor<WeaponModel>(Replicated.WaitForChild("Weapons"), weaponName).Clone();
         
         this.attachMotors(model);
-        task.wait(1);
         model.Parent = this.viewModel.model;
         
         this.viewModel.setEquipped(model);
-        this.viewModel.playAnimation("Idle");
         this.weaponData = this.viewModel.data!;
         this.weaponModel = model;
 
@@ -81,14 +89,26 @@ export class FPSController {
 
         this.state.ammo.mag = this.weaponData.magSize;
         this.state.ammo.reserve = this.weaponData.reserve;
-        this.state.equipped = true;
+        this.events.ammoChanged.Fire(this.state.ammo);
+
+        this.crosshair.maxSize = this.weaponData.crossExpansion.max;
+        this.crosshair.setSize(this.weaponData.crossExpansion.hip);
+
+        const equipAnim = this.viewModel.playAnimation("Equip", false)!;
+        this.viewModel.playAnimation("Idle");
+        let conn: RBXScriptConnection;
+        conn = equipAnim.Stopped.Connect(() => {
+            this.state.equipped = true;
+            conn.Disconnect();
+        });
+        equipAnim.Play();
     }
 
     public reload(): void {
         if (!this.state.equipped) return;
         if (!this.weaponModel || !this.weaponData) return;
         if (this.state.reloading) return;
-        if (this.state.aiming) return;
+        if (this.state.aimed) return;
         if (this.state.shooting) return;
         if (this.state.ammo.mag >= this.weaponData.magSize) return;
         if (this.state.ammo.reserve === 0) return;
@@ -101,21 +121,25 @@ export class FPSController {
 
         const ammoUsed = this.state.ammo.mag - magBeforeReload;
         this.state.ammo.reserve -= ammoUsed;
+        this.events.ammoChanged.Fire(this.state.ammo);
+
         this.state.reloading = false;
     }
 
     public aim(on: boolean): void {
         if (!this.state.equipped) return;
-        if (this.state.aiming === on) return;
+        if (this.state.aimed === on) return;
         if (!this.weaponModel || !this.weaponData) return;
-        this.state.aiming = on;
+        this.state.aimed = on;
 
         this.weaponModel.Sounds[on ? "AimDown" : "AimUp"].Play();
 
-        const info = new TweenInfo(.3, Enum.EasingStyle.Quad)
+        const info = new TweenInfo(.25, Enum.EasingStyle.Quad, Enum.EasingDirection[on ? "Out" : "In"])
         Tween(this.viewModel.getManipulator("Aim"), info, {
             Value: on ? this.weaponModel.Offsets.Aim.Value : new CFrame
         });
+
+        this.crosshair.setSize(on ? 0 : this.weaponData.crossExpansion.hip);
     }
 
     public toggleTriggerPull(on: boolean): void {
@@ -143,6 +167,7 @@ export class FPSController {
 
         this.state.shooting = true;
         this.state.ammo.mag--;
+        this.events.ammoChanged.Fire(this.state.ammo);
 
         this.vfx.createMuzzleFlash(this.weaponModel);
         this.sounds.clone(<Sound>this.weaponModel.Sounds.WaitForChild("Fire"));
@@ -167,13 +192,20 @@ export class FPSController {
             r.NextNumber(mrp[2][0], mrp[2][1])
         );
         
-        this.recoil.kick(cforce, "Camera");
-        this.recoil.kick(mforce, "Model");
+        let stabilization = 1;
+        if (this.state.aimed)
+            stabilization += 0.5;
+
+        this.recoil.kick(this.weaponData, cforce, "Camera", stabilization);
+        this.recoil.kick(this.weaponData, mforce, "Model", stabilization);
         task.delay(.12, () => {
-            this.recoil.kick(cforce.mul(-1), "Camera");
-            this.recoil.kick(mforce.mul(-1), "Model");
+            this.recoil.kick(this.weaponData!, cforce.mul(-1), "Camera", stabilization);
+            this.recoil.kick(this.weaponData!, mforce.mul(-1), "Model", stabilization);
         });
-        
+
+        if (!this.state.aimed)
+            this.crosshair.pulse(this.weaponData);
+
         this.state.shooting = false;
     }
 }

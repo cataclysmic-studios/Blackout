@@ -15,7 +15,7 @@ export class MenuButton extends BaseComponent<Attributes, TextButton> implements
     }
 
     public constructor(
-        private menu: MenuController
+        private readonly menu: MenuController
     ) {
         super();
     }

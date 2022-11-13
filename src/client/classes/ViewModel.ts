@@ -7,6 +7,7 @@ import { WeaponModel } from "./WeaponModel";
 const camera = World.CurrentCamera!;
 export default class ViewModel {
     private readonly janitor = new Janitor;
+    private oldCamCF?: CFrame;
     private offsets = {
         walkCycle: new CFrame
     }
@@ -35,6 +36,18 @@ export default class ViewModel {
     public getManipulator(name: string): CFrameValue {
         const value = WaitFor<CFrameValue>(this.weapon!.CFrameManipulators, name);
         return value;
+    }
+
+    public updateCamera(): void {
+        const newCF = WaitFor<Part>(this.model, "Camera").CFrame.ToObjectSpace(this.root.CFrame);
+        let cf = new CFrame;
+        if (this.oldCamCF) {
+            const [_, __, z] = newCF.ToOrientation();
+            const [x, y] = newCF.ToObjectSpace(this.oldCamCF).ToEulerAnglesXYZ();
+            World.CurrentCamera!.CFrame = World.CurrentCamera!.CFrame.mul(CFrame.Angles(x, y, -z));
+        }
+
+        this.oldCamCF = newCF;
     }
 
     public getCFrame(): CFrame {

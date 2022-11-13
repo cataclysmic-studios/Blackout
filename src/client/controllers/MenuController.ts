@@ -19,8 +19,8 @@ export class MenuController implements OnInit, OnRender {
     private currentPage?: MenuPage;
 
     public constructor(
-        private fps: FPSController,
-        private crosshair: CrosshairController
+        private readonly fps: FPSController,
+        private readonly crosshair: CrosshairController
     ) {}
 
     private togglePage(page: MenuPage, on?: boolean): void {
