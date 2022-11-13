@@ -9,6 +9,12 @@ export class InputController implements OnStart {
     ) {}
 
     public onStart(): void {
-        Players.LocalPlayer.GetMouse().Button1Down.Connect(() => this.fps.shoot());
+        const mouse = Players.LocalPlayer.GetMouse();
+        mouse.Button1Down.Connect(() => {
+            this.fps.toggleTriggerPull(true);
+            this.fps.shoot();
+        });
+
+        mouse.Button1Up.Connect(() => this.fps.toggleTriggerPull(false));
     }
 }

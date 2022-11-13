@@ -1,6 +1,7 @@
 import { OnStart } from "@flamework/core";
 import { Component, BaseComponent } from "@flamework/components";
 import { Janitor } from "@rbxts/janitor";
+import { MenuController } from "client/controllers/MenuController";
 
 interface Attributes {}
 
@@ -11,6 +12,12 @@ export class MenuButton extends BaseComponent<Attributes, TextButton> implements
     private readonly defaultColors = {
         background: this.instance.BackgroundColor3,
         text: this.instance.TextColor3
+    }
+
+    public constructor(
+        private menu: MenuController
+    ) {
+        super();
     }
 
     public destroy(): void {
@@ -26,6 +33,18 @@ export class MenuButton extends BaseComponent<Attributes, TextButton> implements
         this.janitor.Add(this.instance.MouseLeave.Connect(() => {
             this.instance.BackgroundColor3 = this.defaultColors.background;
             this.instance.TextColor3 = this.defaultColors.text;
+        }));
+        this.janitor.Add(this.instance.MouseButton1Click.Connect(() => {
+            switch(this.instance.Name) {
+                case "Play":
+                    this.menu.destroy();
+                    this.destroy();
+                    break;
+
+                default:
+                    print("unhandled");
+                    break;
+            }
         }));
     }
 }

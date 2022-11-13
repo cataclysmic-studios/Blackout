@@ -1,0 +1,64 @@
+import { Janitor } from "@rbxts/janitor";
+import { Workspace as World } from "@rbxts/services";
+import { WaitFor } from "shared/modules/utility/WaitFor";
+import { WeaponData } from "./WeaponData";
+
+const camera = World.CurrentCamera!;
+export default class ViewModel {
+    private readonly janitor = new Janitor;
+    private walkCycleCFrame = new CFrame;
+    
+    public readonly model: Model;
+    public readonly root: BasePart;
+    public weapon?: Folder;
+    public data?: WeaponData;
+
+    public constructor(model: Model) {
+        this.model = model.Clone();
+        this.model.Parent = camera;
+        this.root = this.model.PrimaryPart!;
+
+        this.janitor.Add(this.model);
+    }
+
+    public setWalkCycleCFrame(cf: CFrame): void {
+        this.walkCycleCFrame = cf;
+    }
+
+    public setCFrame(cf: CFrame): void {
+        this.root.CFrame = cf;
+    }
+
+    public getCFrame(): CFrame {
+        if (!this.weapon || !this.data) return new CFrame();
+        return World.CurrentCamera!.CFrame.mul(this.data.vmOffset).mul(this.walkCycleCFrame)
+    }
+
+    public setEquipped(model: Folder): void {
+        this.weapon = model;
+        try {
+            this.data = <WeaponData>require(WaitFor<ModuleScript>(this.weapon, "Data"));
+        } catch(e) {
+            warn(`Weapon data for "${this.weapon.Name}" failed to load. Stack trace:\n${e}`);
+        }
+    }
+
+    public playAnimation(name: string, playImmediately = true): AnimationTrack | undefined {
+        if (!this.weapon || !this.data) return;
+
+        const anims = this.weapon.WaitForChild("Animations");
+        const anim = WaitFor<Animation>(anims, name);
+        const controller = WaitFor<AnimationController>(this.model, "AnimationController");
+        const track = controller.LoadAnimation(anim);
+
+        track.Stopped.Once(() => track.Destroy());
+        if (playImmediately)
+            track.Play();
+            
+        return track;
+    }
+
+    public destroy(): void {
+        this.janitor.Cleanup();
+    }
+}

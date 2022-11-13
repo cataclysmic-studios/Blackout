@@ -1,10 +1,10 @@
 import { Controller, OnRender } from "@flamework/core";
 import Spring from "shared/modules/utility/Spring";
-// import ViewModel from "client/classes/ViewModel";
+import ViewModel from "client/classes/ViewModel";
 
 @Controller({})
 export class RecoilController implements OnRender {
-	private readonly attached: (Camera)[] = []; // | ViewModel
+	private readonly attached: (Camera | ViewModel)[] = []; 
     private readonly springDefaults = {
         camera: [25, 75, 4, 5.5],
         cameraTorque: [50, 110, 4, 15],
@@ -51,8 +51,8 @@ export class RecoilController implements OnRender {
                     obj = <Camera>obj;
                     obj.CFrame = obj.CFrame.mul(crecoil);
                 } else {
-                    // obj = <ViewModel>obj;
-                    // obj.setCFrame(obj.getCFrame().mul(mrecoil));
+                    obj = <ViewModel>obj;
+                    obj.setCFrame(obj.getCFrame().mul(mrecoil));
                 }
     }
 
@@ -88,7 +88,7 @@ export class RecoilController implements OnRender {
         }
     }
 
-    public attach(instance: Camera): void { // | ViewModel
+    public attach(instance: Camera | ViewModel): void {
         this.attached.push(instance);
     }
 

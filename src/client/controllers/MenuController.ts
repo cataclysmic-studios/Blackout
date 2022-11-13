@@ -1,5 +1,7 @@
 import { Controller, OnInit, OnRender } from "@flamework/core";
-import { Players, Workspace as World } from "@rbxts/services";
+import { Players, SoundService as Sound, Workspace as World } from "@rbxts/services";
+import { WaitFor } from "shared/modules/utility/WaitFor";
+import { FPSController } from "./FPSController";
 
 const { rad } = math;
 
@@ -9,10 +11,15 @@ type MenuPage = Folder & {
 
 @Controller({})
 export class MenuController implements OnInit, OnRender {
-    private readonly mouse = Players.LocalPlayer.GetMouse();
+    private readonly plr = Players.LocalPlayer;
+    private readonly mouse = this.plr.GetMouse();
     private initialCF = new CFrame;
     private active = false;
     private currentPage?: MenuPage;
+
+    public constructor(
+        private fps: FPSController
+    ) {}
 
     private togglePage(page: MenuPage, on?: boolean): void {
         for (const e of <GuiObject[]>page.GetChildren().filter(e => e.IsA("GuiObject")))
@@ -47,5 +54,12 @@ export class MenuController implements OnInit, OnRender {
     public destroy(): void {
         this.active = false;
         World.CurrentCamera!.CameraType = Enum.CameraType.Custom;
+        
+        const menu = WaitFor<ScreenGui>(this.plr.WaitForChild("PlayerGui"), "Menu");
+        menu.Enabled = false;
+
+        this.plr.CameraMode = Enum.CameraMode.LockFirstPerson;
+        Sound.Music.Menu.Stop();
+        this.fps.equip("HK416");
     }
 }
