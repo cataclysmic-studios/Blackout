@@ -3,6 +3,7 @@ import { Players, SoundService as Sound, Workspace as World } from "@rbxts/servi
 import { WaitFor } from "shared/modules/utility/WaitFor";
 import { CrosshairController } from "./CrosshairController";
 import { FPSController } from "./FPSController";
+import { UIController } from "./UIController";
 
 const { rad } = math;
 
@@ -20,14 +21,17 @@ export class MenuController implements OnInit, OnRender {
 
     public constructor(
         private readonly fps: FPSController,
+        private readonly ui: UIController,
         private readonly crosshair: CrosshairController
     ) {}
 
+    // Toggle visibility of page elements
     private togglePage(page: MenuPage, on?: boolean): void {
         for (const e of <GuiObject[]>page.GetChildren().filter(e => e.IsA("GuiObject")))
             e.Visible = on ?? !e.Visible;
     }
 
+    // Disables current page and enables specified page
     public setPage(page: MenuPage): void {
         if (this.currentPage === page) return;
         if (this.currentPage)
@@ -38,6 +42,7 @@ export class MenuController implements OnInit, OnRender {
         this.currentPage = page;
     }
 
+    // Camera rotation
     public onRender(dt: number): void {
         if (!this.active) return;
 
@@ -53,17 +58,18 @@ export class MenuController implements OnInit, OnRender {
         this.active = true;
     }
 
+    // Menu is finished being used (play button is pressed)
     public destroy(): void {
         this.active = false;
         World.CurrentCamera!.CameraType = Enum.CameraType.Custom;
         
-        const menu = WaitFor<ScreenGui>(this.plr.WaitForChild("PlayerGui"), "Menu");
-        menu.Enabled = false;
+        this.ui.getScreen("Menu").Enabled = false;
 
         this.plr.CameraMode = Enum.CameraMode.LockFirstPerson;
         Sound.Music.Menu.Stop();
 
-        this.crosshair.toggle();
+        this.crosshair.toggleMouseIcon();
+        this.ui.getHUD().toggle();
         this.fps.equip("HK416");
     }
 }

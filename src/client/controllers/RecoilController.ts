@@ -43,11 +43,12 @@ export class RecoilController implements OnRender {
                     obj.CFrame = obj.CFrame.mul(crecoil);
                 } else {
                     obj = <ViewModel>obj;
-                    obj.updateCamera();
+                    obj.syncCameraBone();
                     obj.setCFrame(obj.getCFrame().mul(mrecoil));
                 }
     }
 
+    // Shove recoil springs according to recoil type (camera/model)
     public kick({ recoilSpringModifiers: modifiers }: WeaponData, force: Vector3, recoilType: "Camera" | "Model", stabilization = 1): void {
         if (recoilType === "Camera") {
             const [mainDefaultMass, mainDefaultForce, mainDefaultDamper, mainDefaultSpeed] = this.springDefaults.camera;
@@ -80,10 +81,12 @@ export class RecoilController implements OnRender {
         }
     }
 
+    // Attach recoil updates to a ViewModel or camera
     public attach(instance: Camera | ViewModel): void {
         this.attached.push(instance);
     }
 
+    // Clear attached instances
     public destroy(): void {
         this.attached.clear();
     }

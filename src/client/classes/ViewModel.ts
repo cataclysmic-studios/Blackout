@@ -25,20 +25,24 @@ export default class ViewModel {
         this.janitor.Add(this.model);
     }
 
+    // Camera offset for walk cycle
     public setWalkCycleCFrame(cf: CFrame): void {
         this.offsets.walkCycle = cf;
     }
 
+    // Set rig CFrame
     public setCFrame(cf: CFrame): void {
         this.root.CFrame = cf;
     }
 
+    // Returns a CFrame offset for the camera
     public getManipulator(name: string): CFrameValue {
         const value = WaitFor<CFrameValue>(this.weapon!.CFrameManipulators, name);
         return value;
     }
 
-    public updateCamera(): void {
+    // Sync the camera's movement to the camera bone's movement
+    public syncCameraBone(): void {
         const newCF = WaitFor<Part>(this.model, "Camera").CFrame.ToObjectSpace(this.root.CFrame);
         if (this.oldCamCF) {
             const [_, __, z] = newCF.ToOrientation();
@@ -49,6 +53,7 @@ export default class ViewModel {
         this.oldCamCF = newCF;
     }
 
+    // Returns a CFrame of where the rig should be
     public getCFrame(): CFrame {
         if (!this.weapon || !this.data) return new CFrame();
         return World.CurrentCamera!.CFrame
@@ -57,6 +62,7 @@ export default class ViewModel {
             .mul(this.getManipulator("Aim").Value);
     }
 
+    // Update weapon
     public setEquipped(model?: WeaponModel): void {
         this.weapon = model;
         if (this.weapon)
@@ -67,6 +73,7 @@ export default class ViewModel {
             }
     }
 
+    // Play an animation
     public playAnimation(name: string, playImmediately = true): AnimationTrack | undefined {
         if (!this.weapon || !this.data) return;
 
@@ -82,6 +89,7 @@ export default class ViewModel {
         return track;
     }
 
+    // Cleanup ViewModel
     public destroy(): void {
         this.janitor.Cleanup();
     }

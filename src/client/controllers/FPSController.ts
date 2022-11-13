@@ -10,10 +10,10 @@ import { RecoilController } from "./RecoilController";
 import { CrosshairController } from "./CrosshairController";
 import { SoundController } from "./SoundController";
 import { VFXController } from "./VFXController";
-import ViewModel from "client/classes/ViewModel";
-import Tween from "shared/modules/utility/Tween";
-import Signal from "@rbxts/signal";
 import { Firemode } from "client/classes/Enums";
+import Signal from "@rbxts/signal";
+import Tween from "shared/modules/utility/Tween";
+import ViewModel from "client/classes/ViewModel";
 
 @Controller({})
 export class FPSController {
@@ -93,6 +93,7 @@ export class FPSController {
         this.inspectAnim.Play();
     }
 
+    // Attach all Motor6D's inside of the weapon to the ViewModel
     private attachMotors(model: WeaponModel): void {
         const parts = <BasePart[]>model.GetDescendants().filter(d => d.IsA("BasePart"));
         for (const part of parts)
@@ -112,8 +113,8 @@ export class FPSController {
 
         this.weaponModel?.Destroy();
         this.weaponModel = undefined;
-        this.crosshair.toggle();
-
+        
+        this.crosshair.toggleMouseIcon();
         // const unequipAnim = this.viewModel.playAnimation("Unequip")!;
     }
 
@@ -195,7 +196,7 @@ export class FPSController {
 
         this.weaponModel.Sounds[on ? "AimDown" : "AimUp"].Play();
 
-        const info = new TweenInfo(.25, Enum.EasingStyle.Quad, Enum.EasingDirection[on ? "Out" : "In"])
+        const info = new TweenInfo(.25, Enum.EasingStyle.Quad, Enum.EasingDirection[on ? "Out" : "InOut"])
         Tween(this.viewModel.getManipulator("Aim"), info, {
             Value: on ? this.weaponModel.Offsets.Aim.Value : new CFrame
         });
@@ -264,7 +265,6 @@ export class FPSController {
                 task.wait(fireSpeed);
                 break;
             case Firemode.Auto:
-                print("auto", this.mouseDown)
                 do {
                     pew(); 
                     task.wait(fireSpeed);

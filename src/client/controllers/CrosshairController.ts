@@ -17,22 +17,26 @@ export class CrosshairController {
         private readonly ui: UIController
     ) {}
 
+    // Add onto current size
     public addSize(value: number): Tween {
         this.size += value;
         return this.update();
     }
 
+    // Set size
     public setSize(value: number): Tween {
         this.size = value;
         return this.update();
     }
 
+    // Increase size for a short period of time
     public pulse({ crossExpansion }: WeaponData): void {
         const inc = crossExpansion.shoot;
         this.addSize(inc);
         task.delay(this.tweenSpeed * 1.3, () => this.addSize(-inc));
     }
 
+    // Tween crosshair size
     public update(): Tween {
         this.size = math.clamp(this.size, 0, this.maxSize);
 
@@ -51,12 +55,8 @@ export class CrosshairController {
         return sizeTween;
     }
     
-    public toggle(): void {
+    public toggleMouseIcon(): void {
         this.enabled = !this.enabled;
         UIS.MouseIconEnabled = !this.enabled;
-
-        const hud = this.ui.getScreen("HUD");
-        const frame = WaitFor<Frame>(hud, "Crosshair");
-        frame.Visible = this.enabled;
     }
 }

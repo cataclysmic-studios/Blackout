@@ -16,6 +16,10 @@ export interface WeaponModel extends Folder {
     };
     Trigger: Part & {
         ViewModel: Motor6D;
+        Chamber: Attachment & {
+            Smoke: ParticleEmitter;
+        };
+        Muzzle: Attachment;
     };
     Chamber: Part;
     Mag: Part;
