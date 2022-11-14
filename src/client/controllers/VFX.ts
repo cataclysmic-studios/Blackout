@@ -1,7 +1,8 @@
 import { Controller } from "@flamework/core";
-import { Debris, ReplicatedStorage as Replicated, Workspace as World } from "@rbxts/services";
+import { Debris, Players, ReplicatedStorage as Replicated, Workspace as World } from "@rbxts/services";
+import { Events } from "client/network";
+import { WeaponData, WeaponModel } from "shared/modules/Types";
 import { WaitFor } from "shared/modules/utility/WaitFor";
-import { WeaponModel } from "client/classes/Types";
 import { SoundPlayer } from "./SoundPlayer";
 
 
@@ -10,6 +11,10 @@ export class VFX {
     public constructor(
         private readonly sound: SoundPlayer
     ) {}
+
+    public createTracer(model: WeaponModel, data: WeaponData): void {
+        Events.createBullet.fire(model.Trigger.Muzzle.WorldPosition, Players.LocalPlayer.GetMouse().Hit.LookVector, data.stats.muzzleVelocity);
+    }
 
     public createMuzzleFlash(model: WeaponModel): void {
         const muzzleFlash = model.Trigger.Muzzle.Clone();
@@ -29,9 +34,8 @@ export class VFX {
     }
 
     public createEjectedShell(shellType: string, weapon: WeaponModel): void {
-        const vfx = Replicated.WaitForChild("VFX");
-        const shell = WaitFor<Part>(vfx.WaitForChild("Shells"), shellType).Clone();
-        shell.CFrame = weapon.Trigger.Chamber.WorldCFrame;
+        const shell = WaitFor<Part>(Replicated.VFX.Shells, shellType).Clone();
+        shell.CFrame = new CFrame(weapon.Trigger.Chamber.WorldPosition, weapon.Trigger.CFrame.LookVector);
         shell.Parent = World.Debris;
 
         const r = new Random;

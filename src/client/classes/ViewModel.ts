@@ -1,23 +1,23 @@
 import { UserInputService as UIS, Workspace as World } from "@rbxts/services";
 import { Janitor } from "@rbxts/janitor";
 import { WaitFor } from "shared/modules/utility/WaitFor";
-import { WeaponData, WeaponModel } from "./Types";
+import { WeaponData, WeaponModel } from "../../shared/modules/Types";
 import Spring from "shared/modules/utility/Spring";
 
 const camera = World.CurrentCamera!;
-export default class ViewModel {
+export default class ViewModel<ModelT extends Model = Model> {
     private readonly janitor = new Janitor;
     private oldCamCF?: CFrame;
     private springs = {
         mouseSway: new Spring
     };
     
-    public readonly model: Model;
+    public readonly model: ModelT;
     public readonly root: BasePart;
     public weapon?: WeaponModel;
     public data?: WeaponData;
 
-    public constructor(model: Model) {
+    public constructor(model: ModelT) {
         this.model = model.Clone();
         this.model.Parent = camera;
         this.root = this.model.PrimaryPart!;
@@ -60,6 +60,9 @@ export default class ViewModel {
         const { X: dx, Y: dy } = UIS.GetMouseDelta().div(150);
         const limit = aiming ? .02 : .04;
         this.springs.mouseSway.shove(new Vector3(math.clamp(dx, -limit, limit), math.clamp(dy, -limit, limit), 0));
+
+        const lv = this.weapon.Trigger.AssemblyLinearVelocity;
+        this.weapon.Trigger.AssemblyLinearVelocity = new Vector3(lv.X, 0, lv.Y);
 
         const sway = this.springs.mouseSway.update(dt).div(aiming ? 3 : 1);
         const aimSway = new CFrame(sway.X, sway.Y / 8, 0).mul(CFrame.Angles(-sway.Y / 1.25, sway.X, -sway.X));

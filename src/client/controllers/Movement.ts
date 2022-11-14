@@ -1,5 +1,5 @@
 import { Controller } from "@flamework/core";
-import { LeanState } from "client/classes/Types";
+import { LeanState } from "shared/modules/Types";
 import { FPS } from "./FPS";
 
 @Controller({})

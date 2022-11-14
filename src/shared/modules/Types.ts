@@ -2,6 +2,7 @@ import { Firemode } from "./Enums";
 
 type RecoilPattern = [ [number, number], [number, number], [number, number] ];
 export type LeanState = -1 | 0 | 1;
+export type Slot = 1 | 2 | 3;
 
 export interface WeaponData {
     vmOffset: CFrame;
@@ -26,7 +27,6 @@ export interface WeaponData {
         damage: [number, number];
         range: [number, number];
         muzzleVelocity: number;
-        peakVelocity: number;
 
         firemodes: Firemode[];
         burstCount?: number;    

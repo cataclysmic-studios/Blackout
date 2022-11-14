@@ -1,5 +1,5 @@
 import { Controller } from "@flamework/core";
-import { WeaponData } from "client/classes/Types";
+import { WeaponData } from "shared/modules/Types";
 import Spring from "shared/modules/utility/Spring";
 import ViewModel from "client/classes/ViewModel";
 

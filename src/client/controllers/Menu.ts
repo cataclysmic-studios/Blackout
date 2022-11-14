@@ -70,6 +70,8 @@ export class Menu implements OnInit, OnRender {
 
         this.crosshair.toggleMouseIcon();
         this.ui.getHUD()?.toggle();
-        this.fps.equip("HK416");
+
+        this.fps.addWeapon("HK416", 1);
+        this.fps.equip(1);
     }
 }

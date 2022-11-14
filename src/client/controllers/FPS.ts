@@ -2,18 +2,41 @@ import { Controller, Dependency, OnRender } from "@flamework/core";
 import { ReplicatedStorage as Replicated, Workspace as World } from "@rbxts/services";
 import { Janitor } from "@rbxts/janitor";
 import { WaitFor } from "shared/modules/utility/WaitFor";
-import { WeaponData, WeaponModel } from "client/classes/Types";
+import { LeanState, Slot, WeaponData, WeaponModel } from "shared/modules/Types";
 import { AmmoHUD } from "client/components/AmmoHUD";
 import { MenuButton } from "client/components/MenuButton";
 import { Recoil } from "./Recoil";
 import { Crosshair } from "./Crosshair";
 import { SoundPlayer } from "./SoundPlayer";
 import { VFX } from "./VFX";
-import { Firemode } from "client/classes/Enums";
+import { Firemode } from "shared/modules/Enums";
 import { HUD } from "client/components/HUD";
 import Signal from "@rbxts/signal";
 import Tween from "shared/modules/utility/Tween";
 import ViewModel from "client/classes/ViewModel";
+
+interface FPSState {
+    equipped: boolean;
+    currentSlot: Slot;
+    weapons: (string | undefined)[];
+    weapon: {
+        firemode: Firemode;
+        ammo: {
+            mag: number;
+            reserve: number;
+        };
+    };
+
+    aimed: boolean;
+    shooting: boolean;
+    reloading: boolean;
+    inspecting: boolean;
+
+    sprinting: boolean;
+    crouched: boolean;
+    proned: boolean;
+    lean: LeanState;
+}
 
 @Controller({})
 export class FPS implements OnRender {
@@ -29,18 +52,22 @@ export class FPS implements OnRender {
         ammoChanged: new Signal<(ammo: { mag: number; reserve: number; }) => void>()
     }
 
-    public readonly state = {
+    public readonly state: FPSState = {
         equipped: false,
+        currentSlot: 1,
+        weapons: [],
+        weapon: {
+            firemode: Firemode.Semi,
+            ammo: {
+                mag: 0,
+                reserve: 0
+            }
+        },
+
         aimed: false,
         shooting: false,
         reloading: false,
         inspecting: false,
-        firemode: Firemode.Semi,
-        ammo: {
-            mag: 0,
-            reserve: 0
-        },
-
         sprinting: false,
         crouched: false,
         proned: false,
@@ -54,7 +81,7 @@ export class FPS implements OnRender {
         private readonly vfx: VFX
     ) {
         const cam = World.CurrentCamera!;
-        this.viewModel = new ViewModel(WaitFor<Model>(Replicated.WaitForChild("Character"), "ViewModel"));
+        this.viewModel = new ViewModel(Replicated.Character.ViewModel);
         recoil.attach(this.viewModel);
         recoil.attach(cam);
 
@@ -118,6 +145,14 @@ export class FPS implements OnRender {
         do task.wait(); while (model.Trigger.ViewModel.Part0 !== this.viewModel.root);
     }
 
+    public addWeapon(name: string, slot: Slot): void {
+        this.state.weapons[slot - 1] = name;
+    }
+
+    public removeWeapon(slot: Slot): void {
+        this.state.weapons[slot - 1] = undefined;
+    }
+
     public unequip(): void {
         this.viewModel.setEquipped(undefined);
         this.weaponData = undefined;
@@ -129,8 +164,11 @@ export class FPS implements OnRender {
         // const unequipAnim = this.viewModel.playAnimation("Unequip")!;
     }
 
-    public equip(weaponName: string): void {
-        const model = WaitFor<WeaponModel>(Replicated.WaitForChild("Weapons"), weaponName).Clone();
+    public equip(slot: Slot): void {
+        const weaponName = this.state.weapons[slot - 1];
+        if (!weaponName) return;
+
+        const model = WaitFor<WeaponModel>(Replicated.Weapons, weaponName).Clone();
         this.attachMotors(model);
         
         this.viewModel.setEquipped(model);
@@ -143,10 +181,10 @@ export class FPS implements OnRender {
             cfm.Parent = model.CFrameManipulators;
         }
         
-        this.state.firemode = this.weaponData.stats.firemodes[0];
-        this.state.ammo.mag = this.weaponData.stats.magSize;
-        this.state.ammo.reserve = this.weaponData.stats.reserve;
-        this.events.ammoChanged.Fire(this.state.ammo);
+        this.state.weapon.firemode = this.weaponData.stats.firemodes[0];
+        this.state.weapon.ammo.mag = this.weaponData.stats.magSize;
+        this.state.weapon.ammo.reserve = this.weaponData.stats.reserve;
+        this.events.ammoChanged.Fire(this.state.weapon.ammo);
         
         this.crosshair.maxSize = this.weaponData.crossExpansion.max;
         this.crosshair.setSize(this.weaponData.crossExpansion.hip);
@@ -173,26 +211,25 @@ export class FPS implements OnRender {
         if (this.state.inspecting) return;
         if (this.state.aimed) return;
         if (this.state.shooting) return;
-        if (this.state.ammo.mag === this.weaponData.stats.magSize + this.weaponData.stats.chamber) return;
-        if (this.state.ammo.reserve === 0) return;
+        if (this.state.weapon.ammo.mag === this.weaponData.stats.magSize + this.weaponData.stats.chamber) return;
+        if (this.state.weapon.ammo.reserve === 0) return;
         this.state.reloading = true;
-
-        const magBeforeReload = this.state.ammo.mag;
-        this.state.ammo.mag = this.weaponData.stats.magSize;
-        if (magBeforeReload > 0)
-            this.state.ammo.mag += this.weaponData.stats.chamber;
-
-        const ammoUsed = this.state.ammo.mag - magBeforeReload;
-        this.state.ammo.reserve -= ammoUsed;
         
-        if (this.state.ammo.reserve < 0) {
-            this.state.ammo.mag += this.state.ammo.reserve;
-            this.state.ammo.reserve = 0;
+        // this.viewModel.playAnimation("Reload");
+        const magBeforeReload = this.state.weapon.ammo.mag;
+        this.state.weapon.ammo.mag = this.weaponData.stats.magSize;
+        if (magBeforeReload > 0)
+            this.state.weapon.ammo.mag += this.weaponData.stats.chamber;
+
+        const ammoUsed = this.state.weapon.ammo.mag - magBeforeReload;
+        this.state.weapon.ammo.reserve -= ammoUsed;
+        
+        if (this.state.weapon.ammo.reserve < 0) {
+            this.state.weapon.ammo.mag += this.state.weapon.ammo.reserve;
+            this.state.weapon.ammo.reserve = 0;
         }
 
-        this.events.ammoChanged.Fire(this.state.ammo);
-
-        // this.viewModel.playAnimation("Reload");
+        this.events.ammoChanged.Fire(this.state.weapon.ammo);
         this.state.reloading = false;
     }
 
@@ -234,7 +271,7 @@ export class FPS implements OnRender {
         if (this.state.inspecting)
             this.cancelInspect();
 
-        if (this.state.ammo.mag === 0) {
+        if (this.state.weapon.ammo.mag === 0) {
             this.weaponModel!.Sounds.EmptyClick.Play();
             this.reload();
             return;
@@ -243,7 +280,7 @@ export class FPS implements OnRender {
         const pew = () => {
             if (!this.state.equipped) return;
             if (!this.weaponModel || !this.weaponData) return;
-            if (this.state.ammo.mag === 0) {
+            if (this.state.weapon.ammo.mag === 0) {
                 this.weaponModel!.Sounds.EmptyClick.Play();
                 this.mouseDown = false;
                 this.state.shooting = false;
@@ -251,10 +288,11 @@ export class FPS implements OnRender {
                 return;
             }
             
-            this.state.ammo.mag--;
-            this.events.ammoChanged.Fire(this.state.ammo);
+            this.state.weapon.ammo.mag--;
+            this.events.ammoChanged.Fire(this.state.weapon.ammo);
 
             this.calculateRecoil();
+            this.vfx.createTracer(this.weaponModel, this.weaponData);
             this.vfx.createMuzzleFlash(this.weaponModel);
             this.sounds.clone(<Sound>this.weaponModel.Sounds.WaitForChild("Fire"));
             
@@ -267,9 +305,8 @@ export class FPS implements OnRender {
         }
 
         const fireSpeed = 60 / this.weaponData!.stats.rpm;
-        const mag = this.state.ammo.mag;
         this.state.shooting = true;
-        switch(this.state.firemode) {
+        switch(this.state.weapon.firemode) {
             case Firemode.Bolt:
             case Firemode.Semi:
                 pew();
@@ -283,7 +320,7 @@ export class FPS implements OnRender {
                 break;
             case Firemode.Burst:
                 for (
-                    let i = 0; 
+                    let i = 0;
                     i <= (this.weaponData!.stats.burstCount ?? 3) && this.mouseDown; 
                     i++
                 ) {
@@ -293,7 +330,7 @@ export class FPS implements OnRender {
                 break;
 
             default:
-                throw error("Invalid firemode: " + tostring(this.state.firemode));
+                throw error("Invalid firemode: " + tostring(this.state.weapon.firemode));
         }
 
         this.state.shooting = false;
