@@ -1,7 +1,7 @@
 import { Controller } from "@flamework/core";
 import { Debris, ReplicatedStorage as Replicated, Workspace as World } from "@rbxts/services";
 import { WaitFor } from "shared/modules/utility/WaitFor";
-import { WeaponModel } from "client/classes/WeaponModel";
+import { WeaponModel } from "client/classes/Types";
 import { SoundPlayer } from "./SoundPlayer";
 
 

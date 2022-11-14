@@ -1,8 +1,7 @@
 import { UserInputService as UIS, Workspace as World } from "@rbxts/services";
 import { Janitor } from "@rbxts/janitor";
 import { WaitFor } from "shared/modules/utility/WaitFor";
-import { WeaponData } from "./WeaponData";
-import { WeaponModel } from "./WeaponModel";
+import { WeaponData, WeaponModel } from "./Types";
 import Spring from "shared/modules/utility/Spring";
 
 const camera = World.CurrentCamera!;

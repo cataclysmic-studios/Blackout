@@ -1,6 +1,7 @@
 import { Firemode } from "./Enums";
 
 type RecoilPattern = [ [number, number], [number, number], [number, number] ];
+export type LeanState = -1 | 0 | 1;
 
 export interface WeaponData {
     vmOffset: CFrame;
@@ -39,4 +40,33 @@ export interface WeaponData {
         max: number;
         shoot: number;
     }
+}
+
+export interface WeaponModel extends Folder {
+    CFrameManipulators: Folder;
+    Offsets: Folder & {
+        Aim: CFrameValue;
+    };
+    Sounds: Folder & {
+        Fire: Sound;
+        AimDown: Sound;
+        AimUp: Sound;
+        ChangeFiremode: Sound;
+        EmptyClick: Sound;
+        MagIn: Sound;
+        MagOut: Sound;
+        SlidePull: Sound;
+        SlideRelease: Sound;
+    };
+    Trigger: Part & {
+        ViewModel: Motor6D;
+        Chamber: Attachment & {
+            Smoke: ParticleEmitter;
+        };
+        Muzzle: Attachment;
+    };
+    Chamber: Part;
+    Mag: Part;
+    Bolt: Part;
+    ChargingHandle?: Part;
 }

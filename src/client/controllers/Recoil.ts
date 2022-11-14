@@ -1,7 +1,7 @@
-import { Controller, OnRender } from "@flamework/core";
+import { Controller } from "@flamework/core";
+import { WeaponData } from "client/classes/Types";
 import Spring from "shared/modules/utility/Spring";
 import ViewModel from "client/classes/ViewModel";
-import { WeaponData } from "client/classes/WeaponData";
 
 @Controller({})
 export class Recoil {
