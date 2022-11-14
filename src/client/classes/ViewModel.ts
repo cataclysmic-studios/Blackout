@@ -48,6 +48,11 @@ export default class ViewModel {
         this.oldCamCF = newCF;
     }
 
+    // Return the CFrame offset for the idle animation (breathing)
+    public getIdleOffset(dt: number, aiming: boolean): CFrame {
+        return new CFrame(0, math.sin(tick()) / (aiming ? 300 : 150), 0);
+    }
+
     // Returns a CFrame of where the rig should be
     public getCFrame(dt: number, aiming: boolean): CFrame {
         if (!this.weapon || !this.data) return new CFrame();
@@ -62,6 +67,7 @@ export default class ViewModel {
         const swayCF = aiming ? aimSway : hipSway;
         return World.CurrentCamera!.CFrame
             .mul(this.data.vmOffset)
+            .mul(this.getIdleOffset(dt, aiming))
             .mul(this.getManipulator("Aim").Value)
             .mul(swayCF);
     }
