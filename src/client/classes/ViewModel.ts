@@ -53,12 +53,14 @@ export default class ViewModel {
     public getCFrame(dt: number, aiming: boolean): CFrame {
         if (!this.weapon || !this.data) return new CFrame();
 
-        const { X: dx, Y: dy } = UIS.GetMouseDelta().div(600);
-        const limit = aiming ? .01 : .1;
+        const { X: dx, Y: dy } = UIS.GetMouseDelta().div(150);
+        const limit = aiming ? .02 : .04;
         this.springs.mouseSway.shove(new Vector3(math.clamp(dx, -limit, limit), math.clamp(dy, -limit, limit), 0));
 
         const sway = this.springs.mouseSway.update(dt).div(aiming ? 3 : 1);
-        const swayCF = new CFrame(sway.X, sway.Y / 8, 0).mul(CFrame.Angles(sway.Y / 1.25, sway.X, 0));
+        const aimSway = new CFrame(sway.X, sway.Y / 8, 0).mul(CFrame.Angles(-sway.Y / 1.25, sway.X, -sway.X));
+        const hipSway = new CFrame(sway.X * 1.5, -sway.Y / 16, 0).mul(CFrame.Angles(-sway.Y / 4, sway.X, 0));
+        const swayCF = aiming ? aimSway : hipSway;
         return World.CurrentCamera!.CFrame
             .mul(this.data.vmOffset)
             .mul(this.getManipulator("Aim").Value)

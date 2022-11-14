@@ -9,7 +9,7 @@ import Tween from "shared/modules/utility/Tween";
 export class Crosshair {
     private enabled = false;
     private size = 1;
-    private tweenSpeed = .15;
+    private tweenSpeed = .1;
 
     public maxSize = 10;
 

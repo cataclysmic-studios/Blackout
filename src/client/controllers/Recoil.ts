@@ -7,7 +7,7 @@ import { WeaponData } from "client/classes/WeaponData";
 export class Recoil {
 	private readonly attached: (Camera | ViewModel)[] = []; 
     private readonly springDefaults = {
-        camera: [25, 75, 4, 5.5],
+        camera: [20, 40, 4, 4],
         cameraTorque: [50, 110, 4, 15],
         model: [25, 75, 4, 5.5],
         modelTorque: [40, 110, 4, 4]
@@ -32,7 +32,7 @@ export class Recoil {
         const omf = this.springs.model.update(dt).div(springDamp);
         const tmf = this.springs.modelTorque.update(dt).div(springDamp);
         const moffset = new CFrame(0, 0, omf.Z);
-        const mvertClimb = CFrame.Angles(omf.X, 0, 0);
+        const mvertClimb = new CFrame(0, -omf.X * 3, 0).mul(CFrame.Angles(omf.X * 2, 0, 0));
         const mtorque = CFrame.Angles(0, tmf.Y, tmf.Y * torqueMult)
         const mrecoil = moffset.mul(mvertClimb).mul(mtorque);
         
