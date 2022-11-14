@@ -69,7 +69,7 @@ export class Menu implements OnInit, OnRender {
         Sound.Music.Menu.Stop();
 
         this.crosshair.toggleMouseIcon();
-        this.ui.getHUD().toggle();
+        this.ui.getHUD()?.toggle();
         this.fps.equip("HK416");
     }
 }

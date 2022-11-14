@@ -6,9 +6,20 @@ import { FPS } from "client/controllers/FPS";
 interface Attributes {}
 
 interface AmmoUI extends Frame {
-    Weapon: ImageLabel;
-    Mag: TextLabel;
-    Reserve: TextLabel;
+    UICorner: UICorner;
+    UIPadding: UIPadding;
+    UIStroke: UIStroke;
+    Line: Frame;
+    Mag: TextLabel & {
+        UIStroke: UIStroke;
+        UIGradient: UIGradient;
+        UIPadding: UIPadding;
+    };
+    Reserve: TextLabel & {
+        UIStroke: UIStroke;
+        UIGradient: UIGradient;
+        UIPadding: UIPadding;
+    };
 }
 
 @Component({ tag: "AmmoHUD" })

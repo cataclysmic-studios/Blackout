@@ -5,7 +5,7 @@ import { Janitor } from "@rbxts/janitor";
 interface Attributes {}
 
 @Component({ tag: "HUD" })
-export class HUD extends BaseComponent<Attributes, PlayerGui["HUD"]> implements OnInit {
+export class HUD extends BaseComponent<Attributes, ScreenGui> implements OnInit {
     private readonly janitor = new Janitor;
     
     public onInit(): void {

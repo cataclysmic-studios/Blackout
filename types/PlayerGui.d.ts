@@ -120,7 +120,7 @@ interface PlayerGui extends BasePlayerGui {
 				UIPadding: UIPadding;
 				UIStroke: UIStroke;
 			};
-			Weapon: ImageLabel;
+			Line: Frame;
 		};
 		Crosshair: Frame & {
 			B: Frame;

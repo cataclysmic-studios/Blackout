@@ -9,7 +9,7 @@ interface Attributes {}
 @Component({ tag: "MenuButton" })
 export class MenuButton extends BaseComponent<Attributes, TextButton> implements OnStart {
     private readonly janitor = new Janitor;
-    private readonly selectColor = Color3.fromRGB(255, 155, 16);
+    private readonly selectColor = Color3.fromRGB(255, 176, 15);
     private readonly defaultColors = {
         background: this.instance.BackgroundColor3,
         text: this.instance.TextColor3
@@ -28,7 +28,7 @@ export class MenuButton extends BaseComponent<Attributes, TextButton> implements
 
     // Establish button animations and logic
     public onStart(): void {
-        const info = new TweenInfo(.15, Enum.EasingStyle.Quad);
+        const info = new TweenInfo(.175, Enum.EasingStyle.Quad);
         this.janitor.Add(this.instance.MouseEnter.Connect(() => 
             Tween(this.instance, info, {
                 BackgroundColor3: this.selectColor,
