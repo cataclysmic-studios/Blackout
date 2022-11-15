@@ -22,9 +22,7 @@ export class VFX {
         
         for (const v of <(ParticleEmitter | Light)[]>muzzleFlash.GetChildren()) {
             v.Enabled = true;
-            task.delay(v.Name === "BarrelSmoke" ? .15 : .1, () => {
-                v.Enabled = false
-            });
+            task.delay(v.Name === "BarrelSmoke" ? 1.5 : .1, () => v.Enabled = false);
         }
         task.delay(2.5, () => muzzleFlash.Destroy());
 

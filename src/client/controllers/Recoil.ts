@@ -26,14 +26,14 @@ export class Recoil {
         const tcf = this.springs.cameraTorque.update(dt).div(springDamp);
         const coffset = new CFrame(0, 0, ocf.Z * 2.5);
         const cvertClimb = CFrame.Angles(ocf.X, 0, 0);
-        const ctorque = CFrame.Angles(0, tcf.Y, tcf.Y * torqueMult)
+        const ctorque = CFrame.Angles(0, tcf.Y, tcf.Y * torqueMult * (aimed ? 1.25 : 1))
         const crecoil = coffset.mul(cvertClimb).mul(ctorque);
 
         const omf = this.springs.model.update(dt).div(springDamp);
         const tmf = this.springs.modelTorque.update(dt).div(springDamp);
         const moffset = new CFrame(0, 0, omf.Z);
-        const mvertClimb = new CFrame(0, -omf.X * 3, 0).mul(CFrame.Angles(omf.X * 2, 0, 0));
-        const mtorque = CFrame.Angles(0, tmf.Y, tmf.Y * torqueMult)
+        const mvertClimb = new CFrame(0, -omf.X * 4, 0).mul(CFrame.Angles(omf.X * 2, 0, 0));
+        const mtorque = CFrame.Angles(0, tmf.Y, tmf.Y * torqueMult); // * (aimed ? 1.25 : 1)
         const mrecoil = moffset.mul(mvertClimb).mul(mtorque);
         
         for (let obj of this.attached)
@@ -45,6 +45,10 @@ export class Recoil {
                     obj = <ViewModel>obj;
                     obj.syncCameraBone();
                     obj.setCFrame(obj.getCFrame(dt, aimed).mul(mrecoil));
+                    if (obj.weapon) {
+                        const lv = obj.weapon!.Trigger.AssemblyLinearVelocity;
+                        obj.weapon!.Trigger.AssemblyLinearVelocity = new Vector3(lv.X, 0, lv.Y);
+                    }   
                 }
     }
 

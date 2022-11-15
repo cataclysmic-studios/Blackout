@@ -79,6 +79,10 @@ export class InputController implements OnStart {
                 case "E":
                     this.movement.lean(key.Name === "Q" ? -1 : 1);
                     break;
+
+                case "P":
+                    UIS.MouseIconEnabled = !UIS.MouseIconEnabled;
+                    break;
             }
         });
     }

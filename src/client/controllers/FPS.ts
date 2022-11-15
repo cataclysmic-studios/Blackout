@@ -340,7 +340,7 @@ export class FPS implements OnRender {
         if (!this.weaponData) return;
 
         const r = new Random;
-        const torqueDir = (new Random).NextInteger(1, 2) === 1 ? 1 : -1;
+        const torqueDir = r.NextNumber(-1, 1); //r.NextInteger(1, 2) === 1 ? 1 : -1;
         const [cy, cx, cz] = this.weaponData.recoil.camera;
         const cforce = new Vector3(
             r.NextNumber(cy[0], cy[1]),
