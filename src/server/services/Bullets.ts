@@ -13,12 +13,17 @@ export class Bullets implements OnStart {
     public onStart(): void {
         Events.createBullet.connect((plr, origin, dir, velocity) => this.create(plr, origin, dir, velocity));
 
-        this.bulletCache = new PartCacheModule(Replicated.VFX.Bullet, 10);
+        this.bulletCache = new PartCacheModule(Replicated.VFX.Bullet, 30);
         this.bulletCache.SetCacheParent(World.Debris);
 
-        // FastCast.VisualizeCasts = true;
+        FastCast.VisualizeCasts = true;
         Players.PlayerAdded.Connect(plr => this.playerCasters.set(plr.UserId, new FastCast));
         Players.PlayerRemoving.Connect(plr => this.playerCasters.delete(plr.UserId));
+    }
+
+    private resetBullet(bullet: Part): void {
+        bullet.AssemblyLinearVelocity = new Vector3;
+        this.bulletCache?.ReturnPart(bullet);
     }
 
     private createContainer(): Part {
@@ -48,7 +53,7 @@ export class Bullets implements OnStart {
         task.delay(4, () => dustContainer.Destroy());
     }
 
-    private dampenVelocity(cast: ActiveCast, material: Enum.Material, bullet: Part): void {
+    private dampenVelocity(cast: ActiveCast, material: Enum.Material, segVelocity: Vector3, size: number): void {
         let velocityDamp: number;
         switch(material.Name) {
             case "Metal":
@@ -81,7 +86,7 @@ export class Bullets implements OnStart {
                 break;
         }
 
-        cast.AddVelocity((<Part>bullet).CFrame.LookVector.div(velocityDamp));
+        cast.SetVelocity(segVelocity.div(velocityDamp * (size / 1.25)));
     }
 
     private create(player: Player, origin: Vector3, dir: Vector3, velocity: number): ActiveCast | undefined {
@@ -112,33 +117,39 @@ export class Bullets implements OnStart {
             if (rayResult.Instance.GetAttribute("Impenetrable")) return false;
             if (segVelocity.Magnitude < 300) return false;
 
-            const timesPierced = <number>bulletInstance?.GetAttribute("TimesPierced") ?? 0;
-            if (timesPierced > 8) return false;
+            print(segVelocity.Magnitude)
+            if (segVelocity.Magnitude < 300) return false;
 
-            bulletInstance?.SetAttribute("TimesPierced", timesPierced + 1);
             return true;
         }
 
         const cast = caster.Fire(origin.add(new Vector3(0, .05, 0)), dir, velocity, behavior);
         let hit: RBXScriptConnection;
-        hit = caster.RayHit.Connect((cast, { Instance, Position, Normal, Material }, segVelocity, bullet) => {
-            print(Instance)
+        hit = caster.RayHit.Connect((cast, { Position, Normal, Material }, segVelocity, bullet) => {
             hit.Disconnect();
 
             if (!bullet?.GetAttribute("InUse")) return;
             this.createImpactVFX(Position, Normal, Material);
-            this.bulletCache?.ReturnPart(<Part>bullet);
+            this.resetBullet(<Part>bullet);
         });
-        const pierced = caster.RayPierced.Connect((cast, { Position, Normal, Material }, segVelocity, bullet) => {
+        const pierced = caster.RayPierced.Connect((cast, { Instance, Position, Normal, Material }, segVelocity, bullet) => {
             if (!bullet?.GetAttribute("InUse")) return;
             this.createImpactVFX(Position, Normal.mul(-1), Material);
-            this.dampenVelocity(cast, Material, <Part>bullet);
+
+            let size: number;
+            if (math.floor(Normal.X) !== 0)
+                size = Instance.Size.X;
+            else if (math.floor(Normal.Y) !== 0)
+                size = Instance.Size.Y;
+            else
+                size = Instance.Size.Z;
+
+            this.dampenVelocity(cast, Material, segVelocity, size);
         });
         task.delay(6, () => {
-            if (bulletInstance?.GetAttribute("InUse")) {
-                bulletInstance.SetAttribute("TimesPierced", undefined);
-                this.bulletCache?.ReturnPart(<Part>bulletInstance);
-            }
+            if (bulletInstance?.GetAttribute("InUse"))
+                this.resetBullet(<Part>bulletInstance);
+
             pierced.Disconnect();
             lengthChange.Disconnect();
         })
