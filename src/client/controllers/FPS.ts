@@ -268,8 +268,8 @@ export class FPS implements OnRender {
     
     public shoot(): void {
         if (!this.state.equipped) return;
-        if (this.state.inspecting)
-            this.cancelInspect();
+        if(this.state.shooting) return;
+        if (this.state.inspecting) this.cancelInspect();
 
         if (this.state.weapon.ammo.mag === 0) {
             this.weaponModel!.Sounds.EmptyClick.Play();
@@ -337,21 +337,22 @@ export class FPS implements OnRender {
     }
 
     private calculateRecoil(): void {
+        if (!this.state.equipped) return;
         if (!this.weaponData) return;
 
         const r = new Random;
-        const torqueDir = r.NextNumber(-1, 1); //r.NextInteger(1, 2) === 1 ? 1 : -1;
+        const torqueDir = r.NextInteger(1, 2) === 1 ? 1 : -1;
         const [cy, cx, cz] = this.weaponData.recoil.camera;
         const cforce = new Vector3(
             r.NextNumber(cy[0], cy[1]),
-            r.NextNumber(cx[0], cx[1]) * torqueDir,
+            r.NextNumber(cx[0], cx[1]),
             r.NextNumber(cz[0], cz[1])
         );
 
         const [my, mx, mz] = this.weaponData.recoil.model;
         const mforce = new Vector3(
             r.NextNumber(my[0], my[1]),
-            r.NextNumber(mx[0], mx[1]) * torqueDir,
+            r.NextNumber(mx[0], mx[1]),
             r.NextNumber(mz[0], mz[1])
         );
 
@@ -359,11 +360,11 @@ export class FPS implements OnRender {
         if (this.state.aimed)
             stabilization += 0.8;
 
-        this.recoil.kick(this.weaponData, cforce, "Camera", stabilization);
-        this.recoil.kick(this.weaponData, mforce, "Model", stabilization);
+        this.recoil.kick(this.weaponData, cforce, "Camera", stabilization, torqueDir);
+        this.recoil.kick(this.weaponData, mforce, "Model", stabilization, torqueDir);
         task.delay(.12, () => {
-            this.recoil.kick(this.weaponData!, cforce.mul(-1), "Camera", stabilization);
-            this.recoil.kick(this.weaponData!, mforce.mul(-1), "Model", stabilization);
+            this.recoil.kick(this.weaponData!, cforce.mul(-1), "Camera", stabilization, torqueDir);
+            this.recoil.kick(this.weaponData!, mforce.mul(-1), "Model", stabilization, torqueDir);
         });
     }
 }

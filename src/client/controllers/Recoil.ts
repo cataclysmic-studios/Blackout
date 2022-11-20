@@ -8,7 +8,7 @@ export class Recoil {
 	private readonly attached: (Camera | ViewModel)[] = []; 
     private readonly springDefaults = {
         camera: [20, 40, 4, 4],
-        cameraTorque: [50, 110, 4, 15],
+        cameraTorque: [70, 1, 4, 15],
         model: [25, 75, 4, 5.5],
         modelTorque: [40, 110, 4, 4]
     };
@@ -20,13 +20,13 @@ export class Recoil {
     };
 
 	public update(dt: number, aimed: boolean): void {
-        const torqueMult = 14;
+        const torqueMult = 12;
         const springDamp = 80;
         const ocf = this.springs.camera.update(dt).div(springDamp);
         const tcf = this.springs.cameraTorque.update(dt).div(springDamp);
         const coffset = new CFrame(0, 0, ocf.Z * 2.5);
         const cvertClimb = CFrame.Angles(ocf.X, 0, 0);
-        const ctorque = CFrame.Angles(0, tcf.Y, tcf.Y * torqueMult * (aimed ? 1.25 : 1))
+        const ctorque = CFrame.Angles(0, tcf.Y, tcf.Y * torqueMult)
         const crecoil = coffset.mul(cvertClimb).mul(ctorque);
 
         const omf = this.springs.model.update(dt).div(springDamp);
@@ -53,7 +53,7 @@ export class Recoil {
     }
 
     // Shove recoil springs according to recoil type (camera/model)
-    public kick({ recoilSpringModifiers: modifiers }: WeaponData, force: Vector3, recoilType: "Camera" | "Model", stabilization = 1): void {
+    public kick({ recoilSpringModifiers: modifiers }: WeaponData, force: Vector3, recoilType: "Camera" | "Model", stabilization: number, torqueDir: number): void {
         if (recoilType === "Camera") {
             const [mainDefaultMass, mainDefaultForce, mainDefaultDamper, mainDefaultSpeed] = this.springDefaults.camera;
             this.springs.camera.mass = mainDefaultMass / modifiers.camRecoverSpeed;
@@ -67,7 +67,10 @@ export class Recoil {
             this.springs.cameraTorque.force = torqueDefaultForce / modifiers.camKickMult;
             this.springs.cameraTorque.damping = torqueDefaultDamper * modifiers.camKickDamper;
             this.springs.cameraTorque.speed = torqueDefaultSpeed * modifiers.camKickSpeed;
-            this.springs.cameraTorque.shove(force.div(stabilization));
+
+            const torque = force.div(stabilization);
+            this.springs.cameraTorque.shove(torque.mul(torqueDir));
+            task.delay(.1, () => this.springs.cameraTorque.shove(torque.mul(-torqueDir)));
         } else if (recoilType === "Model") {
             const [mainDefaultMass, mainDefaultForce, mainDefaultDamper, mainDefaultSpeed] = this.springDefaults.model;
             this.springs.model.mass = mainDefaultMass / modifiers.modelRecoverSpeed;
@@ -81,7 +84,10 @@ export class Recoil {
             this.springs.modelTorque.force = torqueDefaultForce / modifiers.modelKickMult;
             this.springs.modelTorque.damping = torqueDefaultDamper * modifiers.modelKickDamper;
             this.springs.modelTorque.speed = torqueDefaultSpeed * modifiers.modelKickSpeed;
-            this.springs.modelTorque.shove(force.div(stabilization));
+
+            const torque = force.div(stabilization);
+            this.springs.modelTorque.shove(torque.mul(torqueDir));
+            task.delay(.1, () => this.springs.modelTorque.shove(torque.mul(-torqueDir)));
         }
     }
 
