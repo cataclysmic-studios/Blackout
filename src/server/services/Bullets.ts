@@ -1,9 +1,11 @@
 import { OnStart, Service } from "@flamework/core";
-import { Players, ReplicatedStorage as Replicated, Workspace, Workspace as World } from "@rbxts/services";
+import { Players, ReplicatedStorage as Replicated, Workspace as World } from "@rbxts/services";
 import { Events } from "server/network";
-import FastCast, { ActiveCast, Caster } from "@rbxts/fastcast";
-import PartCacheModule from "@rbxts/partcache";
 import { PartCache } from "@rbxts/partcache/out/class";
+import PartCacheModule from "@rbxts/partcache";
+import FastCast, { ActiveCast, Caster } from "@rbxts/fastcast";
+
+const { floor, clamp } = math;
 
 @Service({})
 export class Bullets implements OnStart {
@@ -16,7 +18,7 @@ export class Bullets implements OnStart {
         this.bulletCache = new PartCacheModule(Replicated.VFX.Bullet, 30);
         this.bulletCache.SetCacheParent(World.Debris);
 
-        FastCast.VisualizeCasts = true;
+        // FastCast.VisualizeCasts = true;
         Players.PlayerAdded.Connect(plr => this.playerCasters.set(plr.UserId, new FastCast));
         Players.PlayerRemoving.Connect(plr => this.playerCasters.delete(plr.UserId));
     }
@@ -36,21 +38,70 @@ export class Bullets implements OnStart {
         return container;
     }
 
-    private createImpactVFX(origin: Vector3, normal: Vector3, material: Enum.Material): void {
-        const dustContainer = this.createContainer();
-        dustContainer.CFrame = new CFrame(origin, normal);
+    private getBulletHoleTexture(material: Enum.Material): string {
+        switch(material.Name) {
+            case "Wood":
+            case "WoodPlanks":
+                return "6552016340";
 
-        let dust = <Folder>Replicated.VFX.BulletImpacts.FindFirstChild(material.Name);
-        if (!dust)
-            dust = Replicated.VFX.BulletImpacts.Default;
-            
+            case "Metal":
+            case "CorrodedMetal":
+            case "DiamondPlate":
+                return "9827740725";
+
+            default:
+                return "1844445084";
+        }
+    }
+
+    private createImpactVFX(origin: Vector3, normal: Vector3, material: Enum.Material, color: Color3): void {
+        const fixedNormal = new Vector3(clamp(normal.X, 0, 1), clamp(normal.Y, 0, 1), clamp(normal.Z, 0, 1));
+        const dustContainer = this.createContainer();
+        dustContainer.Name = "Dust"
+        dustContainer.CFrame = new CFrame(origin, origin.add(fixedNormal));
+        
+        const dust = <Folder>Replicated.VFX.BulletImpacts.FindFirstChild(material.Name) ?? Replicated.VFX.BulletImpacts.Default;
         for (let particle of <ParticleEmitter[]>dust.GetChildren()) {
             particle = particle.Clone()
+            if (particle.Name === "Smoke") {
+                const damp = 1.1;
+                const dampenedColor = new Color3(color.R / damp, color.G / damp, color.B / damp);
+                particle.Color = new ColorSequence(dampenedColor);
+            }
+
             particle.Parent = dustContainer;
             task.delay(.2, () => particle.Enabled = false);
         }
+        
+        const holeContainer = this.createContainer();
+        holeContainer.Name = "BulletHole";
 
-        task.delay(4, () => dustContainer.Destroy());
+        const z = .5, size = .35;
+        if (fixedNormal.X !== 0)
+            holeContainer.Size = new Vector3(z, size, size);
+        else if (fixedNormal.Y !== 0)
+            holeContainer.Size = new Vector3(size, size, z);
+        else
+            holeContainer.Size = new Vector3(size, z, size);
+
+        holeContainer.CFrame = new CFrame(origin, origin.add(fixedNormal));
+        
+        const holeFront = new Instance("Decal");
+        holeFront.Face = Enum.NormalId.Front;
+        holeFront.Texture = "rbxassetid://" + this.getBulletHoleTexture(material);
+        holeFront.Color3 = color;
+        holeFront.Parent = holeContainer;
+
+        const holeBack = holeFront.Clone();
+        holeBack.Face = Enum.NormalId.Back;
+        holeBack.Parent = holeContainer;
+
+        const cleanup = () => {
+            dustContainer.Destroy();
+            holeContainer.Destroy();
+        }
+
+        task.delay(5, cleanup);
     }
 
     private dampenVelocity(cast: ActiveCast, material: Enum.Material, segVelocity: Vector3, size: number): void {
@@ -117,29 +168,26 @@ export class Bullets implements OnStart {
             if (rayResult.Instance.GetAttribute("Impenetrable")) return false;
             if (segVelocity.Magnitude < 300) return false;
 
-            print(segVelocity.Magnitude)
-            if (segVelocity.Magnitude < 300) return false;
-
             return true;
         }
 
         const cast = caster.Fire(origin.add(new Vector3(0, .05, 0)), dir, velocity, behavior);
         let hit: RBXScriptConnection;
-        hit = caster.RayHit.Connect((cast, { Position, Normal, Material }, segVelocity, bullet) => {
+        hit = caster.RayHit.Connect((cast, { Instance, Position, Normal, Material }, segVelocity, bullet) => {
             hit.Disconnect();
 
             if (!bullet?.GetAttribute("InUse")) return;
-            this.createImpactVFX(Position, Normal, Material);
+            this.createImpactVFX(Position, Normal, Material, Instance.Color);
             this.resetBullet(<Part>bullet);
         });
         const pierced = caster.RayPierced.Connect((cast, { Instance, Position, Normal, Material }, segVelocity, bullet) => {
             if (!bullet?.GetAttribute("InUse")) return;
-            this.createImpactVFX(Position, Normal.mul(-1), Material);
+            this.createImpactVFX(Position, Normal, Material, Instance.Color);
 
             let size: number;
-            if (math.floor(Normal.X) !== 0)
+            if (floor(Normal.X) !== 0)
                 size = Instance.Size.X;
-            else if (math.floor(Normal.Y) !== 0)
+            else if (floor(Normal.Y) !== 0)
                 size = Instance.Size.Y;
             else
                 size = Instance.Size.Z;
