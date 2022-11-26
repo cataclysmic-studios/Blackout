@@ -49,8 +49,9 @@ export default class ViewModel<ModelT extends Model = Model> {
     }
 
     // Return the CFrame offset for the idle animation (breathing)
-    public getIdleOffset(dt: number, aiming: boolean): CFrame {
-        return new CFrame(0, math.sin(tick()) / (aiming ? 325 : 130), 0);
+    public getIdleOffset(dt: number, aiming: boolean, mouseY: number): CFrame {
+        return new CFrame(0, math.sin(tick()) / (aiming ? 325 : 130), 0)
+            .mul(new CFrame(0, -mouseY / 2, mouseY / 5));
     }
 
     // Returns a CFrame of where the rig should be
@@ -58,6 +59,7 @@ export default class ViewModel<ModelT extends Model = Model> {
         if (!this.weapon || !this.data) return new CFrame();
 
         const { X: dx, Y: dy } = UIS.GetMouseDelta().div(150);
+        const [ly] = camera.CFrame.ToEulerAnglesYXZ();
         const limit = aiming ? .02 : .04;
         this.springs.mouseSway.shove(new Vector3(math.clamp(dx, -limit, limit), math.clamp(dy, -limit, limit), 0));
 
@@ -69,7 +71,7 @@ export default class ViewModel<ModelT extends Model = Model> {
         const hipSway = new CFrame(-sway.X * 1.75, sway.Y / 1.5, -sway.X * 1.5).mul(CFrame.Angles(-sway.Y / 1.5, -sway.X, 0));
         return World.CurrentCamera!.CFrame
             .mul(this.data.vmOffset)
-            .mul(this.getIdleOffset(dt, aiming))
+            .mul(this.getIdleOffset(dt, aiming, ly / 5))
             .mul(this.getManipulator("Aim").Value)
             .mul(aiming ? aimSway : hipSway);
     }
