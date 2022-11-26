@@ -50,6 +50,7 @@ export default class ViewModel<ModelT extends Model = Model> {
 
     // Return the CFrame offset for the idle animation (breathing)
     public getIdleOffset(dt: number, aiming: boolean, mouseY: number): CFrame {
+        mouseY = aiming ? 0 : mouseY;
         return new CFrame(0, math.sin(tick()) / (aiming ? 325 : 130), 0)
             .mul(new CFrame(0, -mouseY / 2, mouseY / 5));
     }

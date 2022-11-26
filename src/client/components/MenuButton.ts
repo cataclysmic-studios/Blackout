@@ -28,7 +28,7 @@ export class MenuButton extends BaseComponent<Attributes, TextButton> implements
 
     // Establish button animations and logic
     public onStart(): void {
-        const info = new TweenInfo(0.175, Enum.EasingStyle.Quad);
+        const info = new TweenInfo(.175, Enum.EasingStyle.Quad);
         this.janitor.Add(this.instance.MouseEnter.Connect(() => 
             Tween(this.instance, info, {
                 BackgroundColor3: this.selectColor,
