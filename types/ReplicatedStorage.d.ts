@@ -499,6 +499,7 @@ interface ReplicatedStorage extends Instance {
 				SurfaceAppearance: SurfaceAppearance;
 			};
 		};
+		Blood: ParticleEmitter;
 		BulletImpacts: Folder & {
 			Grass: Folder & {
 				Grass: ParticleEmitter;

@@ -1,5 +1,5 @@
 import { OnStart, Service } from "@flamework/core";
-import { Players, ReplicatedStorage as Replicated, Workspace as World } from "@rbxts/services";
+import { Debris, Players, ReplicatedStorage as Replicated, Workspace as World } from "@rbxts/services";
 import { Events } from "server/network";
 import { PartCache } from "@rbxts/partcache/out/class";
 import PartCacheModule from "@rbxts/partcache";
@@ -54,6 +54,59 @@ export class Bullets implements OnStart {
         }
     }
 
+    private dampenVelocity(cast: ActiveCast, material: Enum.Material, segVelocity: Vector3, size: number): void {
+        let velocityDamp: number;
+        switch(material.Name) {
+            case "Metal":
+            case "DiamondPlate":
+                velocityDamp = 1.55;
+                break;
+
+            case "CorrodedMetal":
+            case "Concrete":
+            case "Basalt":
+            case "Brick":
+            case "Cobblestone":
+            case "Marble":
+            case "Slate":
+            case "Rock":
+            case "Salt":
+            case "Pebble":
+            case "Pavement":
+                velocityDamp = 1.3;
+                break;
+
+            case "Glass":
+            case "ForceField":
+            case "Ice":
+                velocityDamp = 1.05;
+                break;
+                
+            default:
+                velocityDamp = 1.15;
+                break;
+        }
+
+        cast.SetVelocity(segVelocity.div(velocityDamp * (size / 1.25)));
+    }
+
+    private createBloodVFX(origin: Vector3, normal: Vector3): void {
+        const fixedNormal = new Vector3(clamp(normal.X, 0, 1), clamp(normal.Y, 0, 1), clamp(normal.Z, 0, 1));
+        const bloodContainer = this.createContainer();
+        bloodContainer.Name = "Blood"
+        bloodContainer.CFrame = new CFrame(origin, origin.add(fixedNormal));
+
+        const attachment = new Instance("Attachment");
+        const blood = Replicated.VFX.Blood.Clone();
+        blood.Parent = attachment;
+        attachment.Parent = bloodContainer;
+        
+        task.delay(.2, () => {
+            blood.Enabled = false;
+            Debris.AddItem(blood, 1);
+        });
+    }
+
     private createImpactVFX(origin: Vector3, normal: Vector3, material: Enum.Material, color: Color3): void {
         const fixedNormal = new Vector3(clamp(normal.X, 0, 1), clamp(normal.Y, 0, 1), clamp(normal.Z, 0, 1));
         const dustContainer = this.createContainer();
@@ -104,40 +157,8 @@ export class Bullets implements OnStart {
         task.delay(5, cleanup);
     }
 
-    private dampenVelocity(cast: ActiveCast, material: Enum.Material, segVelocity: Vector3, size: number): void {
-        let velocityDamp: number;
-        switch(material.Name) {
-            case "Metal":
-            case "DiamondPlate":
-                velocityDamp = 1.55;
-                break;
-
-            case "CorrodedMetal":
-            case "Concrete":
-            case "Basalt":
-            case "Brick":
-            case "Cobblestone":
-            case "Marble":
-            case "Slate":
-            case "Rock":
-            case "Salt":
-            case "Pebble":
-            case "Pavement":
-                velocityDamp = 1.3;
-                break;
-
-            case "Glass":
-            case "ForceField":
-            case "Ice":
-                velocityDamp = 1.05;
-                break;
-                
-            default:
-                velocityDamp = 1.15;
-                break;
-        }
-
-        cast.SetVelocity(segVelocity.div(velocityDamp * (size / 1.25)));
+    private hasHumanoid(instance: Instance): boolean {
+        return instance.FindFirstAncestorOfClass("Model")?.FindFirstChildOfClass("Humanoid") !== undefined;
     }
 
     private create(player: Player, origin: Vector3, dir: Vector3, velocity: number): ActiveCast | undefined {
@@ -177,12 +198,22 @@ export class Bullets implements OnStart {
             hit.Disconnect();
 
             if (!bullet?.GetAttribute("InUse")) return;
-            this.createImpactVFX(Position, Normal, Material, Instance.Color);
+            if (this.hasHumanoid(Instance))
+                this.createBloodVFX(Position, Normal);
+            else
+                this.createImpactVFX(Position, Normal, Material, Instance.Color);
+
             this.resetBullet(<Part>bullet);
         });
         const pierced = caster.RayPierced.Connect((cast, { Instance, Position, Normal, Material }, segVelocity, bullet) => {
             if (!bullet?.GetAttribute("InUse")) return;
-            this.createImpactVFX(Position, Normal, Material, Instance.Color);
+            if (this.hasHumanoid(Instance)) {
+                this.createBloodVFX(Position, Normal);
+                this.createBloodVFX(Position, Normal.mul(-1));
+            } else {
+                this.createImpactVFX(Position, Normal, Material, Instance.Color);
+                this.createImpactVFX(Position, Normal.mul(-1), Material, Instance.Color);
+            }
 
             let size: number;
             if (floor(Normal.X) !== 0)
