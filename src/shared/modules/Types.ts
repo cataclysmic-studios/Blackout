@@ -27,7 +27,11 @@ export interface WeaponData {
         damage: [number, number];
         range: [number, number];
         muzzleVelocity: number;
-        penetrationDepth: number;
+        bodyMultiplier: {
+            head: number;
+            torso: number;
+            limbs: number;
+        };
 
         firemodes: Firemode[];
         burstCount?: number;    

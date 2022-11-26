@@ -13,7 +13,7 @@ export class VFX {
     ) {}
 
     public createTracer(model: WeaponModel, data: WeaponData): void {
-        Events.createBullet.fire(model.Trigger.Muzzle.WorldPosition, Players.LocalPlayer.GetMouse().Hit.LookVector, data.stats.muzzleVelocity);
+        Events.createBullet.fire(model.Trigger.Muzzle.WorldPosition, Players.LocalPlayer.GetMouse().Hit.LookVector, data);
     }
 
     public createMuzzleFlash(model: WeaponModel): void {
