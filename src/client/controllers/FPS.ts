@@ -150,7 +150,6 @@ export class FPS implements OnRender {
         const menu = Dependency<Menu>();
         if (menu.active) return;
 
-        print("equip")
         const weaponName = this.state.weapons[slot - 1];
         if (!weaponName) return;
 
