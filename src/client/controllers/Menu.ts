@@ -16,8 +16,9 @@ export class Menu implements OnInit, OnRender {
     private readonly plr = Players.LocalPlayer;
     private readonly mouse = this.plr.GetMouse();
     private initialCF = new CFrame;
-    private active = false;
     private currentPage?: MenuPage;
+
+    public active = false;
 
     public constructor(
         private readonly fps: FPS,
@@ -46,7 +47,7 @@ export class Menu implements OnInit, OnRender {
     public onRender(dt: number): void {
         if (!this.active) return;
 
-        const damp = 450
+        const damp = 450;
         const { X: mx, Y: my } = new Vector2((this.initialCF.X - this.mouse.X) / damp, (this.initialCF.Y - this.mouse.Y) / damp);
         const camOffset = new CFrame().mul(CFrame.Angles(rad(my), rad(mx), 0));
         World.CurrentCamera!.CFrame = this.initialCF.mul(camOffset);
@@ -60,18 +61,15 @@ export class Menu implements OnInit, OnRender {
 
     // Menu is finished being used (play button is pressed)
     public destroy(): void {
-        this.active = false;
         World.CurrentCamera!.CameraType = Enum.CameraType.Custom;
-        
-        this.ui.getScreen("Menu").Enabled = false;
-
         this.plr.CameraMode = Enum.CameraMode.LockFirstPerson;
         Sound.Music.Menu.Stop();
-
+        
         this.crosshair.toggleMouseIcon();
+        this.ui.getScreen("Menu").Enabled = false;
         this.ui.getHUD()?.toggle();
-
+        
         this.fps.addWeapon("HK416", 1);
-        this.fps.equip(1);
+        this.active = false;
     }
 }

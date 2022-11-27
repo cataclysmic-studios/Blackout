@@ -41,6 +41,29 @@ export class InputController implements OnStart {
 
         UIS.InputBegan.Connect(({ KeyCode: key }) => {
             switch(key.Name) {
+                case "One":
+                    if (this.fps.state.currentSlot === 1)
+                        this.fps.unequip();
+                    else
+                        this.fps.equip(1);
+                    break;
+                case "Two":
+                     if (this.fps.state.currentSlot === 2)
+                        this.fps.unequip();
+                    else
+                        this.fps.equip(2);
+                    break;
+                case "Three":
+                     if (this.fps.state.currentSlot === 3)
+                        this.fps.unequip();
+                    else
+                        this.fps.equip(3);
+                    break;
+
+                case "F":
+                    this.fps.melee();
+                    break
+
                 case "R":
                     this.fps.reload();
                     break;

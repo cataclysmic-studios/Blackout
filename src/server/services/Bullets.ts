@@ -1,10 +1,10 @@
 import { OnStart, Service } from "@flamework/core";
 import { Debris, Players, ReplicatedStorage as Replicated, Workspace as World } from "@rbxts/services";
+import { WeaponData } from "shared/modules/Types";
 import { Events } from "server/network";
 import { PartCache } from "@rbxts/partcache/out/class";
 import PartCacheModule from "@rbxts/partcache";
 import FastCast, { ActiveCast, Caster } from "@rbxts/fastcast";
-import { WeaponData } from "shared/modules/Types";
 
 const { floor, clamp } = math;
 
@@ -246,7 +246,7 @@ export class Bullets implements OnStart {
 
             if (!bullet?.GetAttribute("InUse")) return;
             if (this.hasHumanoid(Instance)) {
-                this.renderHit(player, this.getVictim(Instance)!, bulletInstance!, Instance, origin, weaponData);
+                // this.renderHit(player, this.getVictim(Instance)!, bulletInstance!, Instance, origin, weaponData);
                 this.createBloodVFX(Position, Normal);
             } else
                 this.createImpactVFX(Position, Normal, Material, Instance.Color);

@@ -17,6 +17,21 @@ export class Crosshair {
         private readonly ui: UI
     ) {}
 
+    public toggleDot(): void {
+        const hud = this.ui.getScreen("HUD");
+        const dot = WaitFor<Frame>(hud, "Dot");
+        const frame = WaitFor<Frame>(hud, "Crosshair");
+        dot.Visible = !frame.Visible
+    }
+
+    // Toggle crosshair
+    public toggle(): void {
+        const hud = this.ui.getScreen("HUD");
+        const frame = WaitFor<Frame>(hud, "Crosshair");
+        this.enabled = !this.enabled;
+        frame.Visible = !frame.Visible;
+    }
+
     // Add onto current size
     public addSize(value: number): Tween {
         this.size += value;
@@ -56,7 +71,6 @@ export class Crosshair {
     }
     
     public toggleMouseIcon(): void {
-        this.enabled = !this.enabled;
-        UIS.MouseIconEnabled = !this.enabled;
+        UIS.MouseIconEnabled = !UIS.MouseIconEnabled;
     }
 }

@@ -14,10 +14,11 @@ import { HUD } from "client/components/HUD";
 import Signal from "@rbxts/signal";
 import Tween from "shared/modules/utility/Tween";
 import ViewModel from "client/classes/ViewModel";
+import { Menu } from "./Menu";
 
 interface FPSState {
     equipped: boolean;
-    currentSlot: Slot;
+    currentSlot?: Slot;
     weapons: (string | undefined)[];
     weapon: {
         firemode: Firemode;
@@ -30,6 +31,7 @@ interface FPSState {
     aimed: boolean;
     shooting: boolean;
     reloading: boolean;
+    reloadCancelled: boolean;
     inspecting: boolean;
 
     sprinting: boolean;
@@ -46,6 +48,7 @@ export class FPS implements OnRender {
     private weaponModel?: WeaponModel;
     private triggerAnim?: AnimationTrack;
     private inspectAnim?: AnimationTrack;
+    private reloadAnim?: AnimationTrack;
 
     public mouseDown = false;
     public readonly events = {
@@ -54,7 +57,7 @@ export class FPS implements OnRender {
 
     public readonly state: FPSState = {
         equipped: false,
-        currentSlot: 1,
+        currentSlot: undefined,
         weapons: [],
         weapon: {
             firemode: Firemode.Semi,
@@ -67,6 +70,7 @@ export class FPS implements OnRender {
         aimed: false,
         shooting: false,
         reloading: false,
+        reloadCancelled: false,
         inspecting: false,
         sprinting: false,
         crouched: false,
@@ -106,7 +110,91 @@ export class FPS implements OnRender {
         this.recoil.update(dt, this.state.aimed);
     }
 
+    // Attach all Motor6D's inside of the weapon to the ViewModel
+    private attachMotors(model: WeaponModel): void {
+        const parts = <BasePart[]>model.GetDescendants().filter(d => d.IsA("BasePart"));
+        for (const part of parts)
+            part.Anchored = false;
+
+        const motors = <Motor6D[]>model.GetDescendants().filter(d => d.IsA("Motor6D"));
+        for (const motor of motors)
+            motor.Part0 = model.Trigger;
+
+        model.Trigger.ViewModel.Part0 = this.viewModel.root;
+        do task.wait(); while (model.Trigger.ViewModel.Part0 !== this.viewModel.root);
+    }
+
+    public addWeapon(name: string, slot: Slot): void {
+        this.state.weapons[slot - 1] = name;
+    }
+
+    public removeWeapon(slot: Slot): void {
+        this.state.weapons[slot - 1] = undefined;
+    }
+
+    public unequip(): void {
+        this.state.equipped = false;
+        this.viewModel.setEquipped(undefined);
+        this.weaponData = undefined;
+
+        this.weaponModel?.Destroy();
+        this.weaponModel = undefined;
+        
+        this.crosshair.toggle();
+        this.crosshair.toggleDot();
+        this.state.currentSlot = undefined;
+        // const unequipAnim = this.viewModel.playAnimation("Unequip")!;
+    }
+
+    public equip(slot: Slot): void {
+        const menu = Dependency<Menu>();
+        if (menu.active) return;
+
+        print("equip")
+        const weaponName = this.state.weapons[slot - 1];
+        if (!weaponName) return;
+
+        this.crosshair.toggle();
+        this.crosshair.toggleDot();
+        const model = WaitFor<WeaponModel>(Replicated.Weapons, weaponName).Clone();
+        this.attachMotors(model);
+        
+        this.viewModel.setEquipped(model);
+        this.weaponData = this.viewModel.data!;
+        this.weaponModel = model;
+        this.state.currentSlot = slot;
+        
+        for (const offset of model.Offsets.GetChildren()) {
+            const cfm = <CFrameValue>offset.Clone();
+            cfm.Value = new CFrame;
+            cfm.Parent = model.CFrameManipulators;
+        }
+        
+        this.state.weapon.firemode = this.weaponData.stats.firemodes[0];
+        this.state.weapon.ammo.mag = this.weaponData.stats.magSize;
+        this.state.weapon.ammo.reserve = this.weaponData.stats.reserve;
+        this.events.ammoChanged.Fire(this.state.weapon.ammo);
+        
+        this.crosshair.maxSize = this.weaponData.crossExpansion.max;
+        this.crosshair.setSize(this.weaponData.crossExpansion.hip);
+        
+        model.Parent = this.viewModel.model;
+        const equipAnim = this.viewModel.playAnimation("Equip", false)!;
+        this.viewModel.playAnimation("Idle");
+
+        equipAnim.GetMarkerReachedSignal("BoltBack").Once(() => this.weaponModel?.Sounds.SlidePull.Play());
+        equipAnim.GetMarkerReachedSignal("BoltClosed").Once(() => this.weaponModel?.Sounds.SlideRelease.Play());
+
+        let conn: RBXScriptConnection;
+        conn = equipAnim.Stopped.Connect(() => {
+            this.state.equipped = true;
+            conn.Disconnect();
+        });
+        equipAnim.Play();
+    }
+
     public cancelInspect(): void {
+        if (!this.state.inspecting) return;
         this.inspectAnim?.Stop();
     }
 
@@ -131,77 +219,20 @@ export class FPS implements OnRender {
         this.inspectAnim.Play();
     }
 
-    // Attach all Motor6D's inside of the weapon to the ViewModel
-    private attachMotors(model: WeaponModel): void {
-        const parts = <BasePart[]>model.GetDescendants().filter(d => d.IsA("BasePart"));
-        for (const part of parts)
-            part.Anchored = false;
-
-        const motors = <Motor6D[]>model.GetDescendants().filter(d => d.IsA("Motor6D"));
-        for (const motor of motors)
-            motor.Part0 = model.Trigger;
-
-        model.Trigger.ViewModel.Part0 = this.viewModel.root;
-        do task.wait(); while (model.Trigger.ViewModel.Part0 !== this.viewModel.root);
+    public melee(): void {
+        if (!this.state.equipped) return;
+        if (!this.weaponModel || !this.weaponData) return;
+        this.cancelReload();
+        this.cancelInspect();
     }
 
-    public addWeapon(name: string, slot: Slot): void {
-        this.state.weapons[slot - 1] = name;
-    }
-
-    public removeWeapon(slot: Slot): void {
-        this.state.weapons[slot - 1] = undefined;
-    }
-
-    public unequip(): void {
-        this.viewModel.setEquipped(undefined);
-        this.weaponData = undefined;
-
-        this.weaponModel?.Destroy();
-        this.weaponModel = undefined;
-        
-        this.crosshair.toggleMouseIcon();
-        // const unequipAnim = this.viewModel.playAnimation("Unequip")!;
-    }
-
-    public equip(slot: Slot): void {
-        const weaponName = this.state.weapons[slot - 1];
-        if (!weaponName) return;
-
-        const model = WaitFor<WeaponModel>(Replicated.Weapons, weaponName).Clone();
-        this.attachMotors(model);
-        
-        this.viewModel.setEquipped(model);
-        this.weaponData = this.viewModel.data!;
-        this.weaponModel = model;
-        
-        for (const offset of model.Offsets.GetChildren()) {
-            const cfm = <CFrameValue>offset.Clone();
-            cfm.Value = new CFrame;
-            cfm.Parent = model.CFrameManipulators;
-        }
-        
-        this.state.weapon.firemode = this.weaponData.stats.firemodes[0];
-        this.state.weapon.ammo.mag = this.weaponData.stats.magSize;
-        this.state.weapon.ammo.reserve = this.weaponData.stats.reserve;
-        this.events.ammoChanged.Fire(this.state.weapon.ammo);
-        
-        this.crosshair.maxSize = this.weaponData.crossExpansion.max;
-        this.crosshair.setSize(this.weaponData.crossExpansion.hip);
-        
-        model.Parent = this.viewModel.model;
-        const equipAnim = this.viewModel.playAnimation("Equip", false)!;
-        this.viewModel.playAnimation("Idle");
-
-        equipAnim.GetMarkerReachedSignal("BoltBack").Once(() => this.weaponModel!.Sounds.SlidePull.Play());
-        equipAnim.GetMarkerReachedSignal("BoltClosed").Once(() => this.weaponModel!.Sounds.SlideRelease.Play());
-
-        let conn: RBXScriptConnection;
-        conn = equipAnim.Stopped.Connect(() => {
-            this.state.equipped = true;
-            conn.Disconnect();
-        });
-        equipAnim.Play();
+    public cancelReload(): void {
+        if (!this.state.equipped) return;
+        if (!this.weaponModel || !this.weaponData) return;
+        if (!this.state.reloading) return;
+        this.state.reloadCancelled = true;
+        this.reloadAnim?.Stop();
+        this.state.reloadCancelled = false;
     }
 
     public reload(): void {
@@ -209,13 +240,14 @@ export class FPS implements OnRender {
         if (!this.weaponModel || !this.weaponData) return;
         if (this.state.reloading) return;
         if (this.state.inspecting) return;
-        if (this.state.aimed) return;
+        if (this.state.aimed) return; //aiming reload anim
         if (this.state.shooting) return;
         if (this.state.weapon.ammo.mag === this.weaponData.stats.magSize + this.weaponData.stats.chamber) return;
         if (this.state.weapon.ammo.reserve === 0) return;
         this.state.reloading = true;
         
-        // this.viewModel.playAnimation("Reload");
+        // this.reloadAnim = this.viewModel.playAnimation("Reload")!.Ended.Connect(() => {});
+        if (this.state.reloadCancelled) return;
         const magBeforeReload = this.state.weapon.ammo.mag;
         this.state.weapon.ammo.mag = this.weaponData.stats.magSize;
         if (magBeforeReload > 0)
@@ -237,9 +269,7 @@ export class FPS implements OnRender {
         if (!this.state.equipped) return;
         if (this.state.aimed === on) return;
         if (!this.weaponModel || !this.weaponData) return;
-        if (this.state.inspecting)
-            this.cancelInspect();
-    
+        this.cancelInspect();
         this.state.aimed = on;
 
         this.weaponModel.Sounds[on ? "AimDown" : "AimUp"].Play();
@@ -269,7 +299,8 @@ export class FPS implements OnRender {
     public shoot(): void {
         if (!this.state.equipped) return;
         if(this.state.shooting) return;
-        if (this.state.inspecting) this.cancelInspect();
+        this.cancelReload();
+        this.cancelInspect();
 
         if (this.state.weapon.ammo.mag === 0) {
             this.weaponModel!.Sounds.EmptyClick.Play();
