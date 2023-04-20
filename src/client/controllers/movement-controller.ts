@@ -1,11 +1,11 @@
 import { Controller } from "@flamework/core";
 import { LeanState } from "shared/modules/Types";
-import { FPS } from "./FPS";
+import { ViewmodelController } from "./viewmodel-controller";
 
 @Controller({})
-export class Movement {
+export class MovementController {
   public constructor(
-    private readonly fps: FPS
+    private readonly fps: ViewmodelController
   ) { }
 
   /**

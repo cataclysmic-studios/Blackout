@@ -1,7 +1,7 @@
 import { OnStart } from "@flamework/core";
 import { Component, BaseComponent } from "@flamework/components";
 import { Janitor } from "@rbxts/janitor";
-import { FPS } from "client/controllers/FPS";
+import { ViewmodelController } from "client/controllers/viewmodel-controller";
 
 interface Attributes { }
 
@@ -27,7 +27,7 @@ export class AmmoHUD extends BaseComponent<Attributes, AmmoUI> implements OnStar
   private readonly janitor = new Janitor;
 
   public constructor(
-    private readonly fps: FPS
+    private readonly fps: ViewmodelController
   ) {
     super();
   }

@@ -1,15 +1,15 @@
 import { Controller, OnStart } from "@flamework/core";
 import { Players, UserInputService as UIS } from "@rbxts/services";
-import { FPS } from "./FPS";
-import { Movement } from "./Movement";
+import { ViewmodelController } from "./viewmodel-controller";
+import { MovementController } from "./movement-controller";
 
 @Controller({})
 export class InputController implements OnStart {
   public mouseDown = false;
 
   public constructor(
-    private readonly fps: FPS,
-    private readonly movement: Movement
+    private readonly fps: ViewmodelController,
+    private readonly movement: MovementController
   ) { }
 
   /** @hidden */

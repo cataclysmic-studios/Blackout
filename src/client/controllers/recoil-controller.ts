@@ -1,10 +1,10 @@
 import { Controller } from "@flamework/core";
 import { WeaponData } from "shared/modules/Types";
 import Spring from "shared/modules/utility/Spring";
-import ViewModel from "client/classes/ViewModel";
+import ViewModel from "client/classes/view-model";
 
 @Controller({})
-export class Recoil {
+export class RecoilController {
   private readonly attached: (Camera | ViewModel)[] = [];
   private readonly springDefaults = {
     camera: [20, 40, 4, 4],

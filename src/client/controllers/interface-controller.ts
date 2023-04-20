@@ -2,10 +2,10 @@ import { Components } from "@flamework/components";
 import { Controller, Dependency } from "@flamework/core";
 import { Players } from "@rbxts/services";
 import { WaitFor } from "shared/modules/utility/WaitFor";
-import { HUD } from "client/components/HUD";
+import { HUD } from "client/components/heads-up-display";
 
 @Controller({})
-export class UI {
+export class InterfaceController {
   private readonly playerUI = WaitFor<PlayerGui>(Players.LocalPlayer, "PlayerGui");
 
   /**

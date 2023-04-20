@@ -1,7 +1,7 @@
 import { OnStart } from "@flamework/core";
 import { Component, BaseComponent } from "@flamework/components";
 import { Janitor } from "@rbxts/janitor";
-import { Menu } from "client/controllers/Menu";
+import { MenuController } from "client/controllers/menu-controller";
 import Tween from "shared/modules/utility/Tween";
 
 interface Attributes { }
@@ -16,7 +16,7 @@ export class MenuButton extends BaseComponent<Attributes, TextButton> implements
   }
 
   public constructor(
-    private readonly menu: Menu
+    private readonly menu: MenuController
   ) {
     super();
   }

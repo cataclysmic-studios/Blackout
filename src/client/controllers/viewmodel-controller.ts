@@ -3,18 +3,18 @@ import { ReplicatedStorage as Replicated, Workspace as World } from "@rbxts/serv
 import { Janitor } from "@rbxts/janitor";
 import { WaitFor } from "shared/modules/utility/WaitFor";
 import { LeanState, Slot, WeaponData, WeaponModel } from "shared/modules/Types";
-import { AmmoHUD } from "client/components/AmmoHUD";
-import { MenuButton } from "client/components/MenuButton";
-import { Recoil } from "./Recoil";
-import { Crosshair } from "./Crosshair";
-import { SoundPlayer } from "./SoundPlayer";
-import { VFX } from "./VFX";
+import { AmmoHUD } from "client/components/ammo-hud";
+import { MenuButton } from "client/components/menu-button";
+import { RecoilController } from "./recoil-controller";
+import { CrosshairController } from "./crosshair-controller";
+import { SoundController } from "./sound-controller";
+import { EffectsController } from "./effects-controller";
 import { Firemode } from "shared/modules/Enums";
-import { HUD } from "client/components/HUD";
 import Signal from "@rbxts/signal";
 import Tween from "shared/modules/utility/Tween";
-import ViewModel from "client/classes/ViewModel";
-import { Menu } from "./Menu";
+import ViewModel from "client/classes/view-model";
+import { MenuController } from "./menu-controller";
+import { HUD } from "client/components/heads-up-display";
 
 interface FPSState {
   equipped: boolean;
@@ -41,7 +41,7 @@ interface FPSState {
 }
 
 @Controller({})
-export class FPS implements OnRender {
+export class ViewmodelController implements OnRender {
   private readonly janitor = new Janitor;
   private viewModel: ViewModel;
   private weaponData?: WeaponData;
@@ -79,10 +79,10 @@ export class FPS implements OnRender {
   }
 
   public constructor(
-    private readonly crosshair: Crosshair,
-    private readonly sounds: SoundPlayer,
-    private readonly recoil: Recoil,
-    private readonly vfx: VFX
+    private readonly crosshair: CrosshairController,
+    private readonly sounds: SoundController,
+    private readonly recoil: RecoilController,
+    private readonly vfx: EffectsController
   ) {
     const cam = World.CurrentCamera!;
     this.viewModel = new ViewModel(Replicated.Character.ViewModel);
@@ -176,7 +176,7 @@ export class FPS implements OnRender {
    * @param slot Inventory slot
    */
   public equip(slot: Slot): void {
-    const menu = Dependency<Menu>();
+    const menu = Dependency<MenuController>();
     if (menu.active) return;
 
     const weaponName = this.state.weapons[slot - 1];

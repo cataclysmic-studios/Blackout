@@ -2,11 +2,11 @@ import { Controller } from "@flamework/core";
 import { UserInputService as UIS } from "@rbxts/services";
 import { WaitFor } from "shared/modules/utility/WaitFor";
 import { WeaponData } from "shared/modules/Types";
-import { UI } from "./UI";
+import { InterfaceController } from "./interface-controller";
 import Tween from "shared/modules/utility/Tween";
 
 @Controller({})
-export class Crosshair {
+export class CrosshairController {
   private enabled = false;
   private size = 1;
   private tweenSpeed = .075;
@@ -14,7 +14,7 @@ export class Crosshair {
   public maxSize = 10;
 
   public constructor(
-    private readonly ui: UI
+    private readonly ui: InterfaceController
   ) { }
 
   /**

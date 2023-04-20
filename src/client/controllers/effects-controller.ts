@@ -3,13 +3,13 @@ import { Debris, Players, ReplicatedStorage as Replicated, Workspace as World } 
 import { Events } from "client/network";
 import { WeaponData, WeaponModel } from "shared/modules/Types";
 import { WaitFor } from "shared/modules/utility/WaitFor";
-import { SoundPlayer } from "./SoundPlayer";
+import { SoundController } from "./sound-controller";
 
 
 @Controller({})
-export class VFX {
+export class EffectsController {
   public constructor(
-    private readonly sound: SoundPlayer
+    private readonly sound: SoundController
   ) { }
 
   /**

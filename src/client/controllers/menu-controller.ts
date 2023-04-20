@@ -1,9 +1,9 @@
 import { Controller, OnInit, OnRender } from "@flamework/core";
 import { Players, SoundService as Sound, Workspace as World } from "@rbxts/services";
 import { Events } from "client/network";
-import { Crosshair } from "./Crosshair";
-import { FPS } from "./FPS";
-import { UI } from "./UI";
+import { CrosshairController } from "./crosshair-controller";
+import { ViewmodelController } from "./viewmodel-controller";
+import { InterfaceController } from "./interface-controller";
 
 const { rad } = math;
 
@@ -12,7 +12,7 @@ type MenuPage = Folder & {
 };
 
 @Controller({})
-export class Menu implements OnInit, OnRender {
+export class MenuController implements OnInit, OnRender {
   private readonly plr = Players.LocalPlayer;
   private readonly mouse = this.plr.GetMouse();
   private initialCF = new CFrame;
@@ -21,9 +21,9 @@ export class Menu implements OnInit, OnRender {
   public active = false;
 
   public constructor(
-    private readonly fps: FPS,
-    private readonly ui: UI,
-    private readonly crosshair: Crosshair
+    private readonly fps: ViewmodelController,
+    private readonly ui: InterfaceController,
+    private readonly crosshair: CrosshairController
   ) { }
 
   /**

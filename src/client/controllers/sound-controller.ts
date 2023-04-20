@@ -6,7 +6,7 @@ const soundIDs = {
 };
 
 @Controller({})
-export class SoundPlayer {
+export class SoundController {
     /**
      * Clone a sound, play it, then destroy it
      * @param sound Sound
