@@ -33,6 +33,7 @@
     "@rbxts/partcache": "^1.1.1",
     "@rbxts/services": "^1.5.1",
     "@rbxts/signal": "^1.1.1",
+    "minimatch": "^3.0.5",
     "rbxts-transform-env": "^2.0.3"
   }
 }
