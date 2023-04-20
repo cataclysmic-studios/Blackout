@@ -6,17 +6,17 @@ import { HUD } from "client/components/HUD";
 
 @Controller({})
 export class UI {
-    private readonly playerUI = WaitFor<PlayerGui>(Players.LocalPlayer, "PlayerGui");
-    
-    // Returns the HUD component
-    public getHUD(): HUD | undefined {
-        const components = Dependency<Components>();
-        const hud = components.getComponent<HUD>(this.getScreen("HUD"));
-        return hud;
-    }
+  private readonly playerUI = WaitFor<PlayerGui>(Players.LocalPlayer, "PlayerGui");
 
-    // Returns a ScreenGui inside of PlayerGui
-    public getScreen<T extends keyof PlayerGui>(name: T): PlayerGui[T] {
-        return <PlayerGui[T]>this.playerUI.WaitForChild(name);
-    }
+  // Returns the HUD component
+  public getHUD(): HUD | undefined {
+    const components = Dependency<Components>();
+    const hud = components.getComponent<HUD>(this.getScreen("HUD"));
+    return hud;
+  }
+
+  // Returns a ScreenGui inside of PlayerGui
+  public getScreen<T extends keyof PlayerGui>(name: T): PlayerGui[T] {
+    return <PlayerGui[T]>this.playerUI.WaitForChild(name);
+  }
 }

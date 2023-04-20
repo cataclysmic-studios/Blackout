@@ -2,21 +2,21 @@ import { Component, BaseComponent } from "@flamework/components";
 import { OnInit } from "@flamework/core";
 import { Janitor } from "@rbxts/janitor";
 
-interface Attributes {}
+interface Attributes { }
 
 @Component({ tag: "HUD" })
 export class HUD extends BaseComponent<Attributes, ScreenGui> implements OnInit {
-    private readonly janitor = new Janitor;
-    
-    public onInit(): void {
-        this.janitor.LinkToInstance(this.instance, false);
-    }
+  private readonly janitor = new Janitor;
 
-    public toggle(): void {
-        this.instance.Enabled = !this.instance.Enabled;
-    }
+  public onInit(): void {
+    this.janitor.LinkToInstance(this.instance, false);
+  }
 
-    public destroy(): void {
-        this.janitor.Cleanup();
-    }
+  public toggle(): void {
+    this.instance.Enabled = !this.instance.Enabled;
+  }
+
+  public destroy(): void {
+    this.janitor.Cleanup();
+  }
 }

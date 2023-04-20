@@ -7,70 +7,70 @@ import Tween from "shared/modules/utility/Tween";
 
 @Controller({})
 export class Crosshair {
-    private enabled = false;
-    private size = 1;
-    private tweenSpeed = .075;
+  private enabled = false;
+  private size = 1;
+  private tweenSpeed = .075;
 
-    public maxSize = 10;
+  public maxSize = 10;
 
-    public constructor(
-        private readonly ui: UI
-    ) {}
+  public constructor(
+    private readonly ui: UI
+  ) { }
 
-    public toggleDot(): void {
-        const hud = this.ui.getScreen("HUD");
-        const dot = WaitFor<Frame>(hud, "Dot");
-        const frame = WaitFor<Frame>(hud, "Crosshair");
-        dot.Visible = !frame.Visible
-    }
+  public toggleDot(): void {
+    const hud = this.ui.getScreen("HUD");
+    const dot = WaitFor<Frame>(hud, "Dot");
+    const frame = WaitFor<Frame>(hud, "Crosshair");
+    dot.Visible = !frame.Visible
+  }
 
-    // Toggle crosshair
-    public toggle(): void {
-        const hud = this.ui.getScreen("HUD");
-        const frame = WaitFor<Frame>(hud, "Crosshair");
-        this.enabled = !this.enabled;
-        frame.Visible = !frame.Visible;
-    }
+  // Toggle crosshair
+  public toggle(): void {
+    const hud = this.ui.getScreen("HUD");
+    const frame = WaitFor<Frame>(hud, "Crosshair");
+    this.enabled = !this.enabled;
+    frame.Visible = !frame.Visible;
+  }
 
-    // Add onto current size
-    public addSize(value: number): Tween {
-        this.size += value;
-        return this.update();
-    }
+  // Add onto current size
+  public addSize(value: number): Tween {
+    this.size += value;
+    return this.update();
+  }
 
-    // Set size
-    public setSize(value: number): Tween {
-        this.size = value;
-        return this.update();
-    }
+  // Set size
+  public setSize(value: number): Tween {
+    this.size = value;
+    return this.update();
+  }
 
-    // Increase size for a short period of time
-    public pulse({ crossExpansion }: WeaponData): void {
-        const inc = crossExpansion.shoot;
-        this.addSize(inc);
-        task.delay(this.tweenSpeed * 1.3, () => this.addSize(-inc));
-    }
+  // Increase size for a short period of time
+  public pulse({ crossExpansion }: WeaponData): void {
+    const inc = crossExpansion.shoot;
+    this.addSize(inc);
+    task.delay(this.tweenSpeed * 1.3, () => this.addSize(-inc));
+  }
 
-    // Tween crosshair size
-    public update(): Tween {
-        this.size = math.clamp(this.size, 0, this.maxSize);
+  // Tween crosshair size
+  public update(): Tween {
+    this.size = math.clamp(this.size, 0, this.maxSize);
 
-        const hud = this.ui.getScreen("HUD");
-        const frame = WaitFor<Frame>(hud, "Crosshair");
-        const info = new TweenInfo(this.tweenSpeed, Enum.EasingStyle.Quad);
-        const sizeTween = Tween(frame, info, {
-            Size: UDim2.fromScale(this.size / 10, this.size / 10)
-        });
+    const hud = this.ui.getScreen("HUD");
+    const frame = WaitFor<Frame>(hud, "Crosshair");
+    const info = new TweenInfo(this.tweenSpeed, Enum.EasingStyle.Quad);
+    const sizeTween = Tween(frame, info, {
+      Size: UDim2.fromScale(this.size / 10, this.size / 10)
+    });
 
-        for (const line of <Frame[]>frame.GetChildren().filter(c => c.IsA("Frame")))
-            Tween(line, info, {
-                BackgroundTransparency: this.size === 0 ? 1 : 0
-            });
+    for (const line of <Frame[]>frame.GetChildren().filter(c => c.IsA("Frame")))
+      Tween(line, info, {
+        BackgroundTransparency: this.size === 0 ? 1 : 0
+      });
 
-        return sizeTween;
-    }
-    
-    public toggleMouseIcon(): void {
-        UIS.MouseIconEnabled = !UIS.MouseIconEnabled;
-    }
+    return sizeTween;
+  }
+
+  public toggleMouseIcon(): void {
+    UIS.MouseIconEnabled = !UIS.MouseIconEnabled;
+  }
 }
