@@ -9,7 +9,7 @@ import FastCast, { ActiveCast, Caster } from "@rbxts/fastcast";
 const { floor, clamp } = math;
 
 @Service({})
-export class Bullets implements OnStart {
+export class BulletService implements OnStart {
   private readonly playerCasters = new Map<number, Caster>();
   private bulletCache?: PartCache;
 

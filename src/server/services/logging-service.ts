@@ -4,7 +4,7 @@ import { Events } from "server/network";
 import { $env } from "rbxts-transform-env";
 
 @Service({})
-export class DiscordLog implements OnInit {
+export class LoggingService implements OnInit {
   private readonly url = $env.string("LOG_WEBHOOK")!;
 
   public onInit(): void {
