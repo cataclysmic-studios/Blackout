@@ -26,13 +26,22 @@ export class Menu implements OnInit, OnRender {
     private readonly crosshair: Crosshair
   ) { }
 
-  // Toggle visibility of page elements
+  /**
+   * Set/toggle visibility of page elements
+   * 
+   * @param page Menu page
+   * @param on Whether or not to show page
+   */
   private togglePage(page: MenuPage, on?: boolean): void {
     for (const e of <GuiObject[]>page.GetChildren().filter(e => e.IsA("GuiObject")))
       e.Visible = on ?? !e.Visible;
   }
 
-  // Disables current page and enables specified page
+  /**
+   * Disables the current page and enables the desired page
+   * 
+   * @param page Desired page
+   */
   public setPage(page: MenuPage): void {
     if (this.currentPage === page) return;
     if (this.currentPage)
@@ -43,7 +52,12 @@ export class Menu implements OnInit, OnRender {
     this.currentPage = page;
   }
 
-  // Camera rotation
+  /**
+   * RenderStepped update function
+   * 
+   * @hidden
+   * @param dt Delta time
+   */
   public onRender(dt: number): void {
     if (!this.active) return;
 
@@ -53,13 +67,20 @@ export class Menu implements OnInit, OnRender {
     World.CurrentCamera!.CFrame = this.initialCF.mul(camOffset);
   }
 
+  /**
+   * Initialisation lifecycle method
+   * 
+   * @hidden
+   */
   public onInit(): void {
     World.CurrentCamera!.CameraType = Enum.CameraType.Scriptable;
     World.CurrentCamera!.FieldOfView = 60;
     this.active = true;
   }
 
-  // Menu is finished being used (play button is pressed)
+  /**
+   * Destroy/hide menu
+   */
   public destroy(): void {
     World.CurrentCamera!.CameraType = Enum.CameraType.Custom;
     this.plr.CameraMode = Enum.CameraMode.LockFirstPerson;

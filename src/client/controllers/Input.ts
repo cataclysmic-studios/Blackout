@@ -12,7 +12,7 @@ export class InputController implements OnStart {
     private readonly movement: Movement
   ) { }
 
-
+  /** @hidden */
   public onStart(): void {
     const mouse = Players.LocalPlayer.GetMouse();
     mouse.Button1Down.Connect(() => {

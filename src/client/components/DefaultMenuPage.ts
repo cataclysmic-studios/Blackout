@@ -12,7 +12,11 @@ export class DefaultMenuPage extends BaseComponent<Attributes, Folder & { Cam: C
     super();
   }
 
-  // Set default page then destroy
+  /**
+   * Set default page then destroy
+   * 
+   * @hidden
+   */
   public onStart(): void {
     this.menu.setPage(this.instance)
     this.destroy();

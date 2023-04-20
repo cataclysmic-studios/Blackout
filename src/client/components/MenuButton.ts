@@ -21,12 +21,19 @@ export class MenuButton extends BaseComponent<Attributes, TextButton> implements
     super();
   }
 
-  // Remove connections
+
+  /**
+   * Destroy button
+   */
   public destroy(): void {
     this.janitor.Cleanup();
   }
 
-  // Establish button animations and logic
+  /**
+   * On start lifecycle method
+   * 
+   * @hidden
+   */
   public onStart(): void {
     const info = new TweenInfo(.175, Enum.EasingStyle.Quad);
     this.janitor.Add(this.instance.MouseEnter.Connect(() =>

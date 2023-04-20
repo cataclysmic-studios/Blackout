@@ -17,6 +17,9 @@ export class Crosshair {
     private readonly ui: UI
   ) { }
 
+  /**
+   * Toggle crosshair dot
+   */
   public toggleDot(): void {
     const hud = this.ui.getScreen("HUD");
     const dot = WaitFor<Frame>(hud, "Dot");
@@ -24,7 +27,9 @@ export class Crosshair {
     dot.Visible = !frame.Visible
   }
 
-  // Toggle crosshair
+  /**
+   * Toggle crosshair visiblity
+   */
   public toggle(): void {
     const hud = this.ui.getScreen("HUD");
     const frame = WaitFor<Frame>(hud, "Crosshair");
@@ -32,26 +37,42 @@ export class Crosshair {
     frame.Visible = !frame.Visible;
   }
 
-  // Add onto current size
+  /**
+   * Increase the size of the crosshair
+   * 
+   * @param value Size to add
+   * @returns Tween animating size
+   */
   public addSize(value: number): Tween {
     this.size += value;
     return this.update();
   }
 
-  // Set size
+  /**
+   * Set the crosshair's size
+   * 
+   * @param value Size
+   * @returns Tween animating size
+   */
   public setSize(value: number): Tween {
     this.size = value;
     return this.update();
   }
 
-  // Increase size for a short period of time
+  /**
+   * Temporarily increase the size of the crosshair
+   * 
+   * @param weaponData Weapon data 
+   */
   public pulse({ crossExpansion }: WeaponData): void {
     const inc = crossExpansion.shoot;
     this.addSize(inc);
     task.delay(this.tweenSpeed * 1.3, () => this.addSize(-inc));
   }
 
-  // Tween crosshair size
+  /**
+   * Tween crosshair size
+   */
   public update(): Tween {
     this.size = math.clamp(this.size, 0, this.maxSize);
 
@@ -70,6 +91,9 @@ export class Crosshair {
     return sizeTween;
   }
 
+  /**
+   * Toggle mouse icon enabled
+   */
   public toggleMouseIcon(): void {
     UIS.MouseIconEnabled = !UIS.MouseIconEnabled;
   }

@@ -106,11 +106,21 @@ export class FPS implements OnRender {
     });
   }
 
+  /**
+   * On render function
+   * 
+   * @hidden
+   * @param dt Delta time
+   */
   public onRender(dt: number): void {
     this.recoil.update(dt, this.state.aimed);
   }
 
-  // Attach all Motor6D's inside of the weapon to the ViewModel
+  /**
+   * Attach all Motor6D's inside of the weapon to the ViewMOde
+   * 
+   * @param model Weapon model
+   */
   private attachMotors(model: WeaponModel): void {
     const parts = <BasePart[]>model.GetDescendants().filter(d => d.IsA("BasePart"));
     for (const part of parts)
@@ -124,14 +134,28 @@ export class FPS implements OnRender {
     do task.wait(); while (model.Trigger.ViewModel.Part0 !== this.viewModel.root);
   }
 
+  /**
+   * Add weapon into inventory slot
+   * 
+   * @param name Weapon
+   * @param slot Inventory slot
+   */
   public addWeapon(name: string, slot: Slot): void {
     this.state.weapons[slot - 1] = name;
   }
 
+  /**
+   * Remove weapon from inventory slot
+   * 
+   * @param slot Inventory slot
+   */
   public removeWeapon(slot: Slot): void {
     this.state.weapons[slot - 1] = undefined;
   }
 
+  /**
+   * Unequip currently equipped weapon
+   */
   public unequip(): void {
     this.state.equipped = false;
     this.viewModel.setEquipped(undefined);
@@ -146,6 +170,11 @@ export class FPS implements OnRender {
     // const unequipAnim = this.viewModel.playAnimation("Unequip")!;
   }
 
+  /**
+   * Equip weapon in inventory slot
+   * 
+   * @param slot Inventory slot
+   */
   public equip(slot: Slot): void {
     const menu = Dependency<Menu>();
     if (menu.active) return;
@@ -192,11 +221,17 @@ export class FPS implements OnRender {
     equipAnim.Play();
   }
 
+  /**
+   * Cancel weapon inspection
+   */
   public cancelInspect(): void {
     if (!this.state.inspecting) return;
     this.inspectAnim?.Stop();
   }
 
+  /**
+   * Begin weapon inspection
+   */
   public inspect(): void {
     if (!this.state.equipped) return;
     if (this.state.inspecting) return;
@@ -218,6 +253,9 @@ export class FPS implements OnRender {
     this.inspectAnim.Play();
   }
 
+  /**
+   * Cancel reloading and inspection
+   */
   public melee(): void {
     if (!this.state.equipped) return;
     if (!this.weaponModel || !this.weaponData) return;
@@ -225,6 +263,9 @@ export class FPS implements OnRender {
     this.cancelInspect();
   }
 
+  /**
+   * Cancel reloading
+   */
   public cancelReload(): void {
     if (!this.state.equipped) return;
     if (!this.weaponModel || !this.weaponData) return;
@@ -234,6 +275,9 @@ export class FPS implements OnRender {
     this.state.reloadCancelled = false;
   }
 
+  /**
+   * Begin reloading
+   */
   public reload(): void {
     if (!this.state.equipped) return;
     if (!this.weaponModel || !this.weaponData) return;
@@ -264,6 +308,11 @@ export class FPS implements OnRender {
     this.state.reloading = false;
   }
 
+  /**
+   * Set aiming state
+   * 
+   * @param on Aiming
+   */
   public aim(on: boolean): void {
     if (!this.state.equipped) return;
     if (this.state.aimed === on) return;
@@ -281,6 +330,11 @@ export class FPS implements OnRender {
     this.crosshair.setSize(on ? 0 : this.weaponData.crossExpansion.hip);
   }
 
+  /**
+   * Toggle trigger pull
+   * 
+   * @param on Pulling trigger
+   */
   public toggleTriggerPull(on: boolean): void {
     if (!this.state.equipped) return;
 
@@ -295,6 +349,9 @@ export class FPS implements OnRender {
     }
   }
 
+  /**
+   * Shoot weapon
+   */
   public shoot(): void {
     if (!this.state.equipped) return;
     if (this.state.shooting) return;
@@ -366,6 +423,9 @@ export class FPS implements OnRender {
     this.state.shooting = false;
   }
 
+  /**
+   * Calculate recoil
+   */
   private calculateRecoil(): void {
     if (!this.state.equipped) return;
     if (!this.weaponData) return;

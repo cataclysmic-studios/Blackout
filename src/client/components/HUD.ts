@@ -8,14 +8,21 @@ interface Attributes { }
 export class HUD extends BaseComponent<Attributes, ScreenGui> implements OnInit {
   private readonly janitor = new Janitor;
 
+  /** @hidden */
   public onInit(): void {
     this.janitor.LinkToInstance(this.instance, false);
   }
 
+  /**
+   * Toggle HUD
+   */
   public toggle(): void {
     this.instance.Enabled = !this.instance.Enabled;
   }
 
+  /**
+   * Destroy HUD
+   */
   public destroy(): void {
     this.janitor.Cleanup();
   }

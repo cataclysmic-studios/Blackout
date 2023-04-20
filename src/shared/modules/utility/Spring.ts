@@ -1,5 +1,8 @@
 import isNaN from "./IsNaN";
 
+/**
+ * Simple spring class
+ */
 export default class Spring {
     static readonly iterations = 8;
     public target = new Vector3();
@@ -7,12 +10,17 @@ export default class Spring {
     public velocity = new Vector3();
 
     public constructor(
-        public mass = 5, 
-        public force = 50, 
-        public damping = 4, 
+        public mass = 5,
+        public force = 50,
+        public damping = 4,
         public speed = 4
-    ) {}
+    ) { }
 
+    /**
+     * Shove the spring off equilibrium
+     * 
+     * @param force Force vector
+     */
     public shove(force: Vector3): void {
         let { X: x, Y: y, Z: z } = force;
         if (isNaN(x) || x === math.huge || x === -math.huge)
@@ -25,6 +33,12 @@ export default class Spring {
         this.velocity = this.velocity.add(new Vector3(x, y, z));
     }
 
+    /**
+     * Update the spring
+     * 
+     * @param dt Delta time
+     * @returns New value
+     */
     public update(dt: number): Vector3 {
         const scaledDt: number = math.min(dt, 1) * this.speed / Spring.iterations;
 
@@ -33,7 +47,7 @@ export default class Spring {
             let accel: Vector3 = force
                 .mul(this.force)
                 .div(this.mass);
-            
+
             accel = accel.sub(this.velocity.mul(this.damping));
             this.velocity = this.velocity.add(accel.mul(scaledDt));
             this.position = this.position.add(this.velocity.mul(scaledDt));

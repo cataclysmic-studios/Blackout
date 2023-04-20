@@ -25,18 +25,29 @@ export default class ViewModel<ModelT extends Model = Model> {
     this.janitor.Add(this.model);
   }
 
-  // Set rig CFrame
+  /**
+   * Set rig CFrame
+   * 
+   * @param cf Rig CFrame
+   */
   public setCFrame(cf: CFrame): void {
     this.root.CFrame = cf;
   }
 
-  // Returns a CFrame offset for the camera
+  /**
+   * Returns a CFrame offset for the camera
+   * 
+   * @param name CFrame manipulator name
+   * @returns Camera CFrame offset
+   */
   public getManipulator(name: string): CFrameValue {
     const value = WaitFor<CFrameValue>(this.weapon!.CFrameManipulators, name);
     return value;
   }
 
-  // Sync the camera's movement to the camera bone's movement
+  /**
+   * Sync the camera's movement to the camera bone's movement
+   */
   public syncCameraBone(): void {
     const newCF = WaitFor<Part>(this.model, "Camera").CFrame.ToObjectSpace(this.root.CFrame);
     if (this.oldCamCF) {
@@ -48,14 +59,27 @@ export default class ViewModel<ModelT extends Model = Model> {
     this.oldCamCF = newCF;
   }
 
-  // Return the CFrame offset for the idle animation (breathing)
+  /**
+   * Returns the CFrame offset for the idle animation (breathing)
+   * 
+   * @param dt Delta time
+   * @param aiming Whether or not the player is aiming
+   * @param mouseY Mouse Y
+   * @returns Idle animation CFrame offset
+   */
   public getIdleOffset(dt: number, aiming: boolean, mouseY: number): CFrame {
     mouseY = aiming ? 0 : mouseY;
     return new CFrame(0, math.sin(tick()) / (aiming ? 325 : 130), 0)
       .mul(new CFrame(0, -mouseY / 2, mouseY / 5));
   }
 
-  // Returns a CFrame of where the rig should be
+  /**
+   * Returns a CFrame of where the rig should be
+   * 
+   * @param dt Delta time
+   * @param aiming Whether or not the player is aiming
+   * @returns CFrame of where the rig should be
+   */
   public getCFrame(dt: number, aiming: boolean): CFrame {
     if (!this.weapon || !this.data) return new CFrame();
 
@@ -77,7 +101,11 @@ export default class ViewModel<ModelT extends Model = Model> {
       .mul(aiming ? aimSway : hipSway);
   }
 
-  // Update weapon
+  /**
+   * Update weapon
+   * 
+   * @param model Weapon model
+   */
   public setEquipped(model?: WeaponModel): void {
     this.weapon = model;
     if (this.weapon)
@@ -88,7 +116,13 @@ export default class ViewModel<ModelT extends Model = Model> {
       }
   }
 
-  // Play an animation
+  /**
+   * Play an animation
+   * 
+   * @param name Animation name
+   * @param playImmediately Whether to play it immediately or not
+   * @returns Animation track
+   */
   public playAnimation(name: string, playImmediately = true): AnimationTrack | undefined {
     if (!this.weapon || !this.data) return;
 
@@ -104,7 +138,9 @@ export default class ViewModel<ModelT extends Model = Model> {
     return track;
   }
 
-  // Cleanup ViewModel
+  /**
+   * Cleanup ViewModel
+   */
   public destroy(): void {
     this.janitor.Cleanup();
   }

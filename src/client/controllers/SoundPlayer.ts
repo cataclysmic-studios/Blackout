@@ -7,7 +7,11 @@ const soundIDs = {
 
 @Controller({})
 export class SoundPlayer {
-    // Clone a sound, play it, then destroy it
+    /**
+     * Clone a sound, play it, then destroy it
+     * @param sound Sound
+     * @param chosenParent Instance to parent the sound to
+     */
     public clone(sound: Sound, chosenParent?: Instance): void {
         const parent = sound.Parent;
         sound = sound.Clone();
@@ -16,7 +20,13 @@ export class SoundPlayer {
         sound.Play();
     }
 
-    // Play a sound from the sound library
+    /**
+     * Play a sound from the sound library
+     * 
+     * @param name Sound name
+     * @param parent Instance to parent the sound to
+     * @param onFinished Callback function to run when the sound ends
+     */
     public play(name: keyof typeof soundIDs, parent: Instance = SoundService, onFinished: Callback): void {
         const ids = soundIDs[name];
         assert(ids, `"${name}" is not a valid sound.`);

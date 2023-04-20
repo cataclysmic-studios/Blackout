@@ -13,6 +13,7 @@ export class Bullets implements OnStart {
   private readonly playerCasters = new Map<number, Caster>();
   private bulletCache?: PartCache;
 
+  /** @hidden */
   public onStart(): void {
     Events.createBullet.connect((plr, origin, dir, weaponData) => this.create(plr, origin, dir, weaponData));
 
@@ -30,6 +31,11 @@ export class Bullets implements OnStart {
     this.bulletCache?.ReturnPart(bullet);
   }
 
+  /**
+   * Create container part
+   * 
+   * @returns Container
+   */
   private createContainer(): Part {
     const container = new Instance("Part");
     container.Transparency = 1;
@@ -40,6 +46,12 @@ export class Bullets implements OnStart {
     return container;
   }
 
+  /**
+   * Get bullet hole texture ID based on material
+   * 
+   * @param material Material
+   * @returns Texture ID
+   */
   private getBulletHoleTexture(material: Enum.Material): string {
     switch (material.Name) {
       case "Wood":
@@ -56,6 +68,14 @@ export class Bullets implements OnStart {
     }
   }
 
+  /**
+   * Dampen bullet velocity
+   * 
+   * @param cast Active cast
+   * @param material Material
+   * @param segVelocity Segment velocity
+   * @param size Depth of hit part
+   */
   private dampenVelocity(cast: ActiveCast, material: Enum.Material, segVelocity: Vector3, size: number): void {
     let velocityDamp: number;
     switch (material.Name) {
@@ -92,6 +112,12 @@ export class Bullets implements OnStart {
     cast.SetVelocity(segVelocity.div(velocityDamp * (size / 1.25)));
   }
 
+  /**
+   * Create blood effect
+   * 
+   * @param origin Position
+   * @param normal Normal direction
+   */
   private createBloodVFX(origin: Vector3, normal: Vector3): void {
     const fixedNormal = new Vector3(clamp(normal.X, 0, 1), clamp(normal.Y, 0, 1), clamp(normal.Z, 0, 1));
     const bloodContainer = this.createContainer();
@@ -109,6 +135,14 @@ export class Bullets implements OnStart {
     });
   }
 
+  /**
+   * Create bullet impact VFX
+   * 
+   * @param origin Position
+   * @param normal Normal direction
+   * @param material Material
+   * @param color Color
+   */
   private createImpactVFX(origin: Vector3, normal: Vector3, material: Enum.Material, color: Color3): void {
     const fixedNormal = new Vector3(clamp(normal.X, 0, 1), clamp(normal.Y, 0, 1), clamp(normal.Z, 0, 1));
     const dustContainer = this.createContainer();
@@ -159,14 +193,35 @@ export class Bullets implements OnStart {
     task.delay(5, cleanup);
   }
 
+  /**
+   * Check whether an instance has a humanoid
+   * 
+   * @param instance Instance to checkk
+   * @returns Whether or not the instance has a humanoid
+   */
   private hasHumanoid(instance: Instance): boolean {
     return instance.FindFirstAncestorOfClass("Model")?.FindFirstChildOfClass("Humanoid") !== undefined;
   }
 
+  /**
+   * Get the victim character (hitPart's first ancestor that is a model)
+   * 
+   * @param hitPart The part that was hit
+   * @returns The first ancestor that is a Model
+   */
   private getVictim(hitPart: Instance): Model | undefined {
     return hitPart.FindFirstAncestorOfClass("Model");
   }
 
+  /**
+   * Calculate the damage to deal to the player based on bullet position
+   * 
+   * @param origin Position
+   * @param bulletPos Bullet position
+   * @param damageThreshold Damage thresholds 
+   * @param rangeThreshold Range thresholds
+   * @returns Damage to deal
+   */
   private calculateDamage(origin: Vector3, bulletPos: Vector3, [dmg1, dmg2]: [number, number], [range1, range2]: [number, number]) {
     const dist = origin.sub(bulletPos).Magnitude;
     const distDiff = math.min(dist - range1, 0);
@@ -180,6 +235,16 @@ export class Bullets implements OnStart {
     return math.round(damage);
   }
 
+  /**
+   * Process the hits on the player
+   * 
+   * @param attacker Attacking player
+   * @param victimCharacter Victim character model
+   * @param hitPart Hit part
+   * @param bullet Bullet
+   * @param origin Position
+   * @param weaponData Weapon data
+   */
   private renderHit(attacker: Player, victimCharacter: Model, hitPart: Instance, bullet: Instance, origin: Vector3, weaponData: WeaponData): void {
     const victimHumanoid = victimCharacter?.FindFirstChildOfClass("Humanoid");
     if (victimHumanoid && victimHumanoid.Health > 0) {
@@ -208,6 +273,15 @@ export class Bullets implements OnStart {
     }
   }
 
+  /**
+   * Create bullet
+   * 
+   * @param player Player
+   * @param origin Position
+   * @param dir Direction
+   * @param weaponData Weapon data
+   * @returns Bullet cast
+   */
   private create(player: Player, origin: Vector3, dir: Vector3, weaponData: WeaponData): ActiveCast | undefined {
     if (!this.bulletCache) return;
 

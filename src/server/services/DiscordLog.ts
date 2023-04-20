@@ -11,6 +11,13 @@ export class DiscordLog implements OnInit {
     Events.discordLog.connect((plr, msg, logType) => this.log(plr, msg, logType));
   }
 
+  /**
+   * Log to discord
+   * 
+   * @param player Player
+   * @param message Message
+   * @param logType Log type
+   */
   public log(player: Player, message: string, logType: string): void {
     // if (Runtime.IsStudio()) return;
     const data = HTTP.JSONEncode({

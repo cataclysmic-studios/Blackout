@@ -12,10 +12,21 @@ export class VFX {
     private readonly sound: SoundPlayer
   ) { }
 
+  /**
+   * Create tracer
+   * 
+   * @param model Weapon model
+   * @param data Weapon data
+   */
   public createTracer(model: WeaponModel, data: WeaponData): void {
     Events.createBullet.fire(model.Trigger.Muzzle.WorldPosition, Players.LocalPlayer.GetMouse().Hit.LookVector, data);
   }
 
+  /**
+   * Create muzzle flash
+   * 
+   * @param model Weapon model
+   */
   public createMuzzleFlash(model: WeaponModel): void {
     const muzzleFlash = model.Trigger.Muzzle.Clone();
     muzzleFlash.Parent = model.Trigger;
@@ -31,6 +42,12 @@ export class VFX {
     task.delay(.1, () => chamberSmoke.Enabled = false);
   }
 
+  /**
+   * Create ejected shell effect
+   * 
+   * @param shellType Shell type name
+   * @param weapon Weapon model
+   */
   public createEjectedShell(shellType: string, weapon: WeaponModel): void {
     const shell = WaitFor<Part>(Replicated.VFX.Shells, shellType).Clone();
     shell.CFrame = new CFrame(weapon.Trigger.Chamber.WorldPosition, weapon.Trigger.CFrame.LookVector);

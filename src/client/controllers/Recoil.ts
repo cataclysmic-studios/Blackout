@@ -19,6 +19,12 @@ export class Recoil {
     modelTorque: new Spring(...this.springDefaults.modelTorque),
   };
 
+  /**
+   * Update the recoil
+   * 
+   * @param dt Delta time
+   * @param aimed Whether or not the player is aiming
+   */
   public update(dt: number, aimed: boolean): void {
     const torqueMult = 12;
     const springDamp = 80;
@@ -52,7 +58,15 @@ export class Recoil {
         }
   }
 
-  // Shove recoil springs according to recoil type (camera/model)
+  /**
+   * Shove recoil springs according to recoil type (camera/model)
+   * 
+   * @param {WeaponData} weaponData Weapon data
+   * @param force The recoil force to apply
+   * @param recoilType The recoil type (camera or model)
+   * @param stabilization The stabilization value
+   * @param torqueDir Torque direction
+   */
   public kick({ recoilSpringModifiers: modifiers }: WeaponData, force: Vector3, recoilType: "Camera" | "Model", stabilization: number, torqueDir: number): void {
     if (recoilType === "Camera") {
       const [mainDefaultMass, mainDefaultForce, mainDefaultDamper, mainDefaultSpeed] = this.springDefaults.camera;
@@ -91,12 +105,18 @@ export class Recoil {
     }
   }
 
-  // Attach recoil updates to a ViewModel or camera
+  /**
+   * Attach recoil updates to a ViewModel or camera
+   * 
+   * @param instance The instance to attach recoil to
+   */
   public attach(instance: Camera | ViewModel): void {
     this.attached.push(instance);
   }
 
-  // Clear attached instances
+  /**
+   * Clear attached instances
+   */
   public destroy(): void {
     this.attached.clear();
   }

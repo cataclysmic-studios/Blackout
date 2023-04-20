@@ -32,12 +32,17 @@ export class AmmoHUD extends BaseComponent<Attributes, AmmoUI> implements OnStar
     super();
   }
 
-  // Cleanup events
+  /**
+   * Cleanup
+   */
   public destroy(): void {
     this.janitor.Cleanup();
   }
 
-  // Connect update events
+  /**
+   * On start lifecycle method
+   * @hidden
+   */
   public onStart(): void {
     this.janitor.Add(this.fps.events.ammoChanged.Connect(ammo => {
       this.instance.Mag.Text = tostring(ammo.mag);
