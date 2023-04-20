@@ -5,7 +5,7 @@
 		"body": [
 			"import { Controller, OnInit } from \"@flamework/core\";",
 			"",
-			"@Controller({})",
+			"@Controller()",
 			"export class ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/g} implements OnInit {",
 				"\tpublic onInit(): void {",
 					"\t\t$2",
@@ -20,7 +20,7 @@
 		"body": [
 			"import { Service, OnInit } from \"@flamework/core\";",
 			"",
-			"@Service({})",
+			"@Service()",
 			"export class ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/g} implements OnInit {",
 				"\tpublic onInit(): void {",
 					"\t\t$2",
@@ -38,7 +38,7 @@
 			"",
 			"interface Attributes {}",
 			"",
-			"@Component({})",
+			"@Component({ tag: \"${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/g}\" })",
 			"export class ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/g} extends BaseComponent<Attributes> implements OnStart {",
 				"\tpublic onStart(): void {",
 					"\t\t$0",
