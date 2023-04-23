@@ -1,4 +1,4 @@
-name: NodeJS with Grunt
+name: build
 
 on:
   push:
@@ -23,5 +23,4 @@ jobs:
         node-version: ${{ matrix.node-version }}
 
     - name: Build
-      run: |
-        rbxtsc
+      run: rbxtsc
