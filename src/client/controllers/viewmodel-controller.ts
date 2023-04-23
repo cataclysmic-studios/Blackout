@@ -1,20 +1,16 @@
 import { Controller, Dependency, OnRender } from "@flamework/core";
 import { ReplicatedStorage as Replicated, Workspace as World } from "@rbxts/services";
 import { Janitor } from "@rbxts/janitor";
-import { WaitFor } from "shared/modules/utility/WaitFor";
-import { LeanState, Slot, WeaponData, WeaponModel } from "shared/modules/Types";
-import { AmmoHUD } from "client/components/ammo-hud";
-import { MenuButton } from "client/components/menu-button";
+import { waitFor, tween } from "shared/modules/utility";
+import { LeanState, Slot, WeaponData, WeaponModel } from "shared/modules/types";
 import { RecoilController } from "./recoil-controller";
 import { CrosshairController } from "./crosshair-controller";
 import { SoundController } from "./sound-controller";
 import { EffectsController } from "./effects-controller";
-import { Firemode } from "shared/modules/Enums";
-import Signal from "@rbxts/signal";
-import Tween from "shared/modules/utility/Tween";
-import ViewModel from "client/classes/view-model";
+import { Firemode } from "shared/modules/enums";
 import { MenuController } from "./menu-controller";
-import { HUD } from "client/components/heads-up-display";
+import Signal from "@rbxts/signal";
+import ViewModel from "client/components/view-model";
 
 interface FPSState {
   equipped: boolean;
@@ -40,7 +36,7 @@ interface FPSState {
   lean: LeanState;
 }
 
-@Controller({})
+@Controller()
 export class ViewmodelController implements OnRender {
   private readonly janitor = new Janitor;
   private viewModel: ViewModel;
@@ -96,13 +92,6 @@ export class ViewmodelController implements OnRender {
       this.viewModel.destroy();
       recoil.destroy();
       // proceduralAnims.destroy();
-
-      const menuButtons = Dependency<MenuButton>();
-      const ammoHUD = Dependency<AmmoHUD>();
-      const hud = Dependency<HUD>();
-      menuButtons.destroy();
-      ammoHUD.destroy();
-      hud.destroy();
     });
   }
 
@@ -184,7 +173,7 @@ export class ViewmodelController implements OnRender {
 
     this.crosshair.toggle();
     this.crosshair.toggleDot();
-    const model = WaitFor<WeaponModel>(Replicated.Weapons, weaponName).Clone();
+    const model = waitFor<WeaponModel>(Replicated.Weapons, weaponName).Clone();
     this.attachMotors(model);
 
     this.viewModel.setEquipped(model);
@@ -206,7 +195,7 @@ export class ViewmodelController implements OnRender {
     this.crosshair.maxSize = this.weaponData.crossExpansion.max;
     this.crosshair.setSize(this.weaponData.crossExpansion.hip);
 
-    model.Parent = this.viewModel.model;
+    model.Parent = this.viewModel.instance;
     const equipAnim = this.viewModel.playAnimation("Equip", false)!;
     this.viewModel.playAnimation("Idle");
 
@@ -323,7 +312,7 @@ export class ViewmodelController implements OnRender {
     this.weaponModel.Sounds[on ? "AimDown" : "AimUp"].Play();
 
     const info = new TweenInfo(.25, Enum.EasingStyle.Quad, Enum.EasingDirection[on ? "Out" : "InOut"])
-    Tween(this.viewModel.getManipulator("Aim"), info, {
+    tween(this.viewModel.getManipulator("Aim"), info, {
       Value: on ? this.weaponModel.Offsets.Aim.Value : new CFrame
     });
 

@@ -1,22 +1,22 @@
-import { Components } from "@flamework/components";
-import { Controller, Dependency } from "@flamework/core";
+import { Controller } from "@flamework/core";
 import { Players } from "@rbxts/services";
-import { WaitFor } from "shared/modules/utility/WaitFor";
-import { HUD } from "client/components/heads-up-display";
+import { waitFor } from "shared/utility";
+// import { HUD } from "client/components/heads-up-display";
 
-@Controller({})
+@Controller()
 export class InterfaceController {
-  private readonly playerUI = WaitFor<PlayerGui>(Players.LocalPlayer, "PlayerGui");
+  private readonly playerUI = waitFor<PlayerGui>(Players.LocalPlayer, "PlayerGui");
 
   /**
    * Function to get the HUD component
    * 
    * @returns HUD component
    */
-  public getHUD(): HUD | undefined {
-    const components = Dependency<Components>();
-    const hud = components.getComponent<HUD>(this.getScreen("HUD"));
-    return hud;
+  public getHUD() {
+    // const components = Dependency<Components>();
+    // const hud = components.getComponent<HUD>(this.getScreen("HUD"));
+    // return hud;
+    return this.getScreen("HUD");
   }
 
   /**

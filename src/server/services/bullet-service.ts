@@ -1,6 +1,6 @@
 import { OnStart, Service } from "@flamework/core";
 import { Debris, Players, ReplicatedStorage as Replicated, Workspace as World } from "@rbxts/services";
-import { WeaponData } from "shared/modules/Types";
+import { WeaponData } from "shared/types";
 import { Events } from "server/network";
 import { PartCache } from "@rbxts/partcache/out/class";
 import PartCacheModule from "@rbxts/partcache";
@@ -13,7 +13,6 @@ export class BulletService implements OnStart {
   private readonly playerCasters = new Map<number, Caster>();
   private bulletCache?: PartCache;
 
-  /** @hidden */
   public onStart(): void {
     Events.createBullet.connect((plr, origin, dir, weaponData) => this.create(plr, origin, dir, weaponData));
 

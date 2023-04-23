@@ -3,7 +3,7 @@ import { Players, UserInputService as UIS } from "@rbxts/services";
 import { ViewmodelController } from "./viewmodel-controller";
 import { MovementController } from "./movement-controller";
 
-@Controller({})
+@Controller()
 export class InputController implements OnStart {
   public mouseDown = false;
 
@@ -12,7 +12,6 @@ export class InputController implements OnStart {
     private readonly movement: MovementController
   ) { }
 
-  /** @hidden */
   public onStart(): void {
     const mouse = Players.LocalPlayer.GetMouse();
     mouse.Button1Down.Connect(() => {

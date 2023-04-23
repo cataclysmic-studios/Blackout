@@ -12,7 +12,7 @@ export class LoggingService implements OnInit {
   }
 
   /**
-   * Log to discord
+   * Log to Discord
    * 
    * @param player Player
    * @param message Message
@@ -36,10 +36,6 @@ export class LoggingService implements OnInit {
         }
       ]
     });
-
-    xpcall(
-      () => HTTP.PostAsync(this.url, data),
-      warn
-    );
+    xpcall(() => HTTP.PostAsync(this.url, data), warn);
   }
 }

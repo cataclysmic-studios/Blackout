@@ -1,17 +1,16 @@
 import { Controller, OnInit, OnRender } from "@flamework/core";
 import { Players, SoundService as Sound, Workspace as World } from "@rbxts/services";
-import { Events } from "client/network";
 import { CrosshairController } from "./crosshair-controller";
 import { ViewmodelController } from "./viewmodel-controller";
 import { InterfaceController } from "./interface-controller";
 
 const { rad } = math;
 
-type MenuPage = Folder & {
-  Cam: CFrameValue;
-};
+interface MenuPage extends Folder {
+  readonly Cam: CFrameValue;
+}
 
-@Controller({})
+@Controller()
 export class MenuController implements OnInit, OnRender {
   private readonly plr = Players.LocalPlayer;
   private readonly mouse = this.plr.GetMouse();
@@ -25,6 +24,12 @@ export class MenuController implements OnInit, OnRender {
     private readonly ui: InterfaceController,
     private readonly crosshair: CrosshairController
   ) { }
+
+  public onInit(): void {
+    World.CurrentCamera!.CameraType = Enum.CameraType.Scriptable;
+    World.CurrentCamera!.FieldOfView = 60;
+    this.active = true;
+  }
 
   /**
    * Set/toggle visibility of page elements
@@ -68,17 +73,6 @@ export class MenuController implements OnInit, OnRender {
   }
 
   /**
-   * Initialisation lifecycle method
-   * 
-   * @hidden
-   */
-  public onInit(): void {
-    World.CurrentCamera!.CameraType = Enum.CameraType.Scriptable;
-    World.CurrentCamera!.FieldOfView = 60;
-    this.active = true;
-  }
-
-  /**
    * Destroy/hide menu
    */
   public destroy(): void {
@@ -88,7 +82,9 @@ export class MenuController implements OnInit, OnRender {
 
     this.crosshair.toggleMouseIcon();
     this.ui.getScreen("Menu").Enabled = false;
-    this.ui.getHUD()?.toggle();
+    // this.ui.getHUD()?.toggle();
+    const hud = this.ui.getHUD()!;
+    hud.Enabled = !hud.Enabled
 
     this.fps.addWeapon("HK416", 1);
     this.active = false;

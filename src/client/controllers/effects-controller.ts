@@ -1,10 +1,9 @@
 import { Controller } from "@flamework/core";
 import { Debris, Players, ReplicatedStorage as Replicated, Workspace as World } from "@rbxts/services";
 import { Events } from "client/network";
-import { WeaponData, WeaponModel } from "shared/modules/Types";
-import { WaitFor } from "shared/modules/utility/WaitFor";
+import { WeaponData, WeaponModel } from "shared/types";
+import { waitFor } from "shared/utility";
 import { SoundController } from "./sound-controller";
-
 
 @Controller({})
 export class EffectsController {
@@ -35,8 +34,8 @@ export class EffectsController {
       v.Enabled = true;
       task.delay(v.Name === "BarrelSmoke" ? 1.5 : .1, () => v.Enabled = false);
     }
-    task.delay(2.5, () => muzzleFlash.Destroy());
 
+    task.delay(2.5, () => muzzleFlash.Destroy());
     const chamberSmoke = model.Trigger.Chamber.Smoke;
     chamberSmoke.Enabled = true;
     task.delay(.1, () => chamberSmoke.Enabled = false);
@@ -49,7 +48,7 @@ export class EffectsController {
    * @param weapon Weapon model
    */
   public createEjectedShell(shellType: string, weapon: WeaponModel): void {
-    const shell = WaitFor<Part>(Replicated.VFX.Shells, shellType).Clone();
+    const shell = waitFor<Part>(Replicated.VFX.Shells, shellType).Clone();
     shell.CFrame = new CFrame(weapon.Trigger.Chamber.WorldPosition, weapon.Trigger.CFrame.LookVector);
     shell.Parent = World.Debris;
 
