@@ -1,5 +1,5 @@
 import Roact from "@rbxts/roact";
-import { Loadout } from "./menu-loadout";
+import { Loadout } from "../components/menu-loadout";
 import { tween } from "shared/utility";
 import { Dependency } from "@flamework/core";
 import { MenuController } from "client/controllers/menu";
