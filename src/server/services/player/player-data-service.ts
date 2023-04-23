@@ -1,7 +1,7 @@
 import { Service } from "@flamework/core";
 import { PlayerRemovalService } from "./player-removal-service";
 import ProfileService from "@rbxts/profileservice";
-import DefaultPlayerData, { IPlayerData, PlayerDataProfile } from "shared/meta/default-player-data";
+import DefaultPlayerData, { PlayerData, PlayerDataProfile } from "shared/meta/default-player-data";
 import { KickReason } from "types/enum/kick-reason";
 import { Players } from "@rbxts/services";
 
@@ -9,7 +9,7 @@ import { Players } from "@rbxts/services";
 export class PlayerDataService {
 	constructor(private readonly playerRemovalService: PlayerRemovalService) { }
 
-	private gameProfileStore = ProfileService.GetProfileStore<IPlayerData>("PlayerData", DefaultPlayerData);
+	private gameProfileStore = ProfileService.GetProfileStore<PlayerData>("PlayerData", DefaultPlayerData);
 
 	/**
 	 * Load a player's data profile

@@ -9,5 +9,5 @@ const DefaultPlayerData = {
 
 export default DefaultPlayerData;
 
-export type IPlayerData = typeof DefaultPlayerData;
-export type PlayerDataProfile = Profile<IPlayerData>;
+export type PlayerData = typeof DefaultPlayerData;
+export type PlayerDataProfile = Profile<PlayerData>;
