@@ -1,7 +1,7 @@
 import Roact from '@rbxts/roact';
 import { App } from 'client/controllers/apps';
-import Button from 'shared/ui/components/button';
 import { Scene } from 'shared/enums';
+import Button from 'client/ui/components/button';
 
 const oswald = new Font(
 	'rbxasset://fonts/families/Oswald.json',

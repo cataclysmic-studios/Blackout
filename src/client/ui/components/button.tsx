@@ -1,6 +1,5 @@
 import Roact from '@rbxts/roact';
-import { useState } from '@rbxts/roact-hooked';
-import { Spring, useSingleMotor, useSpring } from '@rbxts/roact-hooked-plus';
+import { Spring, useSingleMotor } from '@rbxts/roact-hooked-plus';
 
 interface Props {
 	text: string;
