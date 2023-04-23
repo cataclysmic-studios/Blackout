@@ -5,6 +5,7 @@ import { Janitor } from "@rbxts/janitor";
 import { waitFor, tween } from "shared/utility";
 import { LeanState, Slot, WeaponData, WeaponModel } from "shared/types";
 import { Firemode } from "shared/enums";
+import { $error } from "rbxts-transform-debug";
 
 import { CrosshairController } from "./crosshair";
 import { SoundController } from "./sound-player";
@@ -382,7 +383,7 @@ export class FPSController implements OnStart, OnRender {
       this.calculateRecoil();
       this.currentWeapon.vfx.createTracer(this.currentWeapon.data);
       this.currentWeapon.vfx.createMuzzleFlash();
-      this.sounds.clone(<Sound>this.currentWeapon.model.Sounds.WaitForChild("Fire"));
+      this.sounds.clone(waitFor<Sound>(this.currentWeapon.model.Sounds, "Fire"));
 
       const boltAnim = this.viewModel!.playAnimation("Shoot", false)!;
       boltAnim.GetMarkerReachedSignal("SlideBack").Once(() =>
@@ -419,7 +420,7 @@ export class FPSController implements OnStart, OnRender {
         break;
 
       default:
-        throw error("Invalid firemode: " + tostring(this.state.weapon.firemode));
+        throw $error("Invalid firemode: " + tostring(this.state.weapon.firemode));
     }
 
     this.state.shooting = false;
