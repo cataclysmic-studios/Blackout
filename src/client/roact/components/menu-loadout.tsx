@@ -6,7 +6,7 @@ const oswald = new Font("rbxasset://fonts/families/Oswald.json", Enum.FontWeight
 interface Props {}
 
 export function Loadout(props: Props) {
-  return <folder Key="Loadout">
+  return <>
     <frame
       Key="Shadow"
       BackgroundColor3={Color3.fromRGB(49, 49, 49)}
@@ -406,5 +406,5 @@ export function Loadout(props: Props) {
         Rotation={90}
       />
     </textbutton>
-  </folder>;
+  </>;
 }
