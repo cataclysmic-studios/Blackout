@@ -5,13 +5,14 @@ import { Janitor } from "@rbxts/janitor";
 import { waitFor, tween } from "shared/utility";
 import { LeanState, Slot, WeaponData, WeaponModel } from "shared/types";
 import { Firemode } from "shared/enums";
-import { GunEffects } from "client/components/gun-effects";
-import { RecoilController } from "./recoil";
+
 import { CrosshairController } from "./crosshair";
 import { SoundController } from "./sound-player";
 import { MenuController } from "./menu";
 import Signal from "@rbxts/signal";
 import ViewModel from "client/components/view-model";
+import GunEffects from "client/components/gun-effects";
+import Recoil from "client/components/recoil";
 
 interface FPSState {
   equipped: boolean;
@@ -40,7 +41,9 @@ interface FPSState {
 @Controller()
 export class ViewModelController implements OnRender {
   private readonly janitor = new Janitor;
-  private viewModel: ViewModel;
+  private vmRecoil?: Recoil;
+  private camRecoil?: Recoil;
+  private viewModel?: ViewModel;
   private currentWeapon?: {
     vfx: GunEffects;
     data: WeaponData;
@@ -49,14 +52,13 @@ export class ViewModelController implements OnRender {
       trigger?: AnimationTrack;
       inspect?: AnimationTrack;
       reload?: AnimationTrack;
-    }
-  }
-
+    };
+  };
 
   public mouseDown = false;
   public readonly events = {
     ammoChanged: new Signal<(ammo: { mag: number; reserve: number; }) => void>()
-  }
+  };
 
   public readonly state: FPSState = {
     equipped: false,
@@ -79,36 +81,31 @@ export class ViewModelController implements OnRender {
     crouched: false,
     proned: false,
     lean: 0
-  }
+  };
 
   public constructor(
     private readonly crosshair: CrosshairController,
-    private readonly sounds: SoundController,
-    private readonly recoil: RecoilController
-  ) {
-    const cam = World.CurrentCamera!;
-    this.viewModel = new ViewModel(Replicated.Character.ViewModel);
-    recoil.attach(this.viewModel);
-    recoil.attach(cam);
+    private readonly sounds: SoundController
+  ) { }
+
+  public onStart(): void {
+    const components = Dependency<Components>();
+    this.viewModel = components.addComponent<ViewModel>(Replicated.Character.ViewModel);
+    this.vmRecoil = components.addComponent<Recoil, ViewModel>(this.viewModel);
+    this.camRecoil = components.addComponent<Recoil>(World.CurrentCamera!);
 
     // proceduralAnims.attach(this.viewModel);
     // proceduralAnims.attach(cam);
 
-    this.janitor.Add(() => {
-      this.viewModel.destroy();
-      recoil.destroy();
-      // proceduralAnims.destroy();
-    });
+    this.janitor.Add(this.viewModel);
+    this.janitor.Add(this.vmRecoil);
+    this.janitor.Add(this.camRecoil);
   }
 
-  /**
-   * On render function
-   * 
-   * @hidden
-   * @param dt Delta time
-   */
   public onRender(dt: number): void {
-    this.recoil.update(dt, this.state.aimed);
+    if (!this.vmRecoil || !this.camRecoil) return;
+    this.vmRecoil.update(dt, this.state.aimed);
+    this.camRecoil.update(dt, this.state.aimed);
   }
 
   /**
@@ -125,8 +122,8 @@ export class ViewModelController implements OnRender {
     for (const motor of motors)
       motor.Part0 = model.Trigger;
 
-    model.Trigger.ViewModel.Part0 = this.viewModel.root;
-    do task.wait(); while (model.Trigger.ViewModel.Part0 !== this.viewModel.root);
+    model.Trigger.ViewModel.Part0 = this.viewModel!.root;
+    do task.wait(); while (model.Trigger.ViewModel.Part0 !== this.viewModel!.root);
   }
 
   /**
@@ -153,7 +150,7 @@ export class ViewModelController implements OnRender {
    */
   public unequip(): void {
     this.state.equipped = false;
-    this.viewModel.setEquipped(undefined);
+    this.viewModel!.setEquipped(undefined);
     this.currentWeapon?.model.Destroy();
     this.currentWeapon = undefined;
 
@@ -181,10 +178,10 @@ export class ViewModelController implements OnRender {
     this.attachMotors(model);
 
     const components = Dependency<Components>();
-    this.viewModel.setEquipped(model);
+    this.viewModel!.setEquipped(model);
     this.currentWeapon = {
       model: model,
-      data: this.viewModel.data!,
+      data: this.viewModel!.data!,
       vfx: components.addComponent<GunEffects>(model),
       anims: {}
     };
@@ -205,9 +202,9 @@ export class ViewModelController implements OnRender {
     this.crosshair.maxSize = this.currentWeapon.data.crossExpansion.max;
     this.crosshair.setSize(this.currentWeapon.data.crossExpansion.hip);
 
-    model.Parent = this.viewModel.instance;
-    const equipAnim = this.viewModel.playAnimation("Equip", false)!;
-    this.viewModel.playAnimation("Idle");
+    model.Parent = this.viewModel!.instance;
+    const equipAnim = this.viewModel!.playAnimation("Equip", false)!;
+    this.viewModel!.playAnimation("Idle");
 
     equipAnim.GetMarkerReachedSignal("BoltBack").Once(() => this.currentWeapon?.model.Sounds.SlidePull.Play());
     equipAnim.GetMarkerReachedSignal("BoltClosed").Once(() => this.currentWeapon?.model.Sounds.SlideRelease.Play());
@@ -244,8 +241,8 @@ export class ViewModelController implements OnRender {
       task.wait(.1);
     }
 
-    this.currentWeapon.anims.inspect = this.viewModel.playAnimation("Inspect", false)!;
     let conn: RBXScriptConnection;
+    this.currentWeapon.anims.inspect = this.viewModel!.playAnimation("Inspect", false)!;
     conn = this.currentWeapon.anims.inspect.Stopped.Connect(() => {
       this.state.inspecting = false;
       conn.Disconnect();
@@ -324,7 +321,7 @@ export class ViewModelController implements OnRender {
     this.currentWeapon.model.Sounds[on ? "AimDown" : "AimUp"].Play();
 
     const info = new TweenInfo(.25, Enum.EasingStyle.Quad, Enum.EasingDirection[on ? "Out" : "InOut"])
-    tween(this.viewModel.getManipulator("Aim"), info, {
+    tween(this.viewModel!.getManipulator("Aim"), info, {
       Value: on ? this.currentWeapon.model.Offsets.Aim.Value : new CFrame
     });
 
@@ -342,7 +339,7 @@ export class ViewModelController implements OnRender {
 
     const fadeSpd = .05;
     if (on) {
-      this.currentWeapon.anims.trigger = this.viewModel.playAnimation("Trigger");
+      this.currentWeapon.anims.trigger = this.viewModel!.playAnimation("Trigger");
       this.currentWeapon.anims.trigger.AdjustWeight(undefined, fadeSpd);
     } else {
       this.currentWeapon.anims.trigger?.Stopped.Once(() => this.currentWeapon?.anims.trigger?.Destroy());
@@ -386,7 +383,7 @@ export class ViewModelController implements OnRender {
       this.currentWeapon.vfx.createMuzzleFlash();
       this.sounds.clone(<Sound>this.currentWeapon.model.Sounds.WaitForChild("Fire"));
 
-      const boltAnim = this.viewModel.playAnimation("Shoot", false)!;
+      const boltAnim = this.viewModel!.playAnimation("Shoot", false)!;
       boltAnim.GetMarkerReachedSignal("SlideBack").Once(() =>
         this.currentWeapon?.vfx.createEjectedShell(this.currentWeapon.data.shell, this.currentWeapon.model));
 
@@ -428,7 +425,7 @@ export class ViewModelController implements OnRender {
   }
 
   /**
-   * Calculate recoil
+   * Calculate recoil (crazy I know)
    */
   private calculateRecoil(): void {
     if (!this.state.equipped) return;
@@ -456,11 +453,11 @@ export class ViewModelController implements OnRender {
     if (this.state.aimed)
       stabilization += 0.8;
 
-    this.recoil.kick(data, cforce, "Camera", stabilization, torqueDir);
-    this.recoil.kick(data, mforce, "Model", stabilization, torqueDir);
+    this.vmRecoil!.kick(data, cforce, stabilization, torqueDir);
+    this.camRecoil!.kick(data, mforce, stabilization, torqueDir);
     task.delay(.12, () => {
-      this.recoil.kick(data, cforce.mul(-1), "Camera", stabilization, torqueDir);
-      this.recoil.kick(data, mforce.mul(-1), "Model", stabilization, torqueDir);
+      this.vmRecoil!.kick(data, cforce.mul(-1), stabilization, torqueDir);
+      this.camRecoil!.kick(data, mforce.mul(-1), stabilization, torqueDir);
     });
   }
 }

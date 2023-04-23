@@ -1,5 +1,5 @@
 import { Networking } from "@flamework/networking";
-import { Slot, WeaponData } from "./modules/types";
+import { Slot, WeaponData } from "./types";
 
 export interface ServerEvents {
     discordLog(message: string, logType: string): void;

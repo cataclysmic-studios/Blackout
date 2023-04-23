@@ -1,5 +1,5 @@
-import { Controller, OnInit, OnRender } from "@flamework/core";
-import { Players, SoundService as Sound, Workspace as World } from "@rbxts/services";
+import { Controller, OnInit, OnRender, OnStart } from "@flamework/core";
+import { Players, ReplicatedStorage as Replicated, SoundService as Sound, Workspace as World } from "@rbxts/services";
 import { CrosshairController } from "./crosshair";
 import { ViewModelController } from "./view-model";
 import { UI } from "../ui";
@@ -11,7 +11,7 @@ interface MenuPage extends Folder {
 }
 
 @Controller()
-export class MenuController implements OnInit, OnRender {
+export class MenuController implements OnStart, OnRender {
   private readonly plr = Players.LocalPlayer;
   private readonly mouse = this.plr.GetMouse();
   private initialCF = new CFrame;
@@ -24,10 +24,28 @@ export class MenuController implements OnInit, OnRender {
     private readonly crosshair: CrosshairController
   ) { }
 
-  public onInit(): void {
+  public onStart(): void {
     World.CurrentCamera!.CameraType = Enum.CameraType.Scriptable;
     World.CurrentCamera!.FieldOfView = 60;
     this.active = true;
+
+    const menu = UI.getScreen("Menu");
+    for (const cam of Replicated.MenuCameras.GetChildren()) {
+      const camCF = cam.Clone();
+      camCF.Name = "Cam";
+      camCF.Parent = <Folder>menu[<keyof typeof menu>cam.Name];
+    }
+
+    this.setPage(menu.Main);
+  }
+
+  public onRender(dt: number): void {
+    if (!this.active) return;
+
+    const damp = 450;
+    const { X, Y } = new Vector2((this.initialCF.X - this.mouse.X) / damp, (this.initialCF.Y - this.mouse.Y) / damp);
+    const camOffset = new CFrame().mul(CFrame.Angles(rad(Y), rad(X), 0));
+    World.CurrentCamera!.CFrame = this.initialCF.mul(camOffset);
   }
 
   /**
@@ -54,21 +72,6 @@ export class MenuController implements OnInit, OnRender {
     this.togglePage(page, true);
     this.initialCF = page.Cam.Value;
     this.currentPage = page;
-  }
-
-  /**
-   * RenderStepped update function
-   * 
-   * @hidden
-   * @param dt Delta time
-   */
-  public onRender(dt: number): void {
-    if (!this.active) return;
-
-    const damp = 450;
-    const { X: mx, Y: my } = new Vector2((this.initialCF.X - this.mouse.X) / damp, (this.initialCF.Y - this.mouse.Y) / damp);
-    const camOffset = new CFrame().mul(CFrame.Angles(rad(my), rad(mx), 0));
-    World.CurrentCamera!.CFrame = this.initialCF.mul(camOffset);
   }
 
   /**

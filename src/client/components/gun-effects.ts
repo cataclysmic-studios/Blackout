@@ -7,7 +7,7 @@ import { SoundController } from "client/controllers/sound-player";
 import { Dependency } from "@flamework/core";
 
 @Component()
-export class GunEffects extends BaseComponent<{}, WeaponModel> {
+export default class GunEffects extends BaseComponent<{}, WeaponModel> {
   private readonly sound = Dependency<SoundController>();
 
   /**

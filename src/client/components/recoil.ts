@@ -1,7 +1,8 @@
-import { BaseComponent, Component } from "@flamework/components";
+import { BaseComponent, Component, Components } from "@flamework/components";
 import { WeaponData } from "shared/types";
 import { Spring } from "shared/utility";
 import ViewModel from "client/components/view-model";
+import { Dependency } from "@flamework/core";
 
 const springDefaults = {
   camera: [20, 40, 4, 4],
@@ -11,20 +12,13 @@ const springDefaults = {
 };
 
 @Component()
-export class Recoil extends BaseComponent<{}> {
+export default class Recoil extends BaseComponent<{}, Model | Camera> {
   private readonly springs = {
     camera: new Spring(...springDefaults.camera),
     cameraTorque: new Spring(...springDefaults.cameraTorque),
     model: new Spring(...springDefaults.model),
     modelTorque: new Spring(...springDefaults.modelTorque)
   };
-
-  public constructor(
-    private readonly toAttach: ViewModel | Camera
-  ) {
-    super();
-    this.instance = (<ViewModel>toAttach).instance ?? toAttach;
-  }
 
   /**
    * Update the recoil
@@ -50,10 +44,11 @@ export class Recoil extends BaseComponent<{}> {
     const mrecoil = moffset.mul(mvertClimb).mul(mtorque);
 
     if (typeOf(this.instance) === "Instance") {
-      const cam = <Camera>this.toAttach;
+      const cam = <Camera>this.instance;
       cam.CFrame = cam.CFrame.mul(crecoil);
     } else {
-      const vm = <ViewModel>this.toAttach;
+      const model = <Model>this.instance;
+      const vm = Dependency<Components>().getComponent<ViewModel>(model)!;
       vm.syncCameraBone();
       vm.setCFrame(vm.getCFrame(dt, aimed).mul(mrecoil));
       if (vm.weapon) {
@@ -72,8 +67,8 @@ export class Recoil extends BaseComponent<{}> {
    * @param stabilization The stabilization value
    * @param torqueDir Torque direction
    */
-  public kick({ recoilSpringModifiers: modifiers }: WeaponData, force: Vector3, recoilType: "Camera" | "Model", stabilization: number, torqueDir: number): void {
-    if (recoilType === "Camera") {
+  public kick({ recoilSpringModifiers: modifiers }: WeaponData, force: Vector3, stabilization: number, torqueDir: number): void {
+    if (typeOf(this.instance) === "Instance") {
       const [mainDefaultMass, mainDefaultForce, mainDefaultDamper, mainDefaultSpeed] = springDefaults.camera;
       this.springs.camera.mass = mainDefaultMass / modifiers.camRecoverSpeed;
       this.springs.camera.force = mainDefaultForce / modifiers.camKickMult;
@@ -90,7 +85,7 @@ export class Recoil extends BaseComponent<{}> {
       const torque = force.div(stabilization);
       this.springs.cameraTorque.shove(torque.mul(torqueDir));
       task.delay(.1, () => this.springs.cameraTorque.shove(torque.mul(-torqueDir)));
-    } else if (recoilType === "Model") {
+    } else {
       const [mainDefaultMass, mainDefaultForce, mainDefaultDamper, mainDefaultSpeed] = springDefaults.model;
       this.springs.model.mass = mainDefaultMass / modifiers.modelRecoverSpeed;
       this.springs.model.force = mainDefaultForce / modifiers.modelKickMult;

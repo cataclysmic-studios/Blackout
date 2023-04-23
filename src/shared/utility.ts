@@ -1,3 +1,5 @@
+import { BaseComponent, Components } from "@flamework/components";
+import { Dependency } from "@flamework/core";
 import { TweenService } from "@rbxts/services";
 const { huge: inf, min, sin } = math;
 
@@ -28,6 +30,15 @@ export function waitFor<T extends Instance>(instance: Instance, childName: strin
   if (!childName) throw error("Child instance name is undefined");
   return <T>instance.WaitForChild(childName, timeout ?? 6);
 }
+
+/**
+ * Get component attached to instance
+ * 
+ * @param instance Attached instance
+ * @returns Component
+ */
+export const getComponent = <T extends BaseComponent>(instance: Instance) =>
+  Dependency<Components>().getComponent<T>(instance);
 
 /**
  * Checks if a value is not a number
@@ -88,8 +99,7 @@ export class Spring {
       this.velocity = this.velocity.add(accel.mul(scaledDt));
       this.position = this.position.add(this.velocity.mul(scaledDt));
     }
-
-    return this.position
+    return this.position;
   }
 }
 

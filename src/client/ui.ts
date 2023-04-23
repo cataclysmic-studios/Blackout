@@ -3,7 +3,7 @@ import { waitFor } from "shared/utility";
 // import { HUD } from "client/components/heads-up-display";
 
 export class UI {
-  private static readonly playerUI = waitFor<PlayerGui>(Players.LocalPlayer, "PlayerGui");
+  public static readonly container = waitFor<PlayerGui>(Players.LocalPlayer, "PlayerGui");
 
   /**
    * Function to get the HUD component
@@ -23,7 +23,7 @@ export class UI {
    * @param name ScreenGui name
    * @returns ScreenGui with the given name
    */
-  public static getScreen<T extends keyof PlayerGui>(name: T): PlayerGui[T] {
-    return <PlayerGui[T]>this.playerUI.WaitForChild(name);
+  public static getScreen<T extends Exclude<keyof PlayerGui, Instance>>(name: T): PlayerGui[T] {
+    return <PlayerGui[T]>this.container.WaitForChild(name);
   }
 }
