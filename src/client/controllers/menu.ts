@@ -25,18 +25,18 @@ export class MenuController implements OnStart, OnRender {
   ) { }
 
   public onStart(): void {
-    World.CurrentCamera!.CameraType = Enum.CameraType.Scriptable;
-    World.CurrentCamera!.FieldOfView = 60;
-    this.active = true;
+    // World.CurrentCamera!.CameraType = Enum.CameraType.Scriptable;
+    // World.CurrentCamera!.FieldOfView = 60;
+    // this.active = true;
 
-    const menu = UI.getScreen("Menu");
-    for (const cam of Replicated.MenuCameras.GetChildren()) {
-      const camCF = cam.Clone();
-      camCF.Name = "Cam";
-      camCF.Parent = <Folder>menu[<keyof typeof menu>cam.Name];
-    }
+    // const menu = UI.getScreen("Menu");
+    // for (const cam of Replicated.MenuCameras.GetChildren()) {
+    //   const camCF = cam.Clone();
+    //   camCF.Name = "Cam";
+    //   camCF.Parent = <Folder>menu[<keyof typeof menu>cam.Name];
+    // }
 
-    this.setPage(menu.Main);
+    // this.setPage(menu.Main);
   }
 
   public onRender(dt: number): void {

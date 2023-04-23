@@ -20,6 +20,6 @@ export class PlayerRemovalService {
 			"and steps to reproduce the bug in our communication server.\n\n" +
 			`${GAME_NAME} Error Code: ${reason}`
 		);
-		this.discord.log(player, "Player removed due to bug.", "Player Removed");
+		this.discord.log(player, `${player.Name} was removed.\n${GAME_NAME} Error Code: ${reason}`, "Player Removed Due To Bug");
 	}
 }

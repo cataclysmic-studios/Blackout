@@ -1,6 +1,6 @@
-import { Scene } from "types/enum/scene";
 import { ActionSetScene } from "../actions/scene-actions";
 import Rodux from "@rbxts/rodux";
+import { Scene } from "shared/enums";
 
 export interface GameReducer {
 	currentScene: Scene;
