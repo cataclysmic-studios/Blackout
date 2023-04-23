@@ -5,6 +5,7 @@ import { Janitor } from "@rbxts/janitor";
 import { waitFor, tween } from "shared/utility";
 import { LeanState, Slot, WeaponData, WeaponModel } from "shared/types";
 import { Firemode } from "shared/enums";
+import { $error } from "rbxts-transform-debug";
 
 import { CrosshairController } from "./crosshair";
 import { SoundController } from "./sound-player";
@@ -418,7 +419,7 @@ export class FPSController implements OnStart, OnRender {
         break;
 
       default:
-        throw error("Invalid firemode: " + tostring(this.state.weapon.firemode));
+        throw $error("Invalid firemode: " + tostring(this.state.weapon.firemode));
     }
 
     this.state.shooting = false;

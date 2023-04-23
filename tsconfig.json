@@ -26,10 +26,13 @@
 		"plugins": [
 			{
 				"transform": "rbxts-transformer-flamework",
-				"obfuscation": false
+				"obfuscation": true
 			},
 			{
 				"transform": "rbxts-transform-env"
+			},
+			{
+				"transform": "rbxts-transform-debug"
 			}
 		]
 	}
