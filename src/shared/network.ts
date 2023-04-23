@@ -1,16 +1,18 @@
 import { Networking } from "@flamework/networking";
-import { Slot, WeaponData } from "./modules/Types";
+import { WeaponData } from "./types";
 
 export interface ServerEvents {
-    discordLog(message: string, logType: string): void;
-    createBullet(origin: Vector3, dir: Vector3, weaponData: WeaponData): void;
+	discordLog(message: string, logType: string): void;
+	createBullet(origin: Vector3, dir: Vector3, weaponData: WeaponData): void;
 }
 
-export interface ClientEvents {}
+export interface ClientEvents {
+	ammoChanged(ammo: { mag: number; reserve: number; }): void;
+}
 
-export interface ServerFunctions {}
+export interface ServerFunctions { }
 
-export interface ClientFunctions {}
+export interface ClientFunctions { }
 
 export const GlobalEvents = Networking.createEvent<ServerEvents, ClientEvents>();
 export const GlobalFunctions = Networking.createFunction<ServerFunctions, ClientFunctions>();
