@@ -1,5 +1,5 @@
 import { OnInit, Service } from "@flamework/core";
-import { HttpService as HTTP } from "@rbxts/services";
+import { HttpService as HTTP, RunService as Runtime } from "@rbxts/services";
 import { Events } from "server/network";
 import { $env } from "rbxts-transform-env";
 
@@ -26,7 +26,7 @@ export class DiscordService implements OnInit {
         {
           title: logType,
           author: {
-            name: player.Name,
+            name: player.Name + Runtime.IsStudio() ? " (Studio)" : "",
             //icon_url: thumb,
             url: "https://www.roblox.com/users/" + player.UserId + "/profile"
           },
