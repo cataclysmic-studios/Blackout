@@ -2,32 +2,36 @@ import { OnStart, Service } from "@flamework/core";
 import { Debris, Players, ReplicatedStorage as Replicated, Workspace as World } from "@rbxts/services";
 import { WeaponData } from "shared/types";
 import { Events } from "server/network";
-import { PartCache } from "@rbxts/partcache/out/class";
 import PartCacheModule from "@rbxts/partcache";
 import FastCast, { ActiveCast, Caster } from "@rbxts/fastcast";
 
 const { floor, clamp } = math;
 
+type Bullet = typeof Replicated.VFX.Bullet;
+
 @Service({})
 export class BulletService implements OnStart {
-  private readonly playerCasters = new Map<number, Caster>();
-  private bulletCache?: PartCache;
+  private readonly playerCasters = new Map<number, Caster<Bullet>>();
+  private readonly bulletCache = new PartCacheModule<Bullet>(Replicated.VFX.Bullet, 50);
 
   public onStart(): void {
     Events.createBullet.connect((plr, origin, dir, weaponData) => this.create(plr, origin, dir, weaponData));
 
-    this.bulletCache = new PartCacheModule(Replicated.VFX.Bullet, 30);
-    this.bulletCache.SetCacheParent(World.Debris);
-
     // FastCast.VisualizeCasts = true;
-    Players.PlayerAdded.Connect(plr => this.playerCasters.set(plr.UserId, new FastCast));
+    this.bulletCache.SetCacheParent(World.Debris);
+    Players.PlayerAdded.Connect(plr => this.playerCasters.set(plr.UserId, new FastCast<Bullet>));
     Players.PlayerRemoving.Connect(plr => this.playerCasters.delete(plr.UserId));
   }
 
-  private resetBullet(bullet: Part): void {
+  /**
+   * Returns a bullet in use by the part cache back into the cache
+   */
+  private resetBullet(bullet: Bullet): void {
+    if (!bullet.GetAttribute("InUse")) return;
+    bullet.SetAttribute("InUse", false);
     bullet.SetAttribute("LastHit", undefined);
     bullet.AssemblyLinearVelocity = new Vector3;
-    this.bulletCache?.ReturnPart(bullet);
+    this.bulletCache.ReturnPart(bullet);
   }
 
   /**
@@ -73,9 +77,9 @@ export class BulletService implements OnStart {
    * @param cast Active cast
    * @param material Material
    * @param segVelocity Segment velocity
-   * @param size Depth of hit part
+   * @param depth Depth of hit part
    */
-  private dampenVelocity(cast: ActiveCast, material: Enum.Material, segVelocity: Vector3, size: number): void {
+  private dampenVelocity(cast: ActiveCast<Bullet>, material: Enum.Material, segVelocity: Vector3, depth: number): void {
     let velocityDamp: number;
     switch (material.Name) {
       case "Metal":
@@ -94,7 +98,7 @@ export class BulletService implements OnStart {
       case "Salt":
       case "Pebble":
       case "Pavement":
-        velocityDamp = 1.3;
+        velocityDamp = 1.4;
         break;
 
       case "Glass":
@@ -107,8 +111,7 @@ export class BulletService implements OnStart {
         velocityDamp = 1.15;
         break;
     }
-
-    cast.SetVelocity(segVelocity.div(velocityDamp * (size / 1.25)));
+    cast.SetVelocity(segVelocity.div(velocityDamp * (depth / 1.25)));
   }
 
   /**
@@ -195,7 +198,7 @@ export class BulletService implements OnStart {
   /**
    * Check whether an instance has a humanoid
    * 
-   * @param instance Instance to checkk
+   * @param instance Instance to check
    * @returns Whether or not the instance has a humanoid
    */
   private hasHumanoid(instance: Instance): boolean {
@@ -244,7 +247,7 @@ export class BulletService implements OnStart {
    * @param origin Position
    * @param weaponData Weapon data
    */
-  private renderHit(attacker: Player, victimCharacter: Model, hitPart: Instance, bullet: Instance, origin: Vector3, weaponData: WeaponData): void {
+  private renderHit(attacker: Player, victimCharacter: Model, hitPart: BasePart, bullet: Bullet, origin: Vector3, weaponData: WeaponData): void {
     const victimHumanoid = victimCharacter?.FindFirstChildOfClass("Humanoid");
     if (victimHumanoid && victimHumanoid.Health > 0) {
       let bodyMult = 1;
@@ -255,6 +258,7 @@ export class BulletService implements OnStart {
 
         case "UpperTorso":
         case "LowerTorso":
+        case "HumanoidRootPart":
           bodyMult = weaponData.stats.bodyMultiplier.torso;
           break;
 
@@ -266,9 +270,8 @@ export class BulletService implements OnStart {
       if (bullet.GetAttribute("LastHit") === victimCharacter.Name) return;
       bullet.SetAttribute("LastHit", victimCharacter.Name);
 
-      const damage = this.calculateDamage(origin, (<Part>bullet).Position, weaponData.stats.damage, weaponData.stats.range);
-      print(damage);
-      victimHumanoid.TakeDamage(damage);
+      const damage = this.calculateDamage(origin, bullet.Position, weaponData.stats.damage, weaponData.stats.range);
+      victimHumanoid.TakeDamage(damage * bodyMult);
     }
   }
 
@@ -281,55 +284,48 @@ export class BulletService implements OnStart {
    * @param weaponData Weapon data
    * @returns Bullet cast
    */
-  private create(player: Player, origin: Vector3, dir: Vector3, weaponData: WeaponData): ActiveCast | undefined {
-    if (!this.bulletCache) return;
-
+  private create(player: Player, origin: Vector3, dir: Vector3, weaponData: WeaponData): ActiveCast<Bullet> | undefined {
     const caster = this.playerCasters.get(player.UserId)!;
-    let bulletInstance: Instance | undefined;
-
-    const lengthChange = caster.LengthChanged.Connect((cast, lastPoint, dir, displacement, segVelocity, bullet) => {
-      bulletInstance = bullet;
+    const lengthChange = caster.LengthChanged.Connect((_, lastPoint, dir, displacement, segVelocity, bullet) => {
       const currentPoint = lastPoint.add(dir.mul(displacement));
-      (<Part>bullet).Position = currentPoint;
+      bullet!.Position = currentPoint;
     });
 
     const rayParams = new RaycastParams;
     rayParams.FilterDescendantsInstances = [World.CurrentCamera!, player.Character!, player.Character!.PrimaryPart!];
     rayParams.FilterType = Enum.RaycastFilterType.Blacklist;
 
-    const behavior = FastCast.newBehavior();
+    const behavior = FastCast.newBehavior<Bullet>();
     behavior.Acceleration = new Vector3(0, -World.Gravity, 0);
     behavior.CosmeticBulletProvider = this.bulletCache;
     behavior.CosmeticBulletContainer = World.Debris;
     behavior.RaycastParams = rayParams;
     behavior.AutoIgnoreContainer = true;
     behavior.MaxDistance = 1000;
-    behavior.CanPierceFunction = function (cast, rayResult, segVelocity): boolean {
+    behavior.CanPierceFunction = (_, rayResult, segVelocity) => {
       if (rayResult.Instance.Transparency === 1 && !rayResult.Instance.FindFirstAncestorOfClass("Model")?.FindFirstChildOfClass("Humanoid")) return false;
       if (rayResult.Instance.GetAttribute("Impenetrable")) return false;
       if (segVelocity.Magnitude < 300) return false;
-
       return true;
     }
 
     const cast = caster.Fire(origin.add(new Vector3(0, .05, 0)), dir, weaponData.stats.muzzleVelocity, behavior);
-    let hit: RBXScriptConnection;
-    hit = caster.RayHit.Connect((cast, { Instance, Position, Normal, Material }, segVelocity, bullet) => {
-      hit.Disconnect();
-
-      if (!bullet?.GetAttribute("InUse")) return;
+    const bullet = cast.RayInfo.CosmeticBulletObject!;
+    bullet.SetAttribute("InUse", true);
+    const hit = caster.RayHit.Connect((_, { Instance, Position, Normal, Material }) => {
+      if (!bullet.GetAttribute("InUse")) return;
       if (this.hasHumanoid(Instance)) {
-        // this.renderHit(player, this.getVictim(Instance)!, bulletInstance!, Instance, origin, weaponData);
+        this.renderHit(player, this.getVictim(Instance)!, Instance, bullet, origin, weaponData);
         this.createBloodVFX(Position, Normal);
       } else
         this.createImpactVFX(Position, Normal, Material, Instance.Color);
 
-      this.resetBullet(<Part>bullet);
+      this.resetBullet(bullet);
     });
-    const pierced = caster.RayPierced.Connect((cast, { Instance, Position, Normal, Material }, segVelocity, bullet) => {
-      if (!bullet?.GetAttribute("InUse")) return;
+    const pierced = caster.RayPierced.Connect((cast, { Instance, Position, Normal, Material }, segVelocity, _) => {
+      if (!bullet.GetAttribute("InUse")) return;
       if (this.hasHumanoid(Instance)) {
-        this.renderHit(player, this.getVictim(Instance)!, bulletInstance!, Instance, origin, weaponData);
+        this.renderHit(player, this.getVictim(Instance)!, Instance, bullet, origin, weaponData);
         this.createBloodVFX(Position, Normal);
         this.createBloodVFX(Position, Normal.mul(-1));
       } else {
@@ -348,12 +344,12 @@ export class BulletService implements OnStart {
       this.dampenVelocity(cast, Material, segVelocity, size);
     });
     task.delay(6, () => {
-      if (bulletInstance?.GetAttribute("InUse"))
-        this.resetBullet(<Part>bulletInstance);
-
+      hit.Disconnect();
       pierced.Disconnect();
       lengthChange.Disconnect();
-    })
+      if (bullet.GetAttribute("InUse"))
+        this.resetBullet(bullet);
+    });
     return cast;
   }
 }

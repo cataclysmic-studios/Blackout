@@ -1,0 +1,1 @@
+# FastCast typings
