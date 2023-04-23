@@ -1,8 +1,8 @@
 import { Controller, OnInit, OnRender } from "@flamework/core";
 import { Players, SoundService as Sound, Workspace as World } from "@rbxts/services";
-import { CrosshairController } from "./crosshair-controller";
-import { ViewmodelController } from "./viewmodel-controller";
-import { InterfaceController } from "./interface-controller";
+import { CrosshairController } from "./crosshair";
+import { ViewModelController } from "./view-model";
+import { UI } from "../ui";
 
 const { rad } = math;
 
@@ -20,8 +20,7 @@ export class MenuController implements OnInit, OnRender {
   public active = false;
 
   public constructor(
-    private readonly fps: ViewmodelController,
-    private readonly ui: InterfaceController,
+    private readonly fps: ViewModelController,
     private readonly crosshair: CrosshairController
   ) { }
 
@@ -81,9 +80,9 @@ export class MenuController implements OnInit, OnRender {
     Sound.Music.Menu.Stop();
 
     this.crosshair.toggleMouseIcon();
-    this.ui.getScreen("Menu").Enabled = false;
+    UI.getScreen("Menu").Enabled = false;
     // this.ui.getHUD()?.toggle();
-    const hud = this.ui.getHUD()!;
+    const hud = UI.getHUD()!;
     hud.Enabled = !hud.Enabled
 
     this.fps.addWeapon("HK416", 1);

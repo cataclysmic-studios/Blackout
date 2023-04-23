@@ -3,11 +3,11 @@ import { Debris, Players, ReplicatedStorage as Replicated, Workspace as World } 
 import { Events } from "client/network";
 import { WeaponData, WeaponModel } from "shared/types";
 import { waitFor } from "shared/utility";
-import { SoundController } from "client/controllers/sound-controller";
+import { SoundController } from "client/controllers/sound-player";
 import { Dependency } from "@flamework/core";
 
 @Component()
-export class Effects extends BaseComponent<{}, WeaponModel> {
+export class GunEffects extends BaseComponent<{}, WeaponModel> {
   private readonly sound = Dependency<SoundController>();
 
   /**

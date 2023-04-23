@@ -2,7 +2,7 @@ import { Controller } from "@flamework/core";
 import { UserInputService as UIS } from "@rbxts/services";
 import { waitFor, tween } from "shared/utility";
 import { WeaponData } from "shared/types";
-import { InterfaceController } from "./interface-controller";
+import { UI } from "../ui";
 
 @Controller()
 export class CrosshairController {
@@ -11,15 +11,11 @@ export class CrosshairController {
   private size = 1;
   public maxSize = 10;
 
-  public constructor(
-    private readonly ui: InterfaceController
-  ) { }
-
   /**
    * Toggle crosshair dot
    */
   public toggleDot(): void {
-    const hud = this.ui.getScreen("HUD");
+    const hud = UI.getScreen("HUD");
     const dot = waitFor<Frame>(hud, "Dot");
     const frame = waitFor<Frame>(hud, "Crosshair");
     dot.Visible = !frame.Visible
@@ -29,7 +25,7 @@ export class CrosshairController {
    * Toggle crosshair visiblity
    */
   public toggle(): void {
-    const hud = this.ui.getScreen("HUD");
+    const hud = UI.getScreen("HUD");
     const frame = waitFor<Frame>(hud, "Crosshair");
     this.enabled = !this.enabled;
     frame.Visible = !frame.Visible;
@@ -74,7 +70,7 @@ export class CrosshairController {
   public update(): Tween {
     this.size = math.clamp(this.size, 0, this.maxSize);
 
-    const hud = this.ui.getScreen("HUD");
+    const hud = UI.getScreen("HUD");
     const frame = waitFor<Frame>(hud, "Crosshair");
     const info = new TweenInfo(this.tweenSpeed, Enum.EasingStyle.Quad);
     const sizeTween = tween(frame, info, {

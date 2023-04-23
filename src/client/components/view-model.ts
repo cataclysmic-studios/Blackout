@@ -121,10 +121,8 @@ export default class ViewModel<M extends Model = Model> extends BaseComponent<{}
    * @param playImmediately Whether to play it immediately or not
    * @returns Animation track
    */
-  public playAnimation(name: string, playImmediately = true): AnimationTrack | undefined {
-    if (!this.weapon || !this.data) return;
-
-    const anims = this.weapon.WaitForChild("Animations");
+  public playAnimation(name: string, playImmediately = true): AnimationTrack {
+    const anims = this.weapon!.WaitForChild("Animations");
     const anim = waitFor<Animation>(anims, name);
     const controller = waitFor<AnimationController>(this.instance, "AnimationController");
     const track = controller.LoadAnimation(anim);

@@ -1,14 +1,15 @@
 import { Controller, Dependency, OnRender } from "@flamework/core";
+import { Components } from "@flamework/components";
 import { ReplicatedStorage as Replicated, Workspace as World } from "@rbxts/services";
 import { Janitor } from "@rbxts/janitor";
 import { waitFor, tween } from "shared/utility";
 import { LeanState, Slot, WeaponData, WeaponModel } from "shared/types";
 import { Firemode } from "shared/enums";
-import { RecoilController } from "./recoil-controller";
-import { CrosshairController } from "./crosshair-controller";
-import { SoundController } from "./sound-controller";
-import { EffectsController } from "./effects-controller";
-import { MenuController } from "./menu-controller";
+import { GunEffects } from "client/components/gun-effects";
+import { RecoilController } from "./recoil";
+import { CrosshairController } from "./crosshair";
+import { SoundController } from "./sound-player";
+import { MenuController } from "./menu";
 import Signal from "@rbxts/signal";
 import ViewModel from "client/components/view-model";
 
@@ -37,14 +38,20 @@ interface FPSState {
 }
 
 @Controller()
-export class ViewmodelController implements OnRender {
+export class ViewModelController implements OnRender {
   private readonly janitor = new Janitor;
   private viewModel: ViewModel;
-  private weaponData?: WeaponData;
-  private weaponModel?: WeaponModel;
-  private triggerAnim?: AnimationTrack;
-  private inspectAnim?: AnimationTrack;
-  private reloadAnim?: AnimationTrack;
+  private currentWeapon?: {
+    vfx: GunEffects;
+    data: WeaponData;
+    model: WeaponModel;
+    anims: {
+      trigger?: AnimationTrack;
+      inspect?: AnimationTrack;
+      reload?: AnimationTrack;
+    }
+  }
+
 
   public mouseDown = false;
   public readonly events = {
@@ -77,8 +84,7 @@ export class ViewmodelController implements OnRender {
   public constructor(
     private readonly crosshair: CrosshairController,
     private readonly sounds: SoundController,
-    private readonly recoil: RecoilController,
-    private readonly vfx: EffectsController
+    private readonly recoil: RecoilController
   ) {
     const cam = World.CurrentCamera!;
     this.viewModel = new ViewModel(Replicated.Character.ViewModel);
@@ -148,10 +154,8 @@ export class ViewmodelController implements OnRender {
   public unequip(): void {
     this.state.equipped = false;
     this.viewModel.setEquipped(undefined);
-    this.weaponData = undefined;
-
-    this.weaponModel?.Destroy();
-    this.weaponModel = undefined;
+    this.currentWeapon?.model.Destroy();
+    this.currentWeapon = undefined;
 
     this.crosshair.toggle();
     this.crosshair.toggleDot();
@@ -176,9 +180,15 @@ export class ViewmodelController implements OnRender {
     const model = waitFor<WeaponModel>(Replicated.Weapons, weaponName).Clone();
     this.attachMotors(model);
 
+    const components = Dependency<Components>();
     this.viewModel.setEquipped(model);
-    this.weaponData = this.viewModel.data!;
-    this.weaponModel = model;
+    this.currentWeapon = {
+      model: model,
+      data: this.viewModel.data!,
+      vfx: components.addComponent<GunEffects>(model),
+      anims: {}
+    };
+
     this.state.currentSlot = slot;
 
     for (const offset of model.Offsets.GetChildren()) {
@@ -187,20 +197,20 @@ export class ViewmodelController implements OnRender {
       cfm.Parent = model.CFrameManipulators;
     }
 
-    this.state.weapon.firemode = this.weaponData.stats.firemodes[0];
-    this.state.weapon.ammo.mag = this.weaponData.stats.magSize;
-    this.state.weapon.ammo.reserve = this.weaponData.stats.reserve;
+    this.state.weapon.firemode = this.currentWeapon.data.stats.firemodes[0];
+    this.state.weapon.ammo.mag = this.currentWeapon.data.stats.magSize;
+    this.state.weapon.ammo.reserve = this.currentWeapon.data.stats.reserve;
     this.events.ammoChanged.Fire(this.state.weapon.ammo);
 
-    this.crosshair.maxSize = this.weaponData.crossExpansion.max;
-    this.crosshair.setSize(this.weaponData.crossExpansion.hip);
+    this.crosshair.maxSize = this.currentWeapon.data.crossExpansion.max;
+    this.crosshair.setSize(this.currentWeapon.data.crossExpansion.hip);
 
     model.Parent = this.viewModel.instance;
     const equipAnim = this.viewModel.playAnimation("Equip", false)!;
     this.viewModel.playAnimation("Idle");
 
-    equipAnim.GetMarkerReachedSignal("BoltBack").Once(() => this.weaponModel?.Sounds.SlidePull.Play());
-    equipAnim.GetMarkerReachedSignal("BoltClosed").Once(() => this.weaponModel?.Sounds.SlideRelease.Play());
+    equipAnim.GetMarkerReachedSignal("BoltBack").Once(() => this.currentWeapon?.model.Sounds.SlidePull.Play());
+    equipAnim.GetMarkerReachedSignal("BoltClosed").Once(() => this.currentWeapon?.model.Sounds.SlideRelease.Play());
 
     let conn: RBXScriptConnection;
     conn = equipAnim.Stopped.Connect(() => {
@@ -215,7 +225,7 @@ export class ViewmodelController implements OnRender {
    */
   public cancelInspect(): void {
     if (!this.state.inspecting) return;
-    this.inspectAnim?.Stop();
+    this.currentWeapon?.anims.inspect?.Stop();
   }
 
   /**
@@ -226,6 +236,7 @@ export class ViewmodelController implements OnRender {
     if (this.state.inspecting) return;
     if (this.state.reloading) return;
     if (this.state.shooting) return;
+    if (!this.currentWeapon) return;
 
     this.state.inspecting = true;
     if (this.state.aimed) {
@@ -233,13 +244,13 @@ export class ViewmodelController implements OnRender {
       task.wait(.1);
     }
 
-    this.inspectAnim = this.viewModel.playAnimation("Inspect", false)!;
+    this.currentWeapon.anims.inspect = this.viewModel.playAnimation("Inspect", false)!;
     let conn: RBXScriptConnection;
-    conn = this.inspectAnim.Stopped.Connect(() => {
+    conn = this.currentWeapon.anims.inspect.Stopped.Connect(() => {
       this.state.inspecting = false;
       conn.Disconnect();
     });
-    this.inspectAnim.Play();
+    this.currentWeapon.anims.inspect.Play();
   }
 
   /**
@@ -247,7 +258,7 @@ export class ViewmodelController implements OnRender {
    */
   public melee(): void {
     if (!this.state.equipped) return;
-    if (!this.weaponModel || !this.weaponData) return;
+    if (!this.currentWeapon) return;
     this.cancelReload();
     this.cancelInspect();
   }
@@ -257,10 +268,10 @@ export class ViewmodelController implements OnRender {
    */
   public cancelReload(): void {
     if (!this.state.equipped) return;
-    if (!this.weaponModel || !this.weaponData) return;
     if (!this.state.reloading) return;
+    if (!this.currentWeapon) return;
     this.state.reloadCancelled = true;
-    this.reloadAnim?.Stop();
+    this.currentWeapon?.anims.reload?.Stop();
     this.state.reloadCancelled = false;
   }
 
@@ -269,21 +280,22 @@ export class ViewmodelController implements OnRender {
    */
   public reload(): void {
     if (!this.state.equipped) return;
-    if (!this.weaponModel || !this.weaponData) return;
     if (this.state.reloading) return;
     if (this.state.inspecting) return;
     if (this.state.aimed) return; //aiming reload anim
     if (this.state.shooting) return;
-    if (this.state.weapon.ammo.mag === this.weaponData.stats.magSize + this.weaponData.stats.chamber) return;
+
+    if (!this.currentWeapon) return;
+    if (this.state.weapon.ammo.mag === this.currentWeapon.data.stats.magSize + this.currentWeapon.data.stats.chamber) return;
     if (this.state.weapon.ammo.reserve === 0) return;
     this.state.reloading = true;
 
     // this.reloadAnim = this.viewModel.playAnimation("Reload")!.Ended.Connect(() => {});
     if (this.state.reloadCancelled) return;
     const magBeforeReload = this.state.weapon.ammo.mag;
-    this.state.weapon.ammo.mag = this.weaponData.stats.magSize;
+    this.state.weapon.ammo.mag = this.currentWeapon.data.stats.magSize;
     if (magBeforeReload > 0)
-      this.state.weapon.ammo.mag += this.weaponData.stats.chamber;
+      this.state.weapon.ammo.mag += this.currentWeapon.data.stats.chamber;
 
     const ammoUsed = this.state.weapon.ammo.mag - magBeforeReload;
     this.state.weapon.ammo.reserve -= ammoUsed;
@@ -305,18 +317,18 @@ export class ViewmodelController implements OnRender {
   public aim(on: boolean): void {
     if (!this.state.equipped) return;
     if (this.state.aimed === on) return;
-    if (!this.weaponModel || !this.weaponData) return;
+    if (!this.currentWeapon) return;
     this.cancelInspect();
     this.state.aimed = on;
 
-    this.weaponModel.Sounds[on ? "AimDown" : "AimUp"].Play();
+    this.currentWeapon.model.Sounds[on ? "AimDown" : "AimUp"].Play();
 
     const info = new TweenInfo(.25, Enum.EasingStyle.Quad, Enum.EasingDirection[on ? "Out" : "InOut"])
     tween(this.viewModel.getManipulator("Aim"), info, {
-      Value: on ? this.weaponModel.Offsets.Aim.Value : new CFrame
+      Value: on ? this.currentWeapon.model.Offsets.Aim.Value : new CFrame
     });
 
-    this.crosshair.setSize(on ? 0 : this.weaponData.crossExpansion.hip);
+    this.crosshair.setSize(on ? 0 : this.currentWeapon.data.crossExpansion.hip);
   }
 
   /**
@@ -326,15 +338,16 @@ export class ViewmodelController implements OnRender {
    */
   public toggleTriggerPull(on: boolean): void {
     if (!this.state.equipped) return;
+    if (!this.currentWeapon) return;
 
     const fadeSpd = .05;
     if (on) {
-      this.triggerAnim = this.viewModel.playAnimation("Trigger");
-      this.triggerAnim!.AdjustWeight(undefined, fadeSpd);
+      this.currentWeapon.anims.trigger = this.viewModel.playAnimation("Trigger");
+      this.currentWeapon.anims.trigger.AdjustWeight(undefined, fadeSpd);
     } else {
-      this.triggerAnim?.Stopped.Once(() => this.triggerAnim?.Destroy());
-      this.triggerAnim?.Stop();
-      this.triggerAnim = undefined;
+      this.currentWeapon.anims.trigger?.Stopped.Once(() => this.currentWeapon?.anims.trigger?.Destroy());
+      this.currentWeapon.anims.trigger?.Stop();
+      this.currentWeapon.anims.trigger = undefined;
     }
   }
 
@@ -344,20 +357,21 @@ export class ViewmodelController implements OnRender {
   public shoot(): void {
     if (!this.state.equipped) return;
     if (this.state.shooting) return;
+    if (!this.currentWeapon) return;
+
     this.cancelReload();
     this.cancelInspect();
-
     if (this.state.weapon.ammo.mag === 0) {
-      this.weaponModel!.Sounds.EmptyClick.Play();
+      this.currentWeapon.model.Sounds.EmptyClick.Play();
       this.reload();
       return;
     }
 
     const pew = () => {
       if (!this.state.equipped) return;
-      if (!this.weaponModel || !this.weaponData) return;
+      if (!this.currentWeapon) return;
       if (this.state.weapon.ammo.mag === 0) {
-        this.weaponModel!.Sounds.EmptyClick.Play();
+        this.currentWeapon.model.Sounds.EmptyClick.Play();
         this.mouseDown = false;
         this.state.shooting = false;
         this.reload();
@@ -368,19 +382,20 @@ export class ViewmodelController implements OnRender {
       this.events.ammoChanged.Fire(this.state.weapon.ammo);
 
       this.calculateRecoil();
-      this.vfx.createTracer(this.weaponModel, this.weaponData);
-      this.vfx.createMuzzleFlash(this.weaponModel);
-      this.sounds.clone(<Sound>this.weaponModel.Sounds.WaitForChild("Fire"));
+      this.currentWeapon.vfx.createTracer(this.currentWeapon.data);
+      this.currentWeapon.vfx.createMuzzleFlash();
+      this.sounds.clone(<Sound>this.currentWeapon.model.Sounds.WaitForChild("Fire"));
 
       const boltAnim = this.viewModel.playAnimation("Shoot", false)!;
-      boltAnim.GetMarkerReachedSignal("SlideBack").Once(() => this.vfx.createEjectedShell(this.weaponData!.shell, this.weaponModel!));
-      boltAnim.Play();
+      boltAnim.GetMarkerReachedSignal("SlideBack").Once(() =>
+        this.currentWeapon?.vfx.createEjectedShell(this.currentWeapon.data.shell, this.currentWeapon.model));
 
+      boltAnim.Play();
       if (!this.state.aimed)
-        this.crosshair.pulse(this.weaponData);
+        this.crosshair.pulse(this.currentWeapon.data);
     }
 
-    const fireSpeed = 60 / this.weaponData!.stats.rpm;
+    const fireSpeed = 60 / this.currentWeapon.data.stats.rpm;
     this.state.shooting = true;
     switch (this.state.weapon.firemode) {
       case Firemode.Bolt:
@@ -397,7 +412,7 @@ export class ViewmodelController implements OnRender {
       case Firemode.Burst:
         for (
           let i = 0;
-          i <= (this.weaponData!.stats.burstCount ?? 3) && this.mouseDown;
+          i <= (this.currentWeapon.data.stats.burstCount ?? 3) && this.mouseDown;
           i++
         ) {
           pew();
@@ -417,18 +432,20 @@ export class ViewmodelController implements OnRender {
    */
   private calculateRecoil(): void {
     if (!this.state.equipped) return;
-    if (!this.weaponData) return;
+    if (!this.currentWeapon) return;
 
     const r = new Random;
     const torqueDir = r.NextInteger(1, 2) === 1 ? 1 : -1;
-    const [cy, cx, cz] = this.weaponData.recoil.camera;
+    const data = this.currentWeapon.data;
+
+    const [cy, cx, cz] = data.recoil.camera;
     const cforce = new Vector3(
       r.NextNumber(cy[0], cy[1]),
       r.NextNumber(cx[0], cx[1]),
       r.NextNumber(cz[0], cz[1])
     );
 
-    const [my, mx, mz] = this.weaponData.recoil.model;
+    const [my, mx, mz] = this.currentWeapon.data.recoil.model;
     const mforce = new Vector3(
       r.NextNumber(my[0], my[1]),
       r.NextNumber(mx[0], mx[1]),
@@ -439,11 +456,11 @@ export class ViewmodelController implements OnRender {
     if (this.state.aimed)
       stabilization += 0.8;
 
-    this.recoil.kick(this.weaponData, cforce, "Camera", stabilization, torqueDir);
-    this.recoil.kick(this.weaponData, mforce, "Model", stabilization, torqueDir);
+    this.recoil.kick(data, cforce, "Camera", stabilization, torqueDir);
+    this.recoil.kick(data, mforce, "Model", stabilization, torqueDir);
     task.delay(.12, () => {
-      this.recoil.kick(this.weaponData!, cforce.mul(-1), "Camera", stabilization, torqueDir);
-      this.recoil.kick(this.weaponData!, mforce.mul(-1), "Model", stabilization, torqueDir);
+      this.recoil.kick(data, cforce.mul(-1), "Camera", stabilization, torqueDir);
+      this.recoil.kick(data, mforce.mul(-1), "Model", stabilization, torqueDir);
     });
   }
 }

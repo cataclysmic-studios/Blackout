@@ -1,7 +1,7 @@
 import { Controller } from "@flamework/core";
 import { SoundService } from "@rbxts/services";
 
-const soundIDs = {
+const library = {
 	MetalShell: [7836829426, 7836830697, 7836831993, 7836831369, 7836831778, 7836831025]
 };
 
@@ -27,8 +27,8 @@ export class SoundController {
 	 * @param parent Instance to parent the sound to
 	 * @param onFinished Callback function to run when the sound ends
 	 */
-	public play(name: keyof typeof soundIDs, parent: Instance = SoundService, onFinished: Callback): void {
-		const ids = soundIDs[name];
+	public play(name: keyof typeof library, parent: Instance = SoundService, onFinished: Callback): void {
+		const ids = library[name];
 		assert(ids, `"${name}" is not a valid sound.`);
 
 		const sound = new Instance("Sound");
