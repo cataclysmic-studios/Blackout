@@ -1,4 +1,4 @@
-import { OnInit, Service } from "@flamework/core";
+import { OnInit, OnStart, Service } from "@flamework/core";
 import { Players } from "@rbxts/services";
 import { Janitor } from "@rbxts/janitor";
 import { KickReason } from "shared/enums";
@@ -6,9 +6,12 @@ import { PlayerDataService } from "./data-service";
 import { PlayerRemovalService } from "./removal-service";
 import PlayerEntity from "server/modules/classes/player-entity";
 import Signal from "@rbxts/signal";
+import { Functions } from "server/network";
+import { ServerResponse } from "shared/interfaces/network-types";
+import { PlayerData } from "shared/meta/default-player-data";
 
 @Service()
-export class PlayerService implements OnInit {
+export class PlayerService implements OnStart, OnInit {
 	// what does this need to do?
 	// - load player data
 	// - save player data
@@ -30,6 +33,18 @@ export class PlayerService implements OnInit {
 				this.onEntityRemoving.Wait();
 		});
 	}
+
+	public onStart(): void {
+		Functions.requestPlayerData.setCallback((player) => this.onPlayerRequestedData(player));
+	}
+
+	private onPlayerRequestedData(player: Player): ServerResponse<PlayerData> {
+		const entity = this.playerEntities.get(player);
+		if (!entity) return { success: false, error: "Player entity not found" };
+
+		return { success: true, data: entity.data };
+	}
+
 
 	private async onPlayerAdded(player: Player) {
 		const playerProfile = await this.playerData.loadPlayerProfile(player);
