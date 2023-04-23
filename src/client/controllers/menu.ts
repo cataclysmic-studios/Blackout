@@ -1,7 +1,7 @@
 import { Controller, OnInit, OnRender, OnStart } from "@flamework/core";
 import { Players, ReplicatedStorage as Replicated, SoundService as Sound, Workspace as World } from "@rbxts/services";
 import { CrosshairController } from "./crosshair";
-import { ViewModelController } from "./view-model";
+import { FPSController } from "./fps";
 import { UI } from "../ui";
 
 const { rad } = math;
@@ -20,7 +20,7 @@ export class MenuController implements OnStart, OnRender {
   public active = false;
 
   public constructor(
-    private readonly fps: ViewModelController,
+    private readonly fps: FPSController,
     private readonly crosshair: CrosshairController
   ) { }
 
