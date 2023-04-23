@@ -1,6 +1,7 @@
 import { Networking } from "@flamework/networking";
 import { WeaponData } from "./types";
 import { PlayerData } from "./meta/default-player-data";
+import { ServerResponse } from "./interfaces/network-types";
 
 export interface ServerEvents {
 	discordLog(message: string, logType: string): void;
@@ -14,7 +15,9 @@ export interface ClientEvents {
 	playerDataChanged(newPlayerData: Partial<PlayerData>): void;
 }
 
-export interface ServerFunctions { }
+export interface ServerFunctions {
+	requestPlayerData(): ServerResponse<PlayerData>;
+}
 
 export interface ClientFunctions { }
 
