@@ -3,7 +3,7 @@ import { Profile } from "@rbxts/profileservice/globals";
 const DefaultPlayerData = {
 	currency: {
 		cash: 0,
-		experiencePoints: 0,
+		xp: 0,
 	}
 }
 

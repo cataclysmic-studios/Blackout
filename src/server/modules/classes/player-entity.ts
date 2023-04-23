@@ -19,7 +19,7 @@ export default class PlayerEntity {
 	constructor(
 		public readonly player: Player,
 		public readonly janitor: Janitor,
-		private dataProfile: PlayerDataProfile,
+		private readonly dataProfile: PlayerDataProfile,
 	) {
 		this.name = player.Name;
 		this.data = dataProfile.Data;
