@@ -7,6 +7,7 @@ import { ClientStore, StoreActions } from 'client/rodux/rodux';
 import Rodux from '@rbxts/rodux';
 import RoactRodux, { StoreProvider } from '@rbxts/roact-rodux';
 import { Players } from '@rbxts/services';
+import { withHookDetection } from '@rbxts/roact-hooked';
 
 type StoreDispatch = Rodux.Dispatch<StoreActions>;
 
@@ -22,6 +23,8 @@ export const App = Modding.createMetaDecorator<[AppConfig]>('Class');
 
 const noop = () => {};
 
+withHookDetection(Roact);
+
 @Controller()
 export class AppController implements OnStart, OnInit {
 	private apps = new Map<Constructor<Roact.Component>, AppConfig>();
@@ -33,9 +36,7 @@ export class AppController implements OnStart, OnInit {
 
 	public onInit(): void {
 		this.scene.OnSceneChanged.Connect((n, o) => this.onSceneChanged(n, o));
-	}
 
-	onStart(): void {
 		const constructors = Modding.getDecorators<typeof App>();
 		for (const { object, arguments: args } of constructors) {
 			const config = args[0];
@@ -44,16 +45,26 @@ export class AppController implements OnStart, OnInit {
 		}
 	}
 
+	onStart(): void {
+		// this.onSceneChanged(ClientStore.getState().gameState.currentScene);
+	}
+
 	private onSceneChanged(newScene: Scene, oldScene?: Scene) {
 		for (const [app, config] of this.apps) {
-			if (!config.requiredScene) continue;
+			print('checking app', config.name);
+			if (config.requiredScene === undefined) continue;
 
 			const usedToBeOpen = config.requiredScene === oldScene;
 			const shouldBeOpen = config.requiredScene === newScene;
 
+			print('used to be open', usedToBeOpen);
+			print('should be open', shouldBeOpen);
+
 			if (usedToBeOpen && !shouldBeOpen) {
+				print('hiding app');
 				this.hideApp(app);
 			} else if (!usedToBeOpen && shouldBeOpen) {
+				print('showing app');
 				this.showApp(app);
 			}
 		}
@@ -61,6 +72,7 @@ export class AppController implements OnStart, OnInit {
 
 	private showApp(app: Constructor<Roact.Component>) {
 		const config = this.apps.get(app)!;
+		print('showing app', config.name);
 
 		let component = app as unknown as Roact.FunctionComponent;
 		if (config.mapStateToProps || config.mapDispatchToProps) {
@@ -97,6 +109,8 @@ export class AppController implements OnStart, OnInit {
 
 	private hideApp(app: Constructor<Roact.Component>) {
 		const handle = this.appHandles.get(app);
+		const config = this.apps.get(app)!;
+		print('hiding app', config.name);
 		if (handle) {
 			Roact.unmount(handle);
 			this.appHandles.delete(app);
