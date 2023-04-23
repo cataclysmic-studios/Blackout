@@ -1,48 +1,23 @@
 import Roact from "@rbxts/roact";
-import StatefulText from "../components/stateful-text";
+import { Crosshair } from "../components/crosshair";
+import AmmoText from "../components/ammo-text";
 
 const { ZIndexBehavior, TextXAlignment, FontWeight, FontStyle } = Enum;
 const inconsolata = new Font("rbxasset://fonts/families/Inconsolata.json", FontWeight.SemiBold, FontStyle.Normal);
 
-function Crosshair() {
-  return <frame
-    Key="Crosshair"
-    AnchorPoint={new Vector2(0.5, 0.5)}
-    BackgroundTransparency={1}
-    Position={new UDim2(0.5, 0, 0.5, 0)}
-    Size={new UDim2(0.4, 0, 0.4, 0)}
-    Visible={false}
-  >
-    <frame
-      Key="T"
-      AnchorPoint={new Vector2(0.5, 0)}
-      BackgroundColor3={Color3.fromRGB(255, 255, 255)}
-      BorderSizePixel={0}
-      Position={new UDim2(0.5, 0, 0, 0)}
-      Size={new UDim2(0, 2, 0, 12)} />
-    <frame
-      Key="B"
-      AnchorPoint={new Vector2(0.5, 1)}
-      BackgroundColor3={Color3.fromRGB(255, 255, 255)}
-      BorderSizePixel={0}
-      Position={new UDim2(0.5, 0, 1, 0)}
-      Size={new UDim2(0, 2, 0, 12)} />
-    <frame
-      Key="L"
-      AnchorPoint={new Vector2(0, 0.5)}
-      BackgroundColor3={Color3.fromRGB(255, 255, 255)}
-      BorderSizePixel={0}
-      Position={new UDim2(0, 0, 0.5, 0)}
-      Size={new UDim2(0, 12, 0, 2)} />
-    <frame
-      Key="R"
-      AnchorPoint={new Vector2(1, 0.5)}
-      BackgroundColor3={Color3.fromRGB(255, 255, 255)}
-      BorderSizePixel={0}
-      Position={new UDim2(1, 0, 0.5, 0)}
-      Size={new UDim2(0, 12, 0, 2)} />
-    <uiaspectratioconstraint />
-  </frame>;
+function ammoTextDetails() {
+  return [
+    <uipadding PaddingBottom={new UDim(0.04, 0)} PaddingTop={new UDim(0.04, 0)} />,
+    <uistroke Color={Color3.fromRGB(49, 49, 49)} Thickness={1.5} Transparency={0.4} />,
+    <uigradient
+      Rotation={90}
+      Color={new ColorSequence([
+        new ColorSequenceKeypoint(0, Color3.fromRGB(190, 190, 190)), 
+        new ColorSequenceKeypoint(0.5, Color3.fromRGB(255, 255, 255)), 
+        new ColorSequenceKeypoint(1, Color3.fromRGB(190, 190, 190))
+      ])}
+    />
+  ];
 }
 
 export const HUD = (
@@ -57,7 +32,7 @@ export const HUD = (
       Rotation={2}
       Size={new UDim2(0.135, 0, 0.08, 0)}
     >
-      <StatefulText Key="Mag" InitialText="30" LabelProperties={{
+      <AmmoText Key="Mag" Type="Mag" InitialText="30" LabelProperties={{
         AnchorPoint: new Vector2(0, 0.5),
         BackgroundTransparency: 1,
         FontFace: inconsolata,
@@ -69,18 +44,9 @@ export const HUD = (
         TextWrapped: true,
         TextXAlignment: TextXAlignment.Right
       }}>
-        <uipadding PaddingBottom={new UDim(0.04, 0)} PaddingTop={new UDim(0.04, 0)} />
-        <uistroke Color={Color3.fromRGB(49, 49, 49)} Thickness={1.5} Transparency={0.4} />
-        <uigradient
-          Rotation={90}
-          Color={new ColorSequence([
-            new ColorSequenceKeypoint(0, Color3.fromRGB(190, 190, 190)), 
-            new ColorSequenceKeypoint(0.5, Color3.fromRGB(255, 255, 255)), 
-            new ColorSequenceKeypoint(1, Color3.fromRGB(190, 190, 190))
-          ])}
-        />
-      </StatefulText>
-      <StatefulText Key="Reserve" InitialText="150" LabelProperties={{
+        {...ammoTextDetails()}
+      </AmmoText>
+      <AmmoText Key="Reserve" Type="Reserve" InitialText="150" LabelProperties={{
         AnchorPoint: new Vector2(1, 1),
         BackgroundTransparency: 1,
         FontFace: inconsolata,
@@ -92,17 +58,8 @@ export const HUD = (
         TextWrapped: true,
         TextXAlignment: TextXAlignment.Left
       }}>
-        <uipadding PaddingBottom={new UDim(0.04, 0)} PaddingTop={new UDim(0.04, 0)} />
-        <uistroke Color={Color3.fromRGB(49, 49, 49)} Thickness={1.5} Transparency={0.4} />
-        <uigradient
-          Rotation={90}
-          Color={new ColorSequence([
-            new ColorSequenceKeypoint(0, Color3.fromRGB(190, 190, 190)), 
-            new ColorSequenceKeypoint(0.5, Color3.fromRGB(255, 255, 255)), 
-            new ColorSequenceKeypoint(1, Color3.fromRGB(190, 190, 190))
-          ])}
-        />
-      </StatefulText>
+        {...ammoTextDetails()}
+      </AmmoText>
       <uipadding
         PaddingBottom={new UDim(0.075, 0)}
         PaddingLeft={new UDim(0.05, 0)}

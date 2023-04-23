@@ -1,12 +1,14 @@
 import { Networking } from "@flamework/networking";
-import { Slot, WeaponData } from "./types";
+import { WeaponData } from "./types";
 
 export interface ServerEvents {
-    discordLog(message: string, logType: string): void;
-    createBullet(origin: Vector3, dir: Vector3, weaponData: WeaponData): void;
+	discordLog(message: string, logType: string): void;
+	createBullet(origin: Vector3, dir: Vector3, weaponData: WeaponData): void;
 }
 
-export interface ClientEvents { }
+export interface ClientEvents {
+	ammoChanged(ammo: { mag: number; reserve: number; }): void;
+}
 
 export interface ServerFunctions { }
 

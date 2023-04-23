@@ -19,6 +19,10 @@ export default class StatefulText<P = {}> extends Roact.Component<PropsWithChild
     this.setState({ LinkedText: text });
   }
 
+  protected willUnmount(): void {
+    this.janitor.Destroy();
+  }
+
   protected didMount(): void {
     this.update(this.props.InitialText ?? "...");
   }
