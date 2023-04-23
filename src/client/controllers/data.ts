@@ -5,7 +5,7 @@ import { PlayerData } from "shared/meta/default-player-data";
 
 @Controller()
 export class DataController implements OnStart {
-	onStart(): void {
+	public onStart(): void {
 		Events.playerDataChanged.connect((data) => this.onReceivedNewData(data));
 	}
 
