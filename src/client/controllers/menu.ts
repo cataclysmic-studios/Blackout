@@ -1,4 +1,4 @@
-import { Controller, OnInit, OnRender, OnStart } from "@flamework/core";
+import { Controller, OnRender, OnStart } from "@flamework/core";
 import { Players, ReplicatedStorage as Replicated, SoundService as Sound, Workspace as World } from "@rbxts/services";
 import { CrosshairController } from "./crosshair";
 import { FPSController } from "./fps";
