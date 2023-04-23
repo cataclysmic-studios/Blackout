@@ -1,17 +1,9 @@
 import { Service } from "@flamework/core";
-<<<<<<< HEAD:src/server/services/player/player-data-service.ts
-import { PlayerRemovalService } from "./player-removal-service";
 import ProfileService from "@rbxts/profileservice";
 import DefaultPlayerData, { PlayerData, PlayerDataProfile } from "shared/meta/default-player-data";
-import { KickReason } from "types/enum/kick-reason";
-=======
->>>>>>> 5fea7b3dc15d7e1376cbd12fda5a7f68ed7f0638:src/server/services/player/data-service.ts
 import { Players } from "@rbxts/services";
-import { KickReason } from "types/enum/kick-reason";
 import { PlayerRemovalService } from "./removal-service";
-
-import ProfileService from "@rbxts/profileservice";
-import DefaultPlayerData, { PlayerData, PlayerDataProfile } from "shared/meta/default-player-data";
+import { KickReason } from "shared/enums";
 
 @Service()
 export class PlayerDataService {
