@@ -7,31 +7,33 @@ import { Janitor } from "@rbxts/janitor";
 import PlayerEntity from "server/modules/classes/player-entity";
 import Signal from "@rbxts/signal";
 
-@Service({})
+@Service()
 export class PlayerService implements OnInit {
 	// what does this need to do?
 	// - load player data
 	// - save player data
 	// - implement OnPlayerJoin lifecycle hook
 
-	private playerEntities = new Map<Player, PlayerEntity>();
-	private onEntityRemoving = new Signal();
+	private playerEntities = new Map<Player, PlayerEntity>;
+	private onEntityRemoving = new Signal;
 
-	constructor(private readonly playerDataService: PlayerDataService, private readonly playerRemovalService: PlayerRemovalService) { }
+	constructor(
+		private readonly playerData: PlayerDataService,
+		private readonly playerRemoval: PlayerRemovalService
+	) { }
 
-	/** @hidden */
-	onInit(): void | Promise<void> {
+	public onInit(): void {
 		Players.PlayerAdded.Connect((player) => this.onPlayerAdded(player));
 		Players.PlayerRemoving.Connect((player) => this.onPlayerRemoving(player));
-
 		game.BindToClose(() => {
-			while (this.playerEntities.size() > 0) this.onEntityRemoving.Wait();
+			while (this.playerEntities.size() > 0)
+				this.onEntityRemoving.Wait();
 		});
 	}
 
 	private async onPlayerAdded(player: Player) {
-		const playerProfile = await this.playerDataService.loadPlayerProfile(player);
-		if (!playerProfile) return this.playerRemovalService.removePlayerForBug(player, KickReason.PlayerEntityInstantiationError);
+		const playerProfile = await this.playerData.loadPlayerProfile(player);
+		if (!playerProfile) return this.playerRemoval.removeDueToBug(player, KickReason.PlayerEntityInstantiationError);
 
 		const janitor = new Janitor();
 		janitor.Add(() => {

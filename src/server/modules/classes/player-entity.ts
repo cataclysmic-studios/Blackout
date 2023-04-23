@@ -1,6 +1,6 @@
 import { Janitor } from "@rbxts/janitor";
 import { Events } from "server/network";
-import { IPlayerData, PlayerDataProfile } from "shared/meta/default-player-data";
+import { PlayerData, PlayerDataProfile } from "shared/meta/default-player-data";
 import { DeepReadonly } from "types/util/readonly";
 
 /**
@@ -14,12 +14,12 @@ export default class PlayerEntity {
 	 * Readonly version of the players data. Updates should be done through the
 	 * `updateData` method.
 	 */
-	public data: DeepReadonly<IPlayerData>;
+	public data: DeepReadonly<PlayerData>;
 
 	constructor(
 		public readonly player: Player,
 		public readonly janitor: Janitor,
-		private dataProfile: PlayerDataProfile,
+		private readonly dataProfile: PlayerDataProfile,
 	) {
 		this.name = player.Name;
 		this.data = dataProfile.Data;
@@ -30,7 +30,7 @@ export default class PlayerEntity {
 	 * 
 	 * @param callback Callback that returns the new data
 	 */
-	public updateData(callback: (existingData: DeepReadonly<IPlayerData>) => IPlayerData) {
+	public updateData(callback: (existingData: DeepReadonly<PlayerData>) => PlayerData) {
 		const currentData = this.dataProfile.Data;
 		const newData = callback(currentData);
 		this.dataProfile.Data = newData;
