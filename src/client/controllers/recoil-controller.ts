@@ -1,6 +1,6 @@
 import { Controller } from "@flamework/core";
-import { WeaponData } from "shared/modules/types";
-import { Spring } from "shared/modules/utility";
+import { WeaponData } from "shared/types";
+import { Spring } from "shared/utility";
 import ViewModel from "client/components/view-model";
 
 @Controller()

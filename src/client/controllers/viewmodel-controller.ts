@@ -1,13 +1,13 @@
 import { Controller, Dependency, OnRender } from "@flamework/core";
 import { ReplicatedStorage as Replicated, Workspace as World } from "@rbxts/services";
 import { Janitor } from "@rbxts/janitor";
-import { waitFor, tween } from "shared/modules/utility";
-import { LeanState, Slot, WeaponData, WeaponModel } from "shared/modules/types";
+import { waitFor, tween } from "shared/utility";
+import { LeanState, Slot, WeaponData, WeaponModel } from "shared/types";
+import { Firemode } from "shared/enums";
 import { RecoilController } from "./recoil-controller";
 import { CrosshairController } from "./crosshair-controller";
 import { SoundController } from "./sound-controller";
 import { EffectsController } from "./effects-controller";
-import { Firemode } from "shared/modules/enums";
 import { MenuController } from "./menu-controller";
 import Signal from "@rbxts/signal";
 import ViewModel from "client/components/view-model";

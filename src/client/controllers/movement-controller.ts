@@ -1,5 +1,5 @@
 import { Controller } from "@flamework/core";
-import { LeanState } from "shared/modules/types";
+import { LeanState } from "shared/types";
 import { ViewmodelController } from "./viewmodel-controller";
 
 @Controller()

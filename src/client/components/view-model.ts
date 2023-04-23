@@ -1,7 +1,7 @@
 import { BaseComponent, Component } from "@flamework/components";
 import { UserInputService as UIS, Workspace as World } from "@rbxts/services";
-import { waitFor, Spring } from "shared/modules/utility";
-import { WeaponData, WeaponModel } from "../../shared/modules/types";
+import { waitFor, Spring } from "shared/utility";
+import { WeaponData, WeaponModel } from "shared/types";
 
 const camera = World.CurrentCamera!;
 

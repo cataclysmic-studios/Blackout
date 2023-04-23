@@ -6,10 +6,10 @@ import { InterfaceController } from "./interface-controller";
 
 @Controller()
 export class CrosshairController {
-  public readonly maxSize = 10;
   private readonly tweenSpeed = .075;
-  private size = 1;
   private enabled = false;
+  private size = 1;
+  public maxSize = 10;
 
   public constructor(
     private readonly ui: InterfaceController
