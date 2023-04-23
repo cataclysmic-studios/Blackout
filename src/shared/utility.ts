@@ -32,15 +32,6 @@ export function waitFor<T extends Instance>(instance: Instance, childName: strin
 }
 
 /**
- * Get component attached to instance
- * 
- * @param instance Attached instance
- * @returns Component
- */
-export const getComponent = <T extends BaseComponent>(instance: Instance) =>
-  Dependency<Components>().getComponent<T>(instance);
-
-/**
  * Checks if a value is not a number
  * 
  * @param x Value

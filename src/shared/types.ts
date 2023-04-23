@@ -47,6 +47,14 @@ export interface WeaponData {
 }
 
 export interface WeaponModel extends Folder {
+	Animations: Folder & {
+		Idle: Animation;
+		Equip: Animation;
+		Inspect: Animation;
+		Reload: Animation;
+		Shoot: Animation;
+		Trigger: Animation;
+	};
 	CFrameManipulators: Folder;
 	Offsets: Folder & {
 		Aim: CFrameValue;
@@ -69,8 +77,8 @@ export interface WeaponModel extends Folder {
 		};
 		Muzzle: Attachment;
 	};
-	Chamber: Part;
-	Mag: Part;
-	Bolt: Part;
-	ChargingHandle?: Part;
+	Data: ModuleScript;
+	Mag: BasePart;
+	Bolt: BasePart;
+	ChargingHandle?: BasePart;
 }

@@ -1,8 +1,8 @@
 import Roact from "@rbxts/roact";
-import { Loadout } from "../components/menu-loadout";
-import { tween } from "shared/utility";
 import { Dependency } from "@flamework/core";
+import { tween } from "shared/utility";
 import { MenuController } from "client/controllers/menu";
+import { Loadout } from "../components/menu-loadout";
 
 const { ScreenInsets, ZIndexBehavior, SortOrder, VerticalAlignment, FontWeight, FontStyle } = Enum;
 const oswald = new Font("rbxasset://fonts/families/Oswald.json", FontWeight.Regular, FontStyle.Normal);

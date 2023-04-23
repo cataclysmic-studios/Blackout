@@ -1,8 +1,8 @@
+import { Dependency } from "@flamework/core";
 import { BaseComponent, Component, Components } from "@flamework/components";
 import { WeaponData } from "shared/types";
 import { Spring } from "shared/utility";
 import ViewModel from "client/components/view-model";
-import { Dependency } from "@flamework/core";
 
 const springDefaults = {
   camera: [20, 40, 4, 4],
@@ -43,12 +43,10 @@ export default class Recoil extends BaseComponent<{}, Model | Camera> {
     const mtorque = CFrame.Angles(0, tmf.Y, tmf.Y * torqueMult); // * (aimed ? 1.25 : 1)
     const mrecoil = moffset.mul(mvertClimb).mul(mtorque);
 
-    if (typeOf(this.instance) === "Instance") {
-      const cam = <Camera>this.instance;
-      cam.CFrame = cam.CFrame.mul(crecoil);
+    if (this.instance.IsA("Camera")) {
+      this.instance.CFrame = this.instance.CFrame.mul(crecoil);
     } else {
-      const model = <Model>this.instance;
-      const vm = Dependency<Components>().getComponent<ViewModel>(model)!;
+      const vm = Dependency<Components>().getComponent<ViewModel>(this.instance)!;
       vm.syncCameraBone();
       vm.setCFrame(vm.getCFrame(dt, aimed).mul(mrecoil));
       if (vm.weapon) {

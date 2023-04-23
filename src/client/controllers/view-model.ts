@@ -1,4 +1,4 @@
-import { Controller, Dependency, OnRender } from "@flamework/core";
+import { Controller, Dependency, OnRender, OnStart } from "@flamework/core";
 import { Components } from "@flamework/components";
 import { ReplicatedStorage as Replicated, Workspace as World } from "@rbxts/services";
 import { Janitor } from "@rbxts/janitor";
@@ -39,7 +39,7 @@ interface FPSState {
 }
 
 @Controller()
-export class ViewModelController implements OnRender {
+export class ViewModelController implements OnStart, OnRender {
   private readonly janitor = new Janitor;
   private vmRecoil?: Recoil;
   private camRecoil?: Recoil;
@@ -90,16 +90,16 @@ export class ViewModelController implements OnRender {
 
   public onStart(): void {
     const components = Dependency<Components>();
-    this.viewModel = components.addComponent<ViewModel>(Replicated.Character.ViewModel);
-    this.vmRecoil = components.addComponent<Recoil, ViewModel>(this.viewModel);
+    this.viewModel = components.addComponent<ViewModel>(Replicated.Character.ViewModel.Clone());
+    this.vmRecoil = components.addComponent<Recoil>(this.viewModel.instance);
     this.camRecoil = components.addComponent<Recoil>(World.CurrentCamera!);
 
     // proceduralAnims.attach(this.viewModel);
     // proceduralAnims.attach(cam);
 
-    this.janitor.Add(this.viewModel);
-    this.janitor.Add(this.vmRecoil);
-    this.janitor.Add(this.camRecoil);
+    this.janitor.Add(this.viewModel, "destroy");
+    this.janitor.Add(this.vmRecoil, "destroy");
+    this.janitor.Add(this.camRecoil, "destroy");
   }
 
   public onRender(dt: number): void {

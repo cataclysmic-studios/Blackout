@@ -1,3 +1,4 @@
+import { OnStart } from "@flamework/core";
 import { BaseComponent, Component } from "@flamework/components";
 import { UserInputService as UIS, Workspace as World } from "@rbxts/services";
 import { waitFor, Spring } from "shared/utility";
@@ -6,21 +7,18 @@ import { WeaponData, WeaponModel } from "shared/types";
 const camera = World.CurrentCamera!;
 
 @Component()
-export default class ViewModel<M extends Model = Model> extends BaseComponent<{}, M> {
+export default class ViewModel extends BaseComponent<{}, Model> implements OnStart {
   private prevCamCF?: CFrame;
   private springs = {
     mouseSway: new Spring
   };
 
-  public readonly root: BasePart;
+  public readonly root = this.instance.PrimaryPart!;
   public weapon?: WeaponModel;
   public data?: WeaponData;
 
-  public constructor(model: M) {
-    super();
-    this.instance = model.Clone();
-    this.root = this.instance.PrimaryPart!;
-    this.maid.GiveTask(this.instance);
+  public onStart(): void {
+    this.instance.Parent = World.CurrentCamera!;
   }
 
   /**
@@ -132,12 +130,5 @@ export default class ViewModel<M extends Model = Model> extends BaseComponent<{}
       track.Play();
 
     return track;
-  }
-
-  /**
-   * Cleanup ViewModel
-   */
-  public destroy(): void {
-    this.maid.Destroy();
   }
 }
