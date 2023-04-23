@@ -48,7 +48,8 @@ export class PlayerService implements OnStart, OnInit {
 
 	private async onPlayerAdded(player: Player) {
 		const playerProfile = await this.playerData.loadPlayerProfile(player);
-		if (!playerProfile) return this.playerRemoval.removeDueToBug(player, KickReason.PlayerEntityInstantiationError);
+		if (!playerProfile)
+			return this.playerRemoval.removeDueToBug(player, KickReason.PlayerEntityInstantiationError);
 
 		const janitor = new Janitor();
 		janitor.Add(() => {

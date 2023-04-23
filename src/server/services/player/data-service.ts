@@ -1,14 +1,16 @@
 import { Service } from "@flamework/core";
-import ProfileService from "@rbxts/profileservice";
-import DefaultPlayerData, { PlayerData, PlayerDataProfile } from "shared/meta/default-player-data";
 import { Players } from "@rbxts/services";
 import { PlayerRemovalService } from "./removal-service";
+import { DiscordService } from "../discord-service";
 import { KickReason } from "shared/enums";
+import ProfileService from "@rbxts/profileservice";
+import DefaultPlayerData, { PlayerData, PlayerDataProfile } from "shared/meta/default-player-data";
 
 @Service()
 export class PlayerDataService {
 	constructor(
-		private readonly playerRemoval: PlayerRemovalService
+		private readonly playerRemoval: PlayerRemovalService,
+		private readonly discord: DiscordService
 	) { }
 
 	private gameProfileStore = ProfileService.GetProfileStore<PlayerData>("PlayerData", DefaultPlayerData);
@@ -35,7 +37,7 @@ export class PlayerDataService {
 		profile.Reconcile();
 		profile.ListenToRelease(() => {
 			if (!player.IsDescendantOf(game)) return;
-			this.playerRemoval.removeDueToBug(player, KickReason.PlayerProfileReleased);
+			this.discord.log(player, "", "Data Saved");
 		});
 
 		return profile;

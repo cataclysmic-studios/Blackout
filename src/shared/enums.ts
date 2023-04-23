@@ -14,8 +14,7 @@ export const enum KickReason {
 	PlayerEntityInstantiationError,
 
 	// Player data related
-	PlayerProfileUndefined,
-	PlayerProfileReleased,
+	PlayerProfileUndefined
 }
 
 export const enum Scene {
