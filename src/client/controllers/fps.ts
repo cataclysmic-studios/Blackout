@@ -13,6 +13,7 @@ import Signal from "@rbxts/signal";
 import ViewModel from "client/components/view-model";
 import GunEffects from "client/components/gun-effects";
 import Recoil from "client/components/recoil";
+import { AppController } from "./apps";
 
 interface FPSState {
   equipped: boolean;
@@ -166,8 +167,8 @@ export class FPSController implements OnStart, OnRender {
    * @param slot Inventory slot
    */
   public equip(slot: Slot): void {
-    const menu = Dependency<MenuController>();
-    if (menu.active) return;
+    const apps = Dependency<AppController>();
+    if (apps.isShowing("Menu")) return;
 
     const weaponName = this.state.weapons[slot - 1];
     if (!weaponName) return;

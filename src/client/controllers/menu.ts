@@ -1,8 +1,6 @@
-import { Controller, OnRender, OnStart } from "@flamework/core";
-import { Players, ReplicatedStorage as Replicated, SoundService as Sound, Workspace as World } from "@rbxts/services";
-import { CrosshairController } from "./crosshair";
-import { FPSController } from "./fps";
-import { StaticUI } from "../static-ui";
+import { Controller, Dependency, OnRender } from "@flamework/core";
+import { Players, Workspace as World } from "@rbxts/services";
+import { AppController } from "./apps";
 
 const { rad } = math;
 
@@ -11,37 +9,15 @@ interface MenuPage extends Folder {
 }
 
 @Controller()
-export class MenuController implements OnStart, OnRender {
+export class MenuController implements OnRender {
   private readonly plr = Players.LocalPlayer;
   private readonly mouse = this.plr.GetMouse();
   private initialCF = new CFrame;
   private currentPage?: MenuPage;
 
-  public active = false;
-
-  public constructor(
-    private readonly fps: FPSController,
-    private readonly crosshair: CrosshairController
-  ) { }
-
-  public onStart(): void {
-    // World.CurrentCamera!.CameraType = Enum.CameraType.Scriptable;
-    // World.CurrentCamera!.FieldOfView = 60;
-    // this.active = true;
-
-    // const menu = UI.getScreen("Menu");
-    // for (const cam of Replicated.MenuCameras.GetChildren()) {
-    //   const camCF = cam.Clone();
-    //   camCF.Name = "Cam";
-    //   camCF.Parent = <Folder>menu[<keyof typeof menu>cam.Name];
-    // }
-
-    // this.setPage(menu.Main);
-  }
-
   public onRender(dt: number): void {
-    if (!this.active) return;
-
+    const apps = Dependency<AppController>();
+    if (!apps.isShowing("Menu")) return;
     const damp = 450;
     const { X, Y } = new Vector2((this.initialCF.X - this.mouse.X) / damp, (this.initialCF.Y - this.mouse.Y) / damp);
     const camOffset = new CFrame().mul(CFrame.Angles(rad(Y), rad(X), 0));
@@ -72,23 +48,5 @@ export class MenuController implements OnStart, OnRender {
     this.togglePage(page, true);
     this.initialCF = page.Cam.Value;
     this.currentPage = page;
-  }
-
-  /**
-   * Destroy/hide menu
-   */
-  public destroy(): void {
-    World.CurrentCamera!.CameraType = Enum.CameraType.Custom;
-    this.plr.CameraMode = Enum.CameraMode.LockFirstPerson;
-    Sound.Music.Menu.Stop();
-
-    this.crosshair.toggleMouseIcon();
-    StaticUI.getScreen("Menu").Enabled = false;
-    // this.ui.getHUD()?.toggle();
-    const hud = StaticUI.getHUD()!;
-    hud.Enabled = !hud.Enabled
-
-    this.fps.addWeapon("HK416", 1);
-    this.active = false;
   }
 }

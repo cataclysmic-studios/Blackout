@@ -28,7 +28,6 @@ export class SceneController implements OnStart {
 	}
 
 	private onSceneChanged(newScene: Scene, oldScene?: Scene) {
-		print(`Scene changed to ${newScene}`);
 		this.OnSceneChanged.Fire(newScene, oldScene);
 	}
 }

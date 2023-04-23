@@ -1,6 +1,9 @@
-import Roact from "@rbxts/roact";
-import { App } from "client/controllers/apps";
+import { Dependency } from "@flamework/core";
+import { SoundService as Sound} from "@rbxts/services";
 import { Scene } from "shared/enums";
+import { App } from "client/controllers/apps";
+import { SceneController } from "client/controllers/scene";
+import Roact from "@rbxts/roact";
 import Button from "client/ui/components/button";
 
 @App({
@@ -9,6 +12,10 @@ import Button from "client/ui/components/button";
 	ignoreGuiInset: true,
 })
 export class MenuApp extends Roact.Component {
+	protected willUnmount(): void {
+    Sound.Music.Menu.Stop();
+	}
+
 	public render() {
 		return (
 			<>
@@ -29,14 +36,13 @@ export class MenuApp extends Roact.Component {
 					<imagelabel
 						BackgroundTransparency={1}
 						Image="http://www.roblox.com/asset/?id=11531960984"
-						Size={new UDim2(1, 0, 1, 0)}
+						Size={new UDim2(1, 0, .5, 0)}
 						AutomaticSize={Enum.AutomaticSize.Y}
 					/>
-					<Button Text="Play" OnClick={(b) => b} />
+					<Button Text="Play" OnClick={() => Dependency<SceneController>().setScene(Scene.Game)} />
 					<Button Text="Loadout" OnClick={(b) => b} />
 					<Button Text="Settings" OnClick={(b) => b} />
 				</frame>
-
 				<frame
 					Key="Shadow"
 					BackgroundColor3={Color3.fromRGB(49, 49, 49)}

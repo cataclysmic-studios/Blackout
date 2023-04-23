@@ -1,5 +1,5 @@
 import Rodux from "@rbxts/rodux";
-import { Scene } from "types/enum/scene";
+import { Scene } from "shared/enums";
 
 export interface ActionSetScene extends Rodux.Action<"SetScene"> {
 	newScene: Scene;
