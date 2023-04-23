@@ -11,7 +11,7 @@ type Bullet = typeof Replicated.VFX.Bullet;
 
 @Service({})
 export class BulletService implements OnStart {
-  private readonly playerCasters = new Map<number, Caster<Bullet>>();
+  private readonly playerCasters = new Map<number, Caster>();
   private readonly bulletCache = new PartCacheModule<Bullet>(Replicated.VFX.Bullet, 50);
 
   public onStart(): void {
@@ -19,7 +19,7 @@ export class BulletService implements OnStart {
 
     // FastCast.VisualizeCasts = true;
     this.bulletCache.SetCacheParent(World.Debris);
-    Players.PlayerAdded.Connect(plr => this.playerCasters.set(plr.UserId, new FastCast<Bullet>));
+    Players.PlayerAdded.Connect(plr => this.playerCasters.set(plr.UserId, new FastCast));
     Players.PlayerRemoving.Connect(plr => this.playerCasters.delete(plr.UserId));
   }
 
@@ -79,7 +79,7 @@ export class BulletService implements OnStart {
    * @param segVelocity Segment velocity
    * @param depth Depth of hit part
    */
-  private dampenVelocity(cast: ActiveCast<Bullet>, material: Enum.Material, segVelocity: Vector3, depth: number): void {
+  private dampenVelocity(cast: ActiveCast, material: Enum.Material, segVelocity: Vector3, depth: number): void {
     let velocityDamp: number;
     switch (material.Name) {
       case "Metal":
@@ -284,18 +284,18 @@ export class BulletService implements OnStart {
    * @param weaponData Weapon data
    * @returns Bullet cast
    */
-  private create(player: Player, origin: Vector3, dir: Vector3, weaponData: WeaponData): ActiveCast<Bullet> | undefined {
+  private create(player: Player, origin: Vector3, dir: Vector3, weaponData: WeaponData): ActiveCast | undefined {
     const caster = this.playerCasters.get(player.UserId)!;
     const lengthChange = caster.LengthChanged.Connect((_, lastPoint, dir, displacement, segVelocity, bullet) => {
       const currentPoint = lastPoint.add(dir.mul(displacement));
-      bullet!.Position = currentPoint;
+      (<Bullet>bullet).Position = currentPoint;
     });
 
     const rayParams = new RaycastParams;
     rayParams.FilterDescendantsInstances = [World.CurrentCamera!, player.Character!, player.Character!.PrimaryPart!];
     rayParams.FilterType = Enum.RaycastFilterType.Blacklist;
 
-    const behavior = FastCast.newBehavior<Bullet>();
+    const behavior = FastCast.newBehavior();
     behavior.Acceleration = new Vector3(0, -World.Gravity, 0);
     behavior.CosmeticBulletProvider = this.bulletCache;
     behavior.CosmeticBulletContainer = World.Debris;
@@ -310,7 +310,7 @@ export class BulletService implements OnStart {
     }
 
     const cast = caster.Fire(origin.add(new Vector3(0, .05, 0)), dir, weaponData.stats.muzzleVelocity, behavior);
-    const bullet = cast.RayInfo.CosmeticBulletObject!;
+    const bullet = <Bullet>cast.RayInfo.CosmeticBulletObject!;
     bullet.SetAttribute("InUse", true);
     const hit = caster.RayHit.Connect((_, { Instance, Position, Normal, Material }) => {
       if (!bullet.GetAttribute("InUse")) return;

@@ -1,5 +1,0 @@
-{
-  "name": "hashids-esm",
-  "type": "module",
-  "main": "hashids.js"
-}

@@ -1,5 +1,7 @@
 import { Networking } from "@flamework/networking";
 import { WeaponData } from "./types";
+import { PlayerData } from "./meta/default-player-data";
+import { ServerResponse } from "./interfaces/network-types";
 
 export interface ServerEvents {
 	discordLog(message: string, logType: string): void;
@@ -8,9 +10,14 @@ export interface ServerEvents {
 
 export interface ClientEvents {
 	ammoChanged(ammo: { mag: number; reserve: number; }): void;
+
+	/** Fired by the server when the player's data changes */
+	playerDataChanged(newPlayerData: Partial<PlayerData>): void;
 }
 
-export interface ServerFunctions { }
+export interface ServerFunctions {
+	requestPlayerData(): ServerResponse<PlayerData>;
+}
 
 export interface ClientFunctions { }
 
