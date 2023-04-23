@@ -1,7 +1,7 @@
 import { Service } from "@flamework/core";
 import { Players } from "@rbxts/services";
 import { KickReason } from "types/enum/kick-reason";
-import { PlayerRemovalService } from "./player-removal-service";
+import { PlayerRemovalService } from "./removal-service";
 
 import ProfileService from "@rbxts/profileservice";
 import DefaultPlayerData, { PlayerData, PlayerDataProfile } from "shared/meta/default-player-data";

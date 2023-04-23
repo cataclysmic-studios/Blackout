@@ -1,9 +1,9 @@
 import { OnInit, Service } from "@flamework/core";
 import { Players } from "@rbxts/services";
-import { PlayerDataService } from "./player-data-service";
-import { PlayerRemovalService } from "./player-removal-service";
-import { KickReason } from "types/enum/kick-reason";
 import { Janitor } from "@rbxts/janitor";
+import { KickReason } from "shared/enums";
+import { PlayerDataService } from "./data-service";
+import { PlayerRemovalService } from "./removal-service";
 import PlayerEntity from "server/modules/classes/player-entity";
 import Signal from "@rbxts/signal";
 
