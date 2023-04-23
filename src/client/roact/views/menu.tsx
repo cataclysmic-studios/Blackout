@@ -4,7 +4,7 @@ import { tween } from "shared/utility";
 import { MenuController } from "client/controllers/menu";
 import { Loadout } from "../components/menu-loadout";
 
-const { ScreenInsets, ZIndexBehavior, SortOrder, VerticalAlignment, FontWeight, FontStyle } = Enum;
+const { ZIndexBehavior, SortOrder, VerticalAlignment, FontWeight, FontStyle } = Enum;
 const oswald = new Font("rbxasset://fonts/families/Oswald.json", FontWeight.Regular, FontStyle.Normal);
 
 const hoverInfo = new TweenInfo(.175, Enum.EasingStyle.Quad);
@@ -50,7 +50,7 @@ export const Menu = (
   <screengui
     Key="Menu"
     IgnoreGuiInset={true}
-    ScreenInsets={ScreenInsets.DeviceSafeInsets}
+    // ScreenInsets={ScreenInsets.DeviceSafeInsets}
     ZIndexBehavior={ZIndexBehavior.Sibling}
   >
     <Loadout />

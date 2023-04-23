@@ -6,7 +6,7 @@ import { LoadScreen } from "client/roact/views/loadscreen";
 import { HUD } from "client/roact/views/hud";
 import { Menu } from "client/roact/views/menu";
 
-@Controller()
+@Controller({ loadOrder: 0 })
 export class RoactController implements OnInit {
   public onInit(): void {
     Roact.mount(LoadScreen, UI.container);

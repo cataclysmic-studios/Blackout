@@ -382,7 +382,7 @@ export class FPSController implements OnStart, OnRender {
       this.calculateRecoil();
       this.currentWeapon.vfx.createTracer(this.currentWeapon.data);
       this.currentWeapon.vfx.createMuzzleFlash();
-      this.sounds.clone(<Sound>this.currentWeapon.model.Sounds.WaitForChild("Fire"));
+      this.sounds.clone(waitFor<Sound>(this.currentWeapon.model.Sounds, "Fire"));
 
       const boltAnim = this.viewModel!.playAnimation("Shoot", false)!;
       boltAnim.GetMarkerReachedSignal("SlideBack").Once(() =>
