@@ -1,8 +1,9 @@
-import Roact from '@rbxts/roact';
-import { Spring, useSingleMotor } from '@rbxts/roact-hooked-plus';
+import Roact from "@rbxts/roact";
+import { Spring, useSingleMotor } from "@rbxts/roact-hooked-plus";
 
 interface Props {
-	text: string;
+	Text: string;
+	OnClick: (b: TextButton) => void;
 }
 
 export default function Button(props: Props) {
@@ -18,12 +19,13 @@ export default function Button(props: Props) {
 			BackgroundTransparency={hovered.map((value) => 0.5 - value * 0.5)}
 			BorderSizePixel={0}
 			Font={Enum.Font.GothamBlack}
-			Text={props.text.upper()}
+			Text={props.Text.upper()}
 			TextSize={24}
 			AutomaticSize={Enum.AutomaticSize.XY}
 			Event={{
 				MouseEnter: () => setHovered(new Spring(1)),
 				MouseLeave: () => setHovered(new Spring(0)),
+				MouseButton1Click: (b) => props.OnClick(b)
 			}}
 		>
 			<uipadding

@@ -2,7 +2,7 @@ import { Controller, OnRender, OnStart } from "@flamework/core";
 import { Players, ReplicatedStorage as Replicated, SoundService as Sound, Workspace as World } from "@rbxts/services";
 import { CrosshairController } from "./crosshair";
 import { FPSController } from "./fps";
-import { UI } from "../ui";
+import { StaticUI } from "../static-ui";
 
 const { rad } = math;
 
@@ -83,9 +83,9 @@ export class MenuController implements OnStart, OnRender {
     Sound.Music.Menu.Stop();
 
     this.crosshair.toggleMouseIcon();
-    UI.getScreen("Menu").Enabled = false;
+    StaticUI.getScreen("Menu").Enabled = false;
     // this.ui.getHUD()?.toggle();
-    const hud = UI.getHUD()!;
+    const hud = StaticUI.getHUD()!;
     hud.Enabled = !hud.Enabled
 
     this.fps.addWeapon("HK416", 1);

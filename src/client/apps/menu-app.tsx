@@ -1,16 +1,10 @@
-import Roact from '@rbxts/roact';
-import { App } from 'client/controllers/apps';
-import { Scene } from 'shared/enums';
-import Button from 'client/ui/components/button';
-
-const oswald = new Font(
-	'rbxasset://fonts/families/Oswald.json',
-	Enum.FontWeight.Regular,
-	Enum.FontStyle.Normal
-);
+import Roact from "@rbxts/roact";
+import { App } from "client/controllers/apps";
+import { Scene } from "shared/enums";
+import Button from "client/ui/components/button";
 
 @App({
-	name: 'Menu',
+	name: "Menu",
 	requiredScene: Scene.Menu,
 	ignoreGuiInset: true,
 })
@@ -38,9 +32,9 @@ export class MenuApp extends Roact.Component {
 						Size={new UDim2(1, 0, 1, 0)}
 						AutomaticSize={Enum.AutomaticSize.Y}
 					/>
-					<Button text="Play" />
-					<Button text="Loadout" />
-					<Button text="Settings" />
+					<Button Text="Play" OnClick={(b) => b} />
+					<Button Text="Loadout" OnClick={(b) => b} />
+					<Button Text="Settings" OnClick={(b) => b} />
 				</frame>
 
 				<frame
