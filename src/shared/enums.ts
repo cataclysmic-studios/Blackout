@@ -6,6 +6,7 @@ export const enum Firemode {
 }
 
 export const enum BanReason {
+	Unbanned,
 	Exploiting
 }
 
@@ -14,7 +15,9 @@ export const enum KickReason {
 	PlayerEntityInstantiationError,
 
 	// Player data related
-	PlayerProfileUndefined
+	PlayerProfileUndefined,
+
+	Banned
 }
 
 export const enum Scene {

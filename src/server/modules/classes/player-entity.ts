@@ -39,4 +39,8 @@ export default class PlayerEntity {
 		// TODO: Only send the changed data
 		Events.playerDataChanged(this.player, newData);
 	}
+
+	public destroy(): void {
+		this.janitor.Destroy();
+	}
 }

@@ -15,7 +15,6 @@ export class PlayerService implements OnStart, OnInit {
 	// what does this need to do?
 	// - load player data
 	// - save player data
-	// - implement OnPlayerJoin lifecycle hook
 
 	private playerEntities = new Map<Player, PlayerEntity>;
 	private onEntityRemoving = new Signal;
@@ -26,8 +25,8 @@ export class PlayerService implements OnStart, OnInit {
 	) { }
 
 	public onInit(): void {
-		Players.PlayerAdded.Connect((player) => this.onPlayerAdded(player));
-		Players.PlayerRemoving.Connect((player) => this.onPlayerRemoving(player));
+		Players.PlayerAdded.Connect(player => this.onPlayerAdded(player));
+		Players.PlayerRemoving.Connect(player => this.onPlayerRemoving(player));
 		game.BindToClose(() => {
 			while (this.playerEntities.size() > 0)
 				this.onEntityRemoving.Wait();
@@ -35,7 +34,7 @@ export class PlayerService implements OnStart, OnInit {
 	}
 
 	public onStart(): void {
-		Functions.requestPlayerData.setCallback((player) => this.onPlayerRequestedData(player));
+		Functions.requestPlayerData.setCallback(player => this.onPlayerRequestedData(player));
 	}
 
 	private onPlayerRequestedData(player: Player): ServerResponse<PlayerData> {
@@ -47,27 +46,27 @@ export class PlayerService implements OnStart, OnInit {
 
 
 	private async onPlayerAdded(player: Player) {
-		const playerProfile = await this.playerData.loadPlayerProfile(player);
-		if (!playerProfile)
+		const profile = await this.playerData.loadProfile(player);
+		if (!profile)
 			return this.playerRemoval.removeDueToBug(player, KickReason.PlayerEntityInstantiationError);
 
 		const janitor = new Janitor;
 		janitor.Add(() => {
 			player.SetAttribute("PlayerRemoving", true);
-			playerProfile.Release();
+			profile.Release();
 
 			this.playerEntities.delete(player);
 			this.onEntityRemoving.Fire();
 		}, true);
 
-		const playerEntity = new PlayerEntity(player, janitor, playerProfile);
+		const playerEntity = new PlayerEntity(player, janitor, profile);
 		this.playerEntities.set(player, playerEntity)
 	}
 
 	private onPlayerRemoving(player: Player) {
 		const playerEntity = this.playerEntities.get(player);
 		if (!playerEntity) return;
-		playerEntity.janitor.Destroy();
+		playerEntity.destroy();
 	}
 
 	public getPlayerEntity(player: Player) {

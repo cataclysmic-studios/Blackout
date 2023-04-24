@@ -14,6 +14,17 @@ export class PlayerDataService {
 	) { }
 
 	private gameProfileStore = ProfileService.GetProfileStore<PlayerData>("PlayerData", DefaultPlayerData);
+	public readonly profiles = new Map<string, PlayerDataProfile>();
+
+	/**
+	 * Returns a loaded player data profile
+	 * 
+	 * @param player Player to get the loaded profile for
+	 * @returns The player's loaded data profile
+	 */
+	public getProfile(userID: number): Maybe<PlayerDataProfile> {
+		return this.profiles.get(tostring(userID));
+	}
 
 	/**
 	 * Load a player's data profile
@@ -21,11 +32,13 @@ export class PlayerDataService {
 	 * @param player Player to load the profile for
 	 * @returns The player's data profile
 	 */
-	public async loadPlayerProfile(player: Player): Promise<PlayerDataProfile | void> {
-		const dataKey = tostring(player.UserId);
+	public async loadProfile(userID: number): Promise<Maybe<PlayerDataProfile>> {
+		const dataKey = tostring(userID);
 		const profile = this.gameProfileStore.LoadProfileAsync(dataKey, "ForceLoad");
 
 		// The profile couldn't be loaded
+		const player = Players.GetPlayerByUserId(userID);
+		if (!player) return;
 		if (profile === undefined)
 			return this.playerRemoval.removeDueToBug(player, KickReason.PlayerProfileUndefined);
 
@@ -40,6 +53,7 @@ export class PlayerDataService {
 			this.discord.log(player, "", "Data Saved");
 		});
 
+		this.profiles.set(dataKey, profile);
 		return profile;
 	}
 }
