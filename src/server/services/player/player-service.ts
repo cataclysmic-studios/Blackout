@@ -7,11 +7,12 @@ import { ServerResponse } from "shared/interfaces/network-types";
 import { PlayerData } from "shared/meta/default-player-data";
 import { PlayerDataService } from "./data-service";
 import { PlayerRemovalService } from "./removal-service";
+import { OnPlayerAdded, OnPlayerRemoving } from "./join";
 import Signal from "@rbxts/signal";
 import PlayerEntity from "server/modules/classes/player-entity";
 
 @Service()
-export class PlayerService implements OnStart, OnInit {
+export class PlayerService implements OnStart, OnInit, OnPlayerAdded, OnPlayerRemoving {
 	// what does this need to do?
 	// - load player data
 	// - save player data
@@ -25,8 +26,6 @@ export class PlayerService implements OnStart, OnInit {
 	) { }
 
 	public onInit(): void {
-		Players.PlayerAdded.Connect(player => this.onPlayerAdded(player));
-		Players.PlayerRemoving.Connect(player => this.onPlayerRemoving(player));
 		game.BindToClose(() => {
 			while (this.playerEntities.size() > 0)
 				this.onEntityRemoving.Wait();
@@ -37,16 +36,8 @@ export class PlayerService implements OnStart, OnInit {
 		Functions.requestPlayerData.setCallback(player => this.onPlayerRequestedData(player));
 	}
 
-	private onPlayerRequestedData(player: Player): ServerResponse<PlayerData> {
-		const entity = this.playerEntities.get(player);
-		if (!entity) return { success: false, error: "Player entity not found" };
-
-		return { success: true, data: entity.data };
-	}
-
-
-	private async onPlayerAdded(player: Player) {
-		const profile = await this.playerData.loadProfile(player);
+	public async onPlayerAdded(player: Player): Promise<void> {
+		const profile = await this.playerData.loadProfile(player.UserId);
 		if (!profile)
 			return this.playerRemoval.removeDueToBug(player, KickReason.PlayerEntityInstantiationError);
 
@@ -60,13 +51,20 @@ export class PlayerService implements OnStart, OnInit {
 		}, true);
 
 		const playerEntity = new PlayerEntity(player, janitor, profile);
-		this.playerEntities.set(player, playerEntity)
+		this.playerEntities.set(player, playerEntity);
 	}
 
-	private onPlayerRemoving(player: Player) {
+	public onPlayerRemoving(player: Player): void {
 		const playerEntity = this.playerEntities.get(player);
 		if (!playerEntity) return;
 		playerEntity.destroy();
+	}
+
+	private onPlayerRequestedData(player: Player): ServerResponse<PlayerData> {
+		const entity = this.playerEntities.get(player);
+		if (!entity) return { success: false, error: "Player entity not found" };
+
+		return { success: true, data: entity.data };
 	}
 
 	public getPlayerEntity(player: Player) {

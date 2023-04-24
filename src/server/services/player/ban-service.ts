@@ -1,23 +1,21 @@
-import { OnInit, Service } from "@flamework/core";
-import { Players } from "@rbxts/services";
+import { Service } from "@flamework/core";
 import { PlayerRemovalService } from "./removal-service";
 import { PlayerDataService } from "./data-service";
 import { BanReason } from "shared/enums";
+import { OnPlayerAdded } from "./join";
 
 @Service()
-export class BanService implements OnInit {
+export class BanService implements OnPlayerAdded {
   public constructor(
     private readonly playerData: PlayerDataService,
     private readonly playerRemoval: PlayerRemovalService
   ) { }
 
-  public onInit(): void {
-    Players.PlayerAdded.Connect(player => {
-      const profile = this.playerData.getProfile(player.UserId);
-      if (!profile) return;
-      if (!profile.Data.banInfo.banned && profile.Data.banInfo.reason === BanReason.Unbanned) return;
-      this.playerRemoval.removeDueToBan(player, profile.Data.banInfo.reason);
-    });
+  public onPlayerAdded(player: Player): void {
+    const profile = this.playerData.getProfile(player.UserId);
+    if (!profile) return;
+    if (!profile.Data.banInfo.banned && profile.Data.banInfo.reason === BanReason.Unbanned) return;
+    this.playerRemoval.removeDueToBan(player, profile.Data.banInfo.reason);
   }
 
   public async ban(player: Player, reason: BanReason): Promise<void> {
