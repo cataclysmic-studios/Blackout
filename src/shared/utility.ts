@@ -1,6 +1,5 @@
-import { BaseComponent, Components } from "@flamework/components";
-import { Dependency } from "@flamework/core";
 import { TweenService } from "@rbxts/services";
+import { $error } from "rbxts-transform-debug";
 const { huge: inf, min, sin } = math;
 
 /**
@@ -26,8 +25,8 @@ export function tween<T extends Instance = Instance>(object: T, info: TweenInfo,
  */
 export function waitFor<T extends Instance>(instance: Instance, childName: string): T
 export function waitFor<T extends Instance>(instance: Instance, childName: string, timeout?: number): Maybe<T> {
-  if (!instance) throw error("Instance is undefined");
-  if (!childName) throw error("Child instance name is undefined");
+  if (!instance) throw $error("Instance is undefined", 2);
+  if (!childName) throw $error("Child instance name is undefined", 2);
   return <T>instance.WaitForChild(childName, timeout ?? 6);
 }
 
