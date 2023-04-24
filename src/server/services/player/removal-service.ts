@@ -1,7 +1,7 @@
 import { Service } from "@flamework/core";
 import { GAME_NAME } from "shared/shared-constants";
-import { DiscordService } from "../discord-service";
 import { BanReason, KickReason } from "shared/enums";
+import { DiscordService } from "../discord-service";
 
 @Service()
 export class PlayerRemovalService {
@@ -10,7 +10,7 @@ export class PlayerRemovalService {
 	) { }
 
 	public ban(player: Player, reason: BanReason): void {
-
+		this.discord.log(player, `Player was banned. Ban Reason: ${reason}`, "Player Banned")
 	}
 
 	public removeDueToBug(player: Player, reason: KickReason): void {
@@ -20,6 +20,6 @@ export class PlayerRemovalService {
 			"and steps to reproduce the bug in our communication server.\n\n" +
 			`${GAME_NAME} Error Code: ${reason}`
 		);
-		this.discord.log(player, `${player.Name} was removed.\n${GAME_NAME} Error Code: ${reason}`, "Player Removed Due To Bug");
+		this.discord.log(player, `Player was removed.\n${GAME_NAME} Error Code: ${reason}`, "Player Removed Due To Bug");
 	}
 }

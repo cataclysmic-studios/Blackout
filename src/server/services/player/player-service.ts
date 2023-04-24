@@ -2,13 +2,13 @@ import { OnInit, OnStart, Service } from "@flamework/core";
 import { Players } from "@rbxts/services";
 import { Janitor } from "@rbxts/janitor";
 import { KickReason } from "shared/enums";
-import { PlayerDataService } from "./data-service";
-import { PlayerRemovalService } from "./removal-service";
-import PlayerEntity from "server/modules/classes/player-entity";
-import Signal from "@rbxts/signal";
 import { Functions } from "server/network";
 import { ServerResponse } from "shared/interfaces/network-types";
 import { PlayerData } from "shared/meta/default-player-data";
+import { PlayerDataService } from "./data-service";
+import { PlayerRemovalService } from "./removal-service";
+import Signal from "@rbxts/signal";
+import PlayerEntity from "server/modules/classes/player-entity";
 
 @Service()
 export class PlayerService implements OnStart, OnInit {
@@ -51,7 +51,7 @@ export class PlayerService implements OnStart, OnInit {
 		if (!playerProfile)
 			return this.playerRemoval.removeDueToBug(player, KickReason.PlayerEntityInstantiationError);
 
-		const janitor = new Janitor();
+		const janitor = new Janitor;
 		janitor.Add(() => {
 			player.SetAttribute("PlayerRemoving", true);
 			playerProfile.Release();
