@@ -32,7 +32,11 @@ function PageFrame(props: PropsWithChildren<PageProps>) {
 	);
 }
 
-function ButtonContainer(props: PropsWithChildren) {
+interface ButtonContainerProps {
+	MainPage?: boolean;
+}
+
+function ButtonContainer(props: PropsWithChildren<ButtonContainerProps>) {
 	return (
     <frame
       Key="Buttons"
@@ -40,7 +44,7 @@ function ButtonContainer(props: PropsWithChildren) {
       Position={new UDim2(0, 0, 0.5, 0)}
       AnchorPoint={new Vector2(0, 0.5)}
       Rotation={-2}
-      Size={new UDim2(0.15, 0, 0.75, 0)}
+      Size={new UDim2(0.15, 0, (props.MainPage ?? false) ? 0.75 : 0.5, 0)}
       AutomaticSize={Enum.AutomaticSize.Y}
     >
       <uilistlayout
@@ -53,6 +57,19 @@ function ButtonContainer(props: PropsWithChildren) {
   )
 }
 
+interface BackButtonProps {
+	Menu: MenuApp;
+}
+
+function BackButton(props: BackButtonProps) {
+	return <Button 
+		Text="Back"
+		Position={UDim2.fromScale(0.006, 0.85)}
+		Rotation={-2}
+		OnClick={() => props.Menu.setPage("Main")} 
+	/>;
+}
+
 interface MenuState {
 	CurrentPage: PageName;
 }
@@ -63,7 +80,7 @@ interface MenuState {
 	ignoreGuiInset: true
 })
 export class MenuApp extends Roact.Component<{}, MenuState> {
-	private setPage(pageName: PageName): void {
+	public setPage(pageName: PageName): void {
 		this.setState({
 			CurrentPage: pageName,
 		});
@@ -114,13 +131,15 @@ export class MenuApp extends Roact.Component<{}, MenuState> {
 				</PageFrame>
 				<PageFrame Title="Loadout" CurrentPage={this.state.CurrentPage}>
 					<ButtonContainer>
-						<Button Text="Back" OnClick={() => this.setPage("Main")} />
+						<Button Text="some button" OnClick={(b) => b} />
 					</ButtonContainer>
+					<BackButton Menu={this} />
 				</PageFrame>
 				<PageFrame Title="Settings" CurrentPage={this.state.CurrentPage}>
 					<ButtonContainer>
-						<Button Text="Back" OnClick={() => this.setPage("Main")} />
+						
 					</ButtonContainer>
+					<BackButton Menu={this} />
 				</PageFrame>
 			</>
 		);
