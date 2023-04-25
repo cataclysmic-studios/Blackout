@@ -131,13 +131,18 @@ export class MenuApp extends Roact.Component<{}, MenuState> {
 				</PageFrame>
 				<PageFrame Title="Loadout" CurrentPage={this.state.CurrentPage}>
 					<ButtonContainer>
-						<Button Text="some button" OnClick={(b) => b} />
+						<Button Text="Loadout 1" LayoutOrder={0} OnClick={(b) => b} />
+						<Button Text="Loadout 2" LayoutOrder={1} OnClick={(b) => b} />
+						<Button Text="Loadout 3" LayoutOrder={2} OnClick={(b) => b} />
+						<Button Text="Loadout 4" LayoutOrder={3} OnClick={(b) => b} />
 					</ButtonContainer>
 					<BackButton Menu={this} />
 				</PageFrame>
 				<PageFrame Title="Settings" CurrentPage={this.state.CurrentPage}>
 					<ButtonContainer>
-						
+						<Button Text="Graphics" LayoutOrder={0} OnClick={(b) => b} />
+						<Button Text="Audio" LayoutOrder={1} OnClick={(b) => b} />
+						<Button Text="Controls" LayoutOrder={2} OnClick={(b) => b} />
 					</ButtonContainer>
 					<BackButton Menu={this} />
 				</PageFrame>

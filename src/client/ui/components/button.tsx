@@ -5,6 +5,7 @@ interface Props {
 	Text: string;
 	Position?: UDim2;
 	Rotation?: number;
+	LayoutOrder?: number;
 	OnClick: (b: TextButton) => void;
 }
 
@@ -28,6 +29,7 @@ export default function Button(props: Props) {
 			AnchorPoint={new Vector2(0, 0.5)}
 			Position={props.Position}
 			Rotation={props.Rotation}
+			LayoutOrder={props.LayoutOrder}
 			Event={{
 				MouseEnter: () => setHovered(new Spring(1)),
 				MouseLeave: () => setHovered(new Spring(0)),
