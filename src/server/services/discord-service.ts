@@ -26,7 +26,7 @@ export class DiscordService implements OnInit {
         {
           title: logType,
           author: {
-            name: player.Name + Runtime.IsStudio() ? " (Studio)" : "",
+            name: player.Name + (Runtime.IsStudio() ? " (Studio)" : ""),
             //icon_url: thumb,
             url: "https://www.roblox.com/users/" + player.UserId + "/profile"
           },
