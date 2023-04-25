@@ -38,7 +38,7 @@ export default class Recoil extends BaseComponent<{}, Model | Camera> {
 
     const omf = this.springs.model.update(dt).div(springDamp);
     const tmf = this.springs.modelTorque.update(dt).div(springDamp);
-    const moffset = new CFrame(0, 0, omf.Z);
+    const moffset = new CFrame(0, 0, -omf.Z);
     const mvertClimb = new CFrame(0, -omf.X * 4, 0).mul(CFrame.Angles(omf.X * 2, 0, 0));
     const mtorque = CFrame.Angles(0, tmf.Y, tmf.Y * torqueMult); // * (aimed ? 1.25 : 1)
     const mrecoil = moffset.mul(mvertClimb).mul(mtorque);
