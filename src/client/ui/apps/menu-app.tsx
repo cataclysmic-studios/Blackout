@@ -1,14 +1,23 @@
 import { Dependency } from "@flamework/core";
 import { SoundService as Sound} from "@rbxts/services";
+import { useState } from "@rbxts/roact-hooked";
 import { AppScene } from "shared/enums";
 import { App } from "client/controllers/apps";
 import { SceneController } from "client/controllers/scene";
 import Roact, { Children, PropsWithChildren } from "@rbxts/roact";
 import Button from "client/ui/components/button";
 
-function PageFrame(props: PropsWithChildren) {
+type PageName = "Main" | "Loadout" | "Settings";
+interface PageProps {
+	Title: PageName;
+	CurrentPage: PageName;
+};
+
+function PageFrame(props: PropsWithChildren<PageProps>) {
 	return (
 		<frame
+			Key={props.Title}
+			Visible={props.CurrentPage === props.Title}
 			BackgroundTransparency={1}
 			Position={new UDim2(0, 0, 0, -50)}
 			Size={new UDim2(1, 0, 1, 50)}
@@ -18,12 +27,26 @@ function PageFrame(props: PropsWithChildren) {
 	);
 }
 
+interface MenuState {
+	CurrentPage: PageName;
+}
+
 @App({
 	name: "Menu",
 	requiredScene: AppScene.Menu,
-	ignoreGuiInset: true,
+	ignoreGuiInset: true
 })
-export class MenuApp extends Roact.Component {
+export class MenuApp extends Roact.Component<{}, MenuState> {
+	private setPage(pageName: PageName): void {
+		this.setState({
+			CurrentPage: pageName,
+		});
+	}
+
+	protected didMount(): void {
+		this.setPage("Main");
+	}
+
 	protected willUnmount(): void {
     Sound.Music.Menu.Stop();
 	}
@@ -31,7 +54,7 @@ export class MenuApp extends Roact.Component {
 	public render() {
 		return (
 			<>
-				<PageFrame Key="Main">
+				<PageFrame Title="Main" CurrentPage={this.state.CurrentPage}>
 					<frame
 						Key="Buttons"
 						BackgroundTransparency={1}
@@ -53,8 +76,8 @@ export class MenuApp extends Roact.Component {
 							AutomaticSize={Enum.AutomaticSize.Y}
 						/>
 						<Button Text="Play" OnClick={() => Dependency<SceneController>().setScene(AppScene.Game)} />
-						<Button Text="Loadout" OnClick={(b) => b} />
-						<Button Text="Settings" OnClick={(b) => b} />
+						<Button Text="Loadout" OnClick={() => this.setPage("Loadout")} />
+						<Button Text="Settings" OnClick={() => this.setPage("Settings")} />
 					</frame>
 					<frame
 						Key="Shadow"
@@ -80,6 +103,12 @@ export class MenuApp extends Roact.Component {
 						PaddingRight={new UDim(0.045, 0)}
 						PaddingTop={new UDim(0, 50)}
 					/>
+				</PageFrame>
+				<PageFrame Title="Loadout" CurrentPage={this.state.CurrentPage}>
+
+				</PageFrame>
+				<PageFrame Title="Settings" CurrentPage={this.state.CurrentPage}>
+					
 				</PageFrame>
 			</>
 		);
