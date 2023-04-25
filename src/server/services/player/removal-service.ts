@@ -22,10 +22,6 @@ export class PlayerRemovalService {
 	}
 
 	public ban(player: Player, reason: BanReason): void {
-		const profile = this.playerData.getProfile(player.UserId);
-		if (!profile)
-			return this.removeDueToBug(player, KickReason.PlayerProfileUndefined);
-
 		this.banService.ban(player, reason);
 		this.discord.log(player, "Player was banned.\nBan Reason: " + reason, "Player Banned")
 	}
