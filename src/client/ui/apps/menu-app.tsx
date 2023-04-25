@@ -21,9 +21,36 @@ function PageFrame(props: PropsWithChildren<PageProps>) {
 			Position={new UDim2(0, 0, 0, -50)}
 			Size={new UDim2(1, 0, 1, 50)}
 		>
+			<uipadding
+				PaddingBottom={new UDim(0.04, 0)}
+				PaddingLeft={new UDim(0.045, 0)}
+				PaddingRight={new UDim(0.045, 0)}
+				PaddingTop={new UDim(0, 50)}
+			/>
 			{props[Children]}
 		</frame>
 	);
+}
+
+function ButtonContainer(props: PropsWithChildren) {
+	return (
+    <frame
+      Key="Buttons"
+      BackgroundTransparency={1}
+      Position={new UDim2(0, 0, 0.5, 0)}
+      AnchorPoint={new Vector2(0, 0.5)}
+      Rotation={-2}
+      Size={new UDim2(0.15, 0, 0.75, 0)}
+      AutomaticSize={Enum.AutomaticSize.Y}
+    >
+      <uilistlayout
+        Padding={new UDim(0, 12)}
+        SortOrder={Enum.SortOrder.LayoutOrder}
+        VerticalAlignment={Enum.VerticalAlignment.Bottom}
+      />
+      {props[Children]}
+    </frame>
+  )
 }
 
 interface MenuState {
@@ -54,30 +81,18 @@ export class MenuApp extends Roact.Component<{}, MenuState> {
 		return (
 			<>
 				<PageFrame Title="Main" CurrentPage={this.state.CurrentPage}>
-					<frame
-						Key="Buttons"
-						BackgroundTransparency={1}
-						Position={new UDim2(0, 0, 0.5, 0)}
-						AnchorPoint={new Vector2(0, 0.5)}
-						Rotation={-2}
-						Size={new UDim2(0.15, 0, 0.5, 0)}
-						AutomaticSize={Enum.AutomaticSize.Y}
-					>
-						<uilistlayout
-							Padding={new UDim(0, 12)}
-							SortOrder={Enum.SortOrder.LayoutOrder}
-							VerticalAlignment={Enum.VerticalAlignment.Center}
-						/>
-						<imagelabel
-							BackgroundTransparency={1}
-							Image="http://www.roblox.com/asset/?id=11531960984"
-							Size={new UDim2(1, 0, .5, 0)}
-							AutomaticSize={Enum.AutomaticSize.Y}
-						/>
+					<ButtonContainer>
 						<Button Text="Play" OnClick={() => Dependency<SceneController>().setScene(AppScene.Game)} />
 						<Button Text="Loadout" OnClick={() => this.setPage("Loadout")} />
 						<Button Text="Settings" OnClick={() => this.setPage("Settings")} />
-					</frame>
+					</ButtonContainer>
+					<imagelabel
+						BackgroundTransparency={1}
+						Image="http://www.roblox.com/asset/?id=11531960984"
+						Position={new UDim2(-0.025, 0, 0.225, 0)}
+						Size={new UDim2(0.3, 0, 0.15, 0)}
+						AutomaticSize={Enum.AutomaticSize.Y}
+					/>
 					<frame
 						Key="Shadow"
 						BackgroundColor3={Color3.fromRGB(49, 49, 49)}
@@ -96,18 +111,16 @@ export class MenuApp extends Roact.Component<{}, MenuState> {
 							}
 						/>
 					</frame>
-					<uipadding
-						PaddingBottom={new UDim(0.04, 0)}
-						PaddingLeft={new UDim(0.045, 0)}
-						PaddingRight={new UDim(0.045, 0)}
-						PaddingTop={new UDim(0, 50)}
-					/>
 				</PageFrame>
 				<PageFrame Title="Loadout" CurrentPage={this.state.CurrentPage}>
-
+					<ButtonContainer>
+						<Button Text="Back" OnClick={() => this.setPage("Main")} />
+					</ButtonContainer>
 				</PageFrame>
 				<PageFrame Title="Settings" CurrentPage={this.state.CurrentPage}>
-					
+					<ButtonContainer>
+						<Button Text="Back" OnClick={() => this.setPage("Main")} />
+					</ButtonContainer>
 				</PageFrame>
 			</>
 		);
