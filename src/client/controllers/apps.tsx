@@ -44,6 +44,11 @@ export class AppController implements OnInit {
 		}
 	}
 
+	/**
+	 * Returns whether or not the given app is mounted
+	 * @param appName
+	 * @returns True if the app is mounted
+	 */
 	public isShowing(appName: string): boolean {
 		let showing = false;
 		this.apps.forEach((config, app) => {
@@ -66,6 +71,10 @@ export class AppController implements OnInit {
 		}
 	}
 
+	/**
+	 * Mounts an app
+	 * @param app
+	 */
 	private showApp(app: Constructor<Roact.Component>) {
 		const config = this.apps.get(app)!;
 		let component = app as unknown as Roact.FunctionComponent;
@@ -101,9 +110,12 @@ export class AppController implements OnInit {
 		this.appHandles.set(app, handle);
 	}
 
+	/**
+	 * Unmounts an app
+	 * @param app
+	 */
 	private hideApp(app: Constructor<Roact.Component>) {
 		const handle = this.appHandles.get(app);
-		const config = this.apps.get(app)!;
 		if (handle) {
 			Roact.unmount(handle);
 			this.appHandles.delete(app);

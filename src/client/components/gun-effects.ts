@@ -8,8 +8,6 @@ import { Dependency } from "@flamework/core";
 
 @Component()
 export default class GunEffects extends BaseComponent<{}, WeaponModel> {
-  private readonly sound = Dependency<SoundController>();
-
   /**
    * Create tracer
    * 
@@ -59,12 +57,13 @@ export default class GunEffects extends BaseComponent<{}, WeaponModel> {
 
     let db = false;
     let conn: RBXScriptConnection;
+    const sound = Dependency<SoundController>();
     conn = shell.Touched.Connect(hit => {
       if (!hit.CanCollide) return;
       if (db) return;
       db = true;
 
-      this.sound.play("MetalShell", shell, () => Debris.AddItem(shell, 1));
+      sound.play("MetalShell", shell, () => Debris.AddItem(shell, 1));
       conn.Disconnect();
     });
   }
