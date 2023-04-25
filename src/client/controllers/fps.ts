@@ -408,9 +408,10 @@ export class FPSController implements OnStart, OnRender {
 				} while (this.mouseDown);
 				break;
 			case Firemode.Burst:
+				const burstCount = this.currentWeapon.data.stats.burstCount ?? 3;
 				for (
 					let i = 0;
-					i <= (this.currentWeapon.data.stats.burstCount ?? 3) && this.mouseDown;
+					i <= burstCount && this.mouseDown;
 					i++
 				) {
 					pew();
@@ -457,6 +458,10 @@ export class FPSController implements OnStart, OnRender {
 		let stabilization = 1;
 		if (this.state.aimed)
 			stabilization += 0.4;
+		if (this.state.crouched)
+			stabilization += 0.1;
+		if (this.state.proned)
+			stabilization += 0.2;
 
 		this.vmRecoil!.kick(data, cforce, stabilization, torqueDir);
 		this.camRecoil!.kick(data, mforce, stabilization, torqueDir);
