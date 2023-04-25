@@ -1,13 +1,6 @@
 import { Modding, Service, OnStart } from "@flamework/core";
 import { Players } from "@rbxts/services";
-
-export interface OnPlayerAdded {
-  onPlayerAdded(player: Player): void;
-}
-
-export interface OnPlayerRemoving {
-  onPlayerRemoving(player: Player): void;
-}
+import { OnPlayerAdded, OnPlayerRemoving } from "shared/meta/player-lifecycle-hooks";
 
 @Service()
 export class PlayerJoinService implements OnStart {

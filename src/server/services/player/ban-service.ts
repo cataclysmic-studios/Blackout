@@ -3,7 +3,7 @@ import { PlayerRemovalService } from "./removal-service";
 import { PlayerDataService } from "./data-service";
 import { DiscordService } from "../discord-service";
 import { BanReason } from "shared/enums";
-import { OnPlayerAdded } from "./join";
+import { OnPlayerAdded } from "shared/meta/player-lifecycle-hooks";
 
 @Service()
 export class BanService implements OnPlayerAdded {

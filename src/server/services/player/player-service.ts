@@ -6,7 +6,7 @@ import { ServerResponse } from "shared/interfaces/network-types";
 import { PlayerData } from "shared/meta/default-player-data";
 import { PlayerDataService } from "./data-service";
 import { PlayerRemovalService } from "./removal-service";
-import { OnPlayerAdded, OnPlayerRemoving } from "./join";
+import { OnPlayerAdded, OnPlayerRemoving } from "shared/meta/player-lifecycle-hooks";
 import Signal from "@rbxts/signal";
 import PlayerEntity from "server/modules/classes/player-entity";
 
