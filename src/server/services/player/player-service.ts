@@ -1,5 +1,4 @@
 import { OnInit, OnStart, Service } from "@flamework/core";
-import { Players } from "@rbxts/services";
 import { Janitor } from "@rbxts/janitor";
 import { KickReason } from "shared/enums";
 import { Functions } from "server/network";
@@ -33,7 +32,7 @@ export class PlayerService implements OnStart, OnInit, OnPlayerAdded, OnPlayerRe
 	}
 
 	public onStart(): void {
-		Functions.requestPlayerData.setCallback(player => this.onPlayerRequestedData(player));
+		Functions.requestPlayerData.setCallback((player: Player) => this.onPlayerRequestedData(player));
 	}
 
 	public async onPlayerAdded(player: Player): Promise<void> {

@@ -2,13 +2,11 @@ import { Service } from "@flamework/core";
 import { GAME_NAME } from "shared/shared-constants";
 import { BanReason, KickReason } from "shared/enums";
 import { DiscordService } from "../discord-service";
-import { BanService } from "./ban-service";
 
 @Service()
 export class PlayerRemovalService {
 	public constructor(
-		private readonly discord: DiscordService,
-		private readonly banService: BanService
+		private readonly discord: DiscordService
 	) { }
 
 	private remove(player: Player, message: string, reason: KickReason): void {
@@ -17,11 +15,6 @@ export class PlayerRemovalService {
 
 	public removeDueToBan(player: Player, reason: BanReason): void {
 		this.remove(player, "You have been banned.\nBan Reason: " + reason, KickReason.Banned);
-	}
-
-	public ban(player: Player, reason: BanReason): void {
-		this.banService.ban(player, reason);
-		this.discord.log(player, "Player was banned.\nBan Reason: " + reason, "Player Banned")
 	}
 
 	public removeDueToBug(player: Player, reason: KickReason): void {

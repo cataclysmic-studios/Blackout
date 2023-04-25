@@ -1,6 +1,7 @@
 import { Service } from "@flamework/core";
 import { PlayerRemovalService } from "./removal-service";
 import { PlayerDataService } from "./data-service";
+import { DiscordService } from "../discord-service";
 import { BanReason } from "shared/enums";
 import { OnPlayerAdded } from "./join";
 
@@ -8,7 +9,8 @@ import { OnPlayerAdded } from "./join";
 export class BanService implements OnPlayerAdded {
   public constructor(
     private readonly playerData: PlayerDataService,
-    private readonly playerRemoval: PlayerRemovalService
+    private readonly playerRemoval: PlayerRemovalService,
+    private readonly discord: DiscordService
   ) { }
 
   public onPlayerAdded(player: Player): void {
@@ -24,6 +26,7 @@ export class BanService implements OnPlayerAdded {
     profile.Data.banInfo.banned = true;
     profile.Data.banInfo.reason = reason;
     this.playerRemoval.removeDueToBan(player, reason);
+    this.discord.log(player, "Player was banned.\nBan Reason: " + reason, "Player Banned")
   }
 
   public async unban(userID: number): Promise<void> {

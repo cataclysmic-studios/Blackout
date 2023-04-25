@@ -20,9 +20,6 @@ export interface ClientEvents {
 }
 
 export interface ServerFunctions {
-	/**
-	 * @uuid
-	 */
 	requestPlayerData(): ServerResponse<PlayerData>;
 }
 
