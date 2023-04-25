@@ -23,8 +23,8 @@ export class SceneController implements OnStart {
 		return sceneEntered;
 	}
 
-	public setScene(newScene: AppScene) {
-		ClientStore.dispatch({ type: "SetScene", newScene });
+	public swapScene(scene: AppScene) {
+		ClientStore.dispatch({ type: "SetScene", newScene: scene });
 	}
 
 	private onSceneChanged(newScene: AppScene, prevScene?: AppScene) {

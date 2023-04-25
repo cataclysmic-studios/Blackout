@@ -122,7 +122,7 @@ export class MenuApp extends Roact.Component<{}, MenuState> {
 				</frame>
 				<PageFrame Title="Main" CurrentPage={this.state.CurrentPage}>
 					<ButtonContainer>
-						<Button Text="Play" OnClick={() => Dependency<SceneController>().setScene(AppScene.Game)} />
+						<Button Text="Play" OnClick={() => Dependency<SceneController>().swapScene(AppScene.Game)} />
 						<Button Text="Loadout" OnClick={() => this.setPage("Loadout")} />
 						<Button Text="Settings" OnClick={() => this.setPage("Settings")} />
 					</ButtonContainer>
