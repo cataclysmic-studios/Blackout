@@ -1,8 +1,9 @@
 import { Dependency } from "@flamework/core";
-import { SoundService as Sound} from "@rbxts/services";
+import { ReplicatedStorage as Replicated, SoundService as Sound } from "@rbxts/services";
 import { AppScene } from "shared/enums";
 import { App } from "client/controllers/apps";
 import { SceneController } from "client/controllers/scene";
+import { MenuController } from "client/controllers/menu";
 import Roact, { Children, PropsWithChildren } from "@rbxts/roact";
 import Button from "client/ui/components/button";
 
@@ -84,6 +85,10 @@ export class MenuApp extends Roact.Component<{}, MenuState> {
 		this.setState({
 			CurrentPage: pageName,
 		});
+
+		const menu = Dependency<MenuController>()
+		const baseCF = Replicated.MenuCameras[pageName].Value;
+		menu.setBaseCFrame(baseCF);
 	}
 
 	protected didMount(): void {
@@ -97,6 +102,24 @@ export class MenuApp extends Roact.Component<{}, MenuState> {
 	public render() {
 		return (
 			<>
+				<frame
+					Key="Shadow"
+					BackgroundColor3={Color3.fromRGB(49, 49, 49)}
+					BackgroundTransparency={0.1}
+					BorderSizePixel={0}
+					Position={new UDim2(-0.045, -7, 0, -50)}
+					Size={new UDim2(0.3, 0, 2, 0)}
+					ZIndex={-1}
+				>
+					<uigradient
+						Transparency={
+							new NumberSequence([
+								new NumberSequenceKeypoint(0, 0.3, 0),
+								new NumberSequenceKeypoint(1, 1, 0),
+							])
+						}
+					/>
+				</frame>
 				<PageFrame Title="Main" CurrentPage={this.state.CurrentPage}>
 					<ButtonContainer>
 						<Button Text="Play" OnClick={() => Dependency<SceneController>().setScene(AppScene.Game)} />
@@ -110,24 +133,6 @@ export class MenuApp extends Roact.Component<{}, MenuState> {
 						Size={new UDim2(0.3, 0, 0.15, 0)}
 						AutomaticSize={Enum.AutomaticSize.Y}
 					/>
-					<frame
-						Key="Shadow"
-						BackgroundColor3={Color3.fromRGB(49, 49, 49)}
-						BackgroundTransparency={0.1}
-						BorderSizePixel={0}
-						Position={new UDim2(-0.045, -7, 0, -50)}
-						Size={new UDim2(0.3, 0, 2, 0)}
-						ZIndex={-1}
-					>
-						<uigradient
-							Transparency={
-								new NumberSequence([
-									new NumberSequenceKeypoint(0, 0.3, 0),
-									new NumberSequenceKeypoint(1, 1, 0),
-								])
-							}
-						/>
-					</frame>
 				</PageFrame>
 				<PageFrame Title="Loadout" CurrentPage={this.state.CurrentPage}>
 					<ButtonContainer>

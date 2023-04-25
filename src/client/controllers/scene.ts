@@ -27,7 +27,7 @@ export class SceneController implements OnStart {
 		ClientStore.dispatch({ type: "SetScene", newScene });
 	}
 
-	private onSceneChanged(newScene: AppScene, oldScene?: AppScene) {
-		this.OnSceneChanged.Fire(newScene, oldScene);
+	private onSceneChanged(newScene: AppScene, prevScene?: AppScene) {
+		this.OnSceneChanged.Fire(newScene, prevScene);
 	}
 }

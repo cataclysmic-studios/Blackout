@@ -2,6 +2,7 @@ interface ReplicatedStorage extends Instance {
 	MenuCameras: Folder & {
 		Main: CFrameValue;
 		Loadout: CFrameValue;
+		Settings: CFrameValue;
 	};
 	TS: Folder & {
 		modules: Folder & {
