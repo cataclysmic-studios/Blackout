@@ -2,14 +2,12 @@ import { Service } from "@flamework/core";
 import { GAME_NAME } from "shared/shared-constants";
 import { BanReason, KickReason } from "shared/enums";
 import { DiscordService } from "../discord-service";
-import { PlayerDataService } from "./data-service";
 import { BanService } from "./ban-service";
 
 @Service()
 export class PlayerRemovalService {
 	public constructor(
 		private readonly discord: DiscordService,
-		private readonly playerData: PlayerDataService,
 		private readonly banService: BanService
 	) { }
 
