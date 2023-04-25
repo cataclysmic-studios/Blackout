@@ -1,6 +1,5 @@
 import { Dependency } from "@flamework/core";
 import { SoundService as Sound} from "@rbxts/services";
-import { useState } from "@rbxts/roact-hooked";
 import { AppScene } from "shared/enums";
 import { App } from "client/controllers/apps";
 import { SceneController } from "client/controllers/scene";
