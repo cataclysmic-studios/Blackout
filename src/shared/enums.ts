@@ -1,26 +1,26 @@
 export const enum Firemode {
-	Auto,
-	Semi,
-	Burst,
-	Bolt
+  Auto,
+  Semi,
+  Burst,
+  Bolt
 }
 
 export const enum BanReason {
-	Unbanned,
-	Exploiting
+  Unbanned,
+  Exploiting
 }
 
 export const enum KickReason {
-	// Player entity related
-	PlayerEntityInstantiationError,
+  // Player entity related
+  PlayerEntityInstantiationError,
 
-	// Player data related
-	PlayerProfileUndefined,
+  // Player data related
+  PlayerProfileUndefined,
 
-	Banned
+  Banned
 }
 
-export const enum Scene {
-	Menu,
-	Game,
+export const enum AppScene {
+  Menu,
+  Game,
 }

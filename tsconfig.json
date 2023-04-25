@@ -14,7 +14,7 @@
 		"forceConsistentCasingInFileNames": true,
 		"strict": true,
 		"target": "ESNext",
-		"typeRoots": ["node_modules/@rbxts", "node_modules/@flamework"],
+		"typeRoots": ["node_modules/@rbxts", "node_modules/@flamework", "types"],
 
 		// configurable
 		"rootDir": "src",

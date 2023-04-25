@@ -3,7 +3,7 @@ import { Constructor } from "@flamework/core/out/types";
 import { withHookDetection } from "@rbxts/roact-hooked";
 import { ClientStore, StoreActions } from "client/rodux/rodux";
 import { StaticUI } from "client/static-ui";
-import { Scene } from "shared/enums";
+import { AppScene } from "shared/enums";
 import { SceneController } from "./scene";
 import RoactRodux, { StoreProvider } from "@rbxts/roact-rodux";
 import Rodux from "@rbxts/rodux";
@@ -13,7 +13,7 @@ type StoreDispatch = Rodux.Dispatch<StoreActions>;
 
 interface AppConfig {
 	name: string;
-	requiredScene?: Scene;
+	requiredScene?: AppScene;
 	ignoreGuiInset?: boolean;
 	mapStateToProps?: (state: ClientStore) => unknown;
 	mapDispatchToProps?: (dispatch: StoreDispatch) => unknown;
@@ -53,7 +53,7 @@ export class AppController implements OnInit {
 		return showing
 	}
 
-	private onSceneChanged(newScene: Scene, oldScene?: Scene) {
+	private onSceneChanged(newScene: AppScene, oldScene?: AppScene) {
 		for (const [app, config] of this.apps) {
 			if (config.requiredScene === undefined) continue;
 

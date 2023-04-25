@@ -1,13 +1,13 @@
 import { ActionSetScene } from "../actions/scene-actions";
 import Rodux from "@rbxts/rodux";
-import { Scene } from "shared/enums";
+import { AppScene } from "shared/enums";
 
 export interface GameReducer {
-	currentScene: Scene;
+	currentScene: AppScene;
 }
 
 const InitialState = {
-	currentScene: Scene.Menu,
+	currentScene: AppScene.Menu,
 };
 
 export type GameActions = ActionSetScene;

@@ -1,7 +1,6 @@
 import { Janitor } from "@rbxts/janitor";
 import { Events } from "server/network";
 import { PlayerData, PlayerDataProfile } from "shared/meta/default-player-data";
-import { DeepReadonly } from "shared/util/readonly";
 
 /**
  * This class should handle *everything* to do with a specific player. This

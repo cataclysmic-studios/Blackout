@@ -1,11 +1,11 @@
 import { Controller, OnStart } from "@flamework/core";
 import { ClientStore } from "client/rodux/rodux";
-import { Scene } from "shared/enums";
+import { AppScene } from "shared/enums";
 import Signal from "@rbxts/signal";
 
 @Controller()
 export class SceneController implements OnStart {
-	public OnSceneChanged = new Signal<(newScene: Scene, prevScene?: Scene) => void>()
+	public OnSceneChanged = new Signal<(newScene: AppScene, prevScene?: AppScene) => void>()
 
 	public onStart(): void {
 		this.onSceneChanged(ClientStore.getState().gameState.currentScene);
@@ -15,7 +15,7 @@ export class SceneController implements OnStart {
 		});
 	}
 
-	public getSceneEnteredSignal(scene: Scene): Signal {
+	public getSceneEnteredSignal(scene: AppScene): Signal {
 		const sceneEntered = new Signal;
 		this.OnSceneChanged.Connect(newScene => {
 			if (newScene === scene) sceneEntered.Fire();
@@ -23,11 +23,11 @@ export class SceneController implements OnStart {
 		return sceneEntered;
 	}
 
-	public setScene(newScene: Scene) {
+	public setScene(newScene: AppScene) {
 		ClientStore.dispatch({ type: "SetScene", newScene });
 	}
 
-	private onSceneChanged(newScene: Scene, oldScene?: Scene) {
+	private onSceneChanged(newScene: AppScene, oldScene?: AppScene) {
 		this.OnSceneChanged.Fire(newScene, oldScene);
 	}
 }

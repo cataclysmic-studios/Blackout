@@ -1,6 +1,6 @@
 import { Dependency } from "@flamework/core";
 import { SoundService as Sound} from "@rbxts/services";
-import { Scene } from "shared/enums";
+import { AppScene } from "shared/enums";
 import { App } from "client/controllers/apps";
 import { SceneController } from "client/controllers/scene";
 import Roact from "@rbxts/roact";
@@ -8,7 +8,7 @@ import Button from "client/ui/components/button";
 
 @App({
 	name: "Menu",
-	requiredScene: Scene.Menu,
+	requiredScene: AppScene.Menu,
 	ignoreGuiInset: true,
 })
 export class MenuApp extends Roact.Component {
@@ -39,7 +39,7 @@ export class MenuApp extends Roact.Component {
 						Size={new UDim2(1, 0, .5, 0)}
 						AutomaticSize={Enum.AutomaticSize.Y}
 					/>
-					<Button Text="Play" OnClick={() => Dependency<SceneController>().setScene(Scene.Game)} />
+					<Button Text="Play" OnClick={() => Dependency<SceneController>().setScene(AppScene.Game)} />
 					<Button Text="Loadout" OnClick={(b) => b} />
 					<Button Text="Settings" OnClick={(b) => b} />
 				</frame>

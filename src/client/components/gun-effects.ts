@@ -1,7 +1,7 @@
 import { BaseComponent, Component } from "@flamework/components";
 import { Debris, Players, ReplicatedStorage as Replicated, Workspace as World } from "@rbxts/services";
 import { Events } from "client/network";
-import { WeaponData, WeaponModel } from "shared/types";
+import { WeaponData, WeaponModel } from "../../shared/interfaces/game-types";
 import { waitFor } from "shared/utility";
 import { SoundController } from "client/controllers/sound-player";
 import { Dependency } from "@flamework/core";

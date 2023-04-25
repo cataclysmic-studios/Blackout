@@ -1,5 +1,5 @@
 import { Networking } from "@flamework/networking";
-import { WeaponData } from "./types";
+import { WeaponData } from "./interfaces/game-types";
 import { PlayerData } from "./meta/default-player-data";
 import { ServerResponse } from "./interfaces/network-types";
 

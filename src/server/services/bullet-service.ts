@@ -1,6 +1,6 @@
 import { OnStart, Service } from "@flamework/core";
 import { Debris, Players, ReplicatedStorage as Replicated, Workspace as World } from "@rbxts/services";
-import { WeaponData } from "shared/types";
+import { WeaponData } from "../../shared/interfaces/game-types";
 import { Events } from "server/network";
 import PartCacheModule from "@rbxts/partcache";
 import FastCast, { ActiveCast, Caster } from "@rbxts/fastcast";

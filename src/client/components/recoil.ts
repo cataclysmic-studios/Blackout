@@ -1,6 +1,6 @@
 import { Dependency } from "@flamework/core";
 import { BaseComponent, Component, Components } from "@flamework/components";
-import { WeaponData } from "shared/types";
+import { WeaponData } from "../../shared/interfaces/game-types";
 import { Spring } from "shared/utility";
 import ViewModel from "client/components/view-model";
 

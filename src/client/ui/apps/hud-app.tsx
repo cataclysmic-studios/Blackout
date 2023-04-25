@@ -1,6 +1,6 @@
 import { Dependency } from "@flamework/core";
 import { Players } from "@rbxts/services";
-import { Scene } from "shared/enums";
+import { AppScene } from "shared/enums";
 import { App } from "client/controllers/apps";
 import { CrosshairController } from "client/controllers/crosshair";
 import { FPSController } from "client/controllers/fps";
@@ -30,7 +30,7 @@ const inconsolata = new Font("rbxasset://fonts/families/Inconsolata.json", FontW
 
 @App({
 	name: "HUD",
-	requiredScene: Scene.Game,
+	requiredScene: AppScene.Game,
 	ignoreGuiInset: true,
 })
 export class HUDApp extends Roact.Component {

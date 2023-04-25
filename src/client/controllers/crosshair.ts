@@ -1,7 +1,7 @@
 import { Controller } from "@flamework/core";
 import { UserInputService as UIS } from "@rbxts/services";
 import { waitFor, tween } from "shared/utility";
-import { WeaponData } from "shared/types";
+import { WeaponData } from "../../shared/interfaces/game-types";
 import { StaticUI } from "../static-ui";
 
 @Controller()

@@ -3,7 +3,7 @@ import { Components } from "@flamework/components";
 import { ReplicatedStorage as Replicated, Workspace as World } from "@rbxts/services";
 import { Janitor } from "@rbxts/janitor";
 import { waitFor, tween } from "shared/utility";
-import { LeanState, Slot, WeaponData, WeaponModel } from "shared/types";
+import { LeanState, Slot, WeaponData, WeaponModel } from "shared/interfaces/game-types";
 import { Firemode } from "shared/enums";
 import { $error } from "rbxts-transform-debug";
 
