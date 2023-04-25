@@ -88,7 +88,7 @@ export class AppController implements OnInit {
 		const handle = Roact.mount(
 			<screengui
 				Key={config.name}
-				IgnoreGuiInset={config.ignoreGuiInset}
+				ScreenInsets={config.ignoreGuiInset ? Enum.ScreenInsets.DeviceSafeInsets : Enum.ScreenInsets.CoreUISafeInsets}
 				ResetOnSpawn={false}
 				ZIndexBehavior={Enum.ZIndexBehavior.Sibling}
 			>
