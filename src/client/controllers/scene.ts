@@ -5,16 +5,22 @@ import Signal from "@rbxts/signal";
 
 @Controller()
 export class SceneController implements OnStart {
-	public OnSceneChanged = new Signal<(newScene: AppScene, prevScene?: AppScene) => void>()
+	public OnSceneChanged = new Signal<(scene: AppScene, prevScene?: AppScene) => void>()
 
 	public onStart(): void {
-		this.onSceneChanged(ClientStore.getState().gameState.currentScene);
-		ClientStore.changed.connect((newState, oldState) => {
-			if (newState.gameState.currentScene !== oldState.gameState.currentScene)
-				this.onSceneChanged(newState.gameState.currentScene, oldState.gameState.currentScene);
+		this.triggerSceneChange(ClientStore.getState().gameState.currentScene);
+		ClientStore.changed.connect((state, prevState) => {
+			if (state.gameState.currentScene !== prevState.gameState.currentScene)
+				this.triggerSceneChange(state.gameState.currentScene, prevState.gameState.currentScene);
 		});
 	}
 
+	/**
+	 * Creates a signal that fires when the current scene changes
+	 * 
+	 * @param {AppScene} scene
+	 * @returns Signal that's fired when the scene changes
+	 */
 	public getSceneEnteredSignal(scene: AppScene): Signal {
 		const sceneEntered = new Signal;
 		this.OnSceneChanged.Connect(newScene => {
@@ -23,11 +29,21 @@ export class SceneController implements OnStart {
 		return sceneEntered;
 	}
 
-	public swapScene(scene: AppScene) {
+	/**
+	 * Swaps the current scene out for a new one
+	 * 
+	 * @param {AppScene} scene
+	 */
+	public swapScene(scene: AppScene): void {
 		ClientStore.dispatch({ type: "SetScene", newScene: scene });
 	}
 
-	private onSceneChanged(newScene: AppScene, prevScene?: AppScene) {
-		this.OnSceneChanged.Fire(newScene, prevScene);
+	/**
+	 * Fires the OnSceneChanged event
+	 * 
+	 * @param {AppScene} scene
+	 */
+	private triggerSceneChange(scene: AppScene, prevScene?: AppScene): void {
+		this.OnSceneChanged.Fire(scene, prevScene);
 	}
 }
