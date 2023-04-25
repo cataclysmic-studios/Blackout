@@ -436,23 +436,27 @@ export class FPSController implements OnStart, OnRender {
 		const torqueDir = r.NextInteger(1, 2) === 1 ? 1 : -1;
 		const data = this.currentWeapon.data;
 
-		const [cy, cx, cz] = data.recoil.camera;
+		const [
+			[cy1, cy2], [cx1, cx2], [cz1, cz2]
+		] = data.recoil.camera;
 		const cforce = new Vector3(
-			r.NextNumber(cy[0], cy[1]),
-			r.NextNumber(cx[0], cx[1]),
-			r.NextNumber(cz[0], cz[1])
+			r.NextNumber(cy1, cy2),
+			r.NextNumber(cx1, cx2),
+			r.NextNumber(cz1, cz2)
 		);
 
-		const [my, mx, mz] = this.currentWeapon.data.recoil.model;
+		const [
+			[my1, my2], [mx1, mx2], [mz1, mz2]
+		] = data.recoil.model;
 		const mforce = new Vector3(
-			r.NextNumber(my[0], my[1]),
-			r.NextNumber(mx[0], mx[1]),
-			r.NextNumber(mz[0], mz[1])
+			r.NextNumber(my1, my2),
+			r.NextNumber(mx1, mx2),
+			r.NextNumber(mz1, mz2)
 		);
 
 		let stabilization = 1;
 		if (this.state.aimed)
-			stabilization += 0.8;
+			stabilization += 0.4;
 
 		this.vmRecoil!.kick(data, cforce, stabilization, torqueDir);
 		this.camRecoil!.kick(data, mforce, stabilization, torqueDir);
