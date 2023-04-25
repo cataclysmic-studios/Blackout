@@ -1,5 +1,6 @@
 import { Controller } from "@flamework/core";
 import { LeanState } from "shared/interfaces/game-types";
+import { tween } from "shared/utility";
 import { FPSController } from "./fps";
 
 @Controller()
@@ -36,5 +37,9 @@ export class MovementController {
   public lean(leanState: LeanState): void {
     if (this.fps.state.lean === leanState) return this.lean(0);
     this.fps.state.lean = leanState;
+    const leanInfo = new TweenInfo(0.25, Enum.EasingStyle.Quad);
+    tween(this.fps.leanOffset, leanInfo, {
+      Value: new CFrame(leanState, 0, 0).mul(CFrame.Angles(0, 0, math.rad(-25 * leanState)))
+    });
   }
 }

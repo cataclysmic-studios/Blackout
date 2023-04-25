@@ -89,8 +89,8 @@ export class InputController implements OnStart {
             cHeld = true;
             while (cHeld) {
               task.wait();
-              timeCHeld += 1 / 30;
-              if (timeCHeld > 1.25 && this.fps.state.crouched)
+              timeCHeld += 1 / 60;
+              if (timeCHeld > 2.5 && this.fps.state.crouched)
                 this.movement.prone(true);
             }
           });

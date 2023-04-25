@@ -2,9 +2,16 @@ import { OnStart } from "@flamework/core";
 import { BaseComponent, Component } from "@flamework/components";
 import { UserInputService as UIS, Workspace as World } from "@rbxts/services";
 import { waitFor, Spring } from "shared/utility";
-import { WeaponData, WeaponModel } from "../../shared/interfaces/game-types";
+import { LeanState, WeaponData, WeaponModel } from "../../shared/interfaces/game-types";
 
 const camera = World.CurrentCamera!;
+const { sin, clamp } = math;
+
+interface CameraOffset {
+  readonly CFrame: CFrame;
+  readonly Lerp: boolean;
+  readonly LerpAlpha: number;
+}
 
 @Component()
 export default class ViewModel extends BaseComponent<{}, Model> implements OnStart {
@@ -31,14 +38,13 @@ export default class ViewModel extends BaseComponent<{}, Model> implements OnSta
   }
 
   /**
-   * Returns a CFrame offset for the camera
+   * Returns a CFrame offset for the camera defined in the current equipped weapon
    * 
    * @param name CFrame manipulator name
    * @returns Camera CFrame offset
    */
   public getManipulator(name: string): CFrameValue {
-    const value = waitFor<CFrameValue>(this.weapon!.CFrameManipulators, name);
-    return value;
+    return waitFor<CFrameValue>(this.weapon!.CFrameManipulators, name);
   }
 
   /**
@@ -60,41 +66,43 @@ export default class ViewModel extends BaseComponent<{}, Model> implements OnSta
    * 
    * @param dt Delta time
    * @param aiming Whether or not the player is aiming
-   * @param mouseY Mouse Y
+   * @param camY Mouse Y
    * @returns Idle animation CFrame offset
    */
-  public getIdleOffset(dt: number, aiming: boolean, mouseY: number): CFrame {
-    mouseY = aiming ? 0 : mouseY;
-    return new CFrame(0, math.sin(tick()) / (aiming ? 325 : 130), 0)
-      .mul(new CFrame(0, -mouseY / 2, mouseY / 5));
+  private getIdleOffset(dt: number, aiming: boolean, leanOffset: CFrame, camY: number): CFrame {
+    camY = aiming ? 0 : camY;
+    return new CFrame(0, sin(tick()) / (aiming ? 325 : 130), 0)
+      .mul(new CFrame(0, -camY / 2, camY / 5))
+      .mul(leanOffset);
   }
 
   /**
    * Returns a CFrame of where the rig should be
    * 
    * @param dt Delta time
-   * @param aiming Whether or not the player is aiming
+   * @param aimed Whether or not the player is aiming
    * @returns CFrame of where the rig should be
    */
-  public getCFrame(dt: number, aiming: boolean): CFrame {
+  public getCFrame(dt: number, aimed: boolean, leanOffset: CFrame): CFrame {
     if (!this.weapon || !this.data) return new CFrame();
 
     const { X: dx, Y: dy } = UIS.GetMouseDelta().div(150);
     const [ly] = camera.CFrame.ToEulerAnglesYXZ();
-    const limit = aiming ? .02 : .04;
-    this.springs.mouseSway.shove(new Vector3(math.clamp(dx, -limit, limit), math.clamp(dy, -limit, limit), 0));
+    const limit = aimed ? .02 : .04;
+    this.springs.mouseSway.shove(new Vector3(clamp(dx, -limit, limit), clamp(dy, -limit, limit), 0));
 
     const lv = this.weapon.Trigger.AssemblyLinearVelocity;
     this.weapon.Trigger.AssemblyLinearVelocity = new Vector3(lv.X, 0, lv.Y);
 
-    const sway = this.springs.mouseSway.update(dt).div(aiming ? 3 : 1);
+    const sway = this.springs.mouseSway.update(dt).div(aimed ? 3 : 1);
     const aimSway = new CFrame(-sway.X, sway.Y, -sway.X).mul(CFrame.Angles(-sway.Y, -sway.X, sway.X));
     const hipSway = new CFrame(-sway.X * 1.75, sway.Y / 1.5, -sway.X * 1.5).mul(CFrame.Angles(-sway.Y / 1.5, -sway.X, 0));
+
     return World.CurrentCamera!.CFrame
       .mul(this.data.vmOffset)
-      .mul(this.getIdleOffset(dt, aiming, ly / 5))
+      .mul(this.getIdleOffset(dt, aimed, leanOffset, ly / 5))
       .mul(this.getManipulator("Aim").Value)
-      .mul(aiming ? aimSway : hipSway);
+      .mul(aimed ? aimSway : hipSway);
   }
 
   /**

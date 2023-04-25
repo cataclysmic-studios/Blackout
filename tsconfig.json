@@ -36,6 +36,9 @@
 			},
 			{
 				"transform": "rbxts-transform-guid"
+			},
+			{
+				"transform": "rbxts-transformer-switchcase"
 			}
 		]
 	}

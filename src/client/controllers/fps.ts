@@ -3,7 +3,7 @@ import { Components } from "@flamework/components";
 import { ReplicatedStorage as Replicated, Workspace as World } from "@rbxts/services";
 import { Janitor } from "@rbxts/janitor";
 import { waitFor, tween } from "shared/utility";
-import { LeanState, Slot, WeaponData, WeaponModel } from "shared/interfaces/game-types";
+import { FPSState, Slot, WeaponData, WeaponModel } from "shared/interfaces/game-types";
 import { Firemode } from "shared/enums";
 import { $error } from "rbxts-transform-debug";
 
@@ -15,33 +15,10 @@ import ViewModel from "client/components/view-model";
 import GunEffects from "client/components/gun-effects";
 import Recoil from "client/components/recoil";
 
-interface FPSState {
-	equipped: boolean;
-	currentSlot?: Slot;
-	weapons: (string | undefined)[];
-	weapon: {
-		firemode: Firemode;
-		ammo: {
-			mag: number;
-			reserve: number;
-		};
-	};
-
-	aimed: boolean;
-	shooting: boolean;
-	reloading: boolean;
-	reloadCancelled: boolean;
-	inspecting: boolean;
-
-	sprinting: boolean;
-	crouched: boolean;
-	proned: boolean;
-	lean: LeanState;
-}
-
 @Controller()
 export class FPSController implements OnStart, OnRender {
 	private readonly janitor = new Janitor;
+	private readonly camera = World.CurrentCamera!;
 	private vmRecoil?: Recoil;
 	private camRecoil?: Recoil;
 	private viewModel?: ViewModel;
@@ -57,6 +34,7 @@ export class FPSController implements OnStart, OnRender {
 	};
 
 	public mouseDown = false;
+	public readonly leanOffset = new Instance("CFrameValue");
 	public readonly events = {
 		ammoChanged: new Signal<(ammo: { mag: number; reserve: number; }) => void>()
 	};
@@ -104,22 +82,32 @@ export class FPSController implements OnStart, OnRender {
 	}
 
 	public onRender(dt: number): void {
-		if (!this.vmRecoil || !this.camRecoil) return;
-		this.vmRecoil.update(dt, this.state.aimed);
-		this.camRecoil.update(dt, this.state.aimed);
+		if (!this.viewModel) return;
+		this.vmRecoil?.update(dt, this.state.aimed, this.leanOffset.Value);
+		this.updateCamera(dt);
 	}
 
 	/**
-	 * Attach all Motor6D's inside of the weapon to the ViewMOde
+	 * Updates everything to do with the camera
+	 * 
+	 * @param dt
+	 */
+	private updateCamera(dt: number): void {
+		if (!this.viewModel) return;
+		this.camRecoil?.update(dt, this.state.aimed, this.leanOffset.Value);
+	}
+
+	/**
+	 * Attach all Motor6D's inside of the weapon to the ViewModel
 	 * 
 	 * @param model Weapon model
 	 */
 	private attachMotors(model: WeaponModel): void {
-		const parts = <BasePart[]>model.GetDescendants().filter(d => d.IsA("BasePart"));
+		const parts = model.GetDescendants().filter((d): d is BasePart => d.IsA("BasePart"));
 		for (const part of parts)
 			part.Anchored = false;
 
-		const motors = <Motor6D[]>model.GetDescendants().filter(d => d.IsA("Motor6D"));
+		const motors = model.GetDescendants().filter((d): d is Motor6D => d.IsA("Motor6D"));
 		for (const motor of motors)
 			motor.Part0 = model.Trigger;
 

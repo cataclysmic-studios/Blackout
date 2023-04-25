@@ -102,24 +102,6 @@ export class MenuApp extends Roact.Component<{}, MenuState> {
 	public render() {
 		return (
 			<>
-				<frame
-					Key="Shadow"
-					BackgroundColor3={Color3.fromRGB(49, 49, 49)}
-					BackgroundTransparency={0.1}
-					BorderSizePixel={0}
-					Position={new UDim2(-0.045, -7, 0, -50)}
-					Size={new UDim2(0.3, 0, 2, 0)}
-					ZIndex={-1}
-				>
-					<uigradient
-						Transparency={
-							new NumberSequence([
-								new NumberSequenceKeypoint(0, 0.3, 0),
-								new NumberSequenceKeypoint(1, 1, 0),
-							])
-						}
-					/>
-				</frame>
 				<PageFrame Title="Main" CurrentPage={this.state.CurrentPage}>
 					<ButtonContainer>
 						<Button Text="Play" OnClick={() => Dependency<SceneController>().swapScene(AppScene.Game)} />
@@ -151,6 +133,24 @@ export class MenuApp extends Roact.Component<{}, MenuState> {
 					</ButtonContainer>
 					<BackButton Menu={this} />
 				</PageFrame>
+				<frame
+					Key="Shadow"
+					BackgroundColor3={Color3.fromRGB(49, 49, 49)}
+					BackgroundTransparency={0.1}
+					BorderSizePixel={0}
+					Position={new UDim2(-0.045, -7, 0, -50)}
+					Size={new UDim2(0.3, 0, 2, 0)}
+					ZIndex={-1}
+				>
+					<uigradient
+						Transparency={
+							new NumberSequence([
+								new NumberSequenceKeypoint(0, 0.3, 0),
+								new NumberSequenceKeypoint(1, 1, 0),
+							])
+						}
+					/>
+				</frame>
 			</>
 		);
 	}

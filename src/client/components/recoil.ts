@@ -1,6 +1,6 @@
 import { Dependency } from "@flamework/core";
 import { BaseComponent, Component, Components } from "@flamework/components";
-import { WeaponData } from "../../shared/interfaces/game-types";
+import { FPSState, WeaponData } from "shared/interfaces/game-types";
 import { Spring } from "shared/utility";
 import ViewModel from "client/components/view-model";
 
@@ -26,7 +26,7 @@ export default class Recoil extends BaseComponent<{}, Model | Camera> {
    * @param dt Delta time
    * @param aimed Whether or not the player is aiming
    */
-  public update(dt: number, aimed: boolean): void {
+  public update(dt: number, aimed: boolean, leanOffset: CFrame): void {
     const torqueMult = 12;
     const springDamp = 80;
     const ocf = this.springs.camera.update(dt).div(springDamp);
@@ -44,11 +44,11 @@ export default class Recoil extends BaseComponent<{}, Model | Camera> {
     const mrecoil = moffset.mul(mvertClimb).mul(mtorque);
 
     if (this.instance.IsA("Camera")) {
-      this.instance.CFrame = this.instance.CFrame.mul(crecoil);
+      this.instance.CFrame = this.instance.CFrame.mul(leanOffset).mul(crecoil);
     } else {
       const vm = Dependency<Components>().getComponent<ViewModel>(this.instance)!;
       vm.syncCameraBone();
-      vm.setCFrame(vm.getCFrame(dt, aimed).mul(mrecoil));
+      vm.setCFrame(vm.getCFrame(dt, aimed, leanOffset).mul(mrecoil));
       if (vm.weapon) {
         const lv = vm.weapon!.Trigger.AssemblyLinearVelocity;
         vm.weapon!.Trigger.AssemblyLinearVelocity = new Vector3(lv.X, 0, lv.Y);
