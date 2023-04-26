@@ -4,9 +4,9 @@ import { AppScene } from "shared/enums";
 import { App } from "client/controllers/apps";
 import { CrosshairController } from "client/controllers/crosshair";
 import { FPSController } from "client/controllers/fps";
+import { Crosshair } from "client/ui/components/crosshair";
 import Roact, { createRef } from "@rbxts/roact";
 import AmmoText from "client/ui/components/ammo-text";
-import { Crosshair } from "client/ui/components/crosshair";
 
 function AmmoTextDetails() {
 	return (
@@ -34,6 +34,9 @@ const inconsolata = new Font("rbxasset://fonts/families/Inconsolata.json", FontW
 	ignoreGuiInset: true,
 })
 export class HUDApp extends Roact.Component {
+	private readonly crosshairRef = createRef<Frame>();
+	private readonly dotRef = createRef<Frame>();
+
 	protected didMount(): void {
 		task.spawn(() => {
 			Players.LocalPlayer.CameraMode = Enum.CameraMode.LockFirstPerson;
@@ -47,7 +50,19 @@ export class HUDApp extends Roact.Component {
 	public render() {
 		return (
 			<>
-				<Crosshair />
+				<Crosshair Ref={this.crosshairRef} />
+				<frame
+					Key="Dot"
+					Ref={this.dotRef}
+					AnchorPoint={new Vector2(0.5, 0.5)}
+					BackgroundColor3={Color3.fromRGB(255, 255, 255)}
+					BorderSizePixel={0}
+					Position={new UDim2(0.5, 0, 0.5, 0)}
+					Size={new UDim2(0, 4, 0, 4)}
+				>
+					<uicorner />
+					<uistroke Thickness={0.5} />
+				</frame>
 				<frame
 					Key="Ammo"
 					AnchorPoint={new Vector2(1, 1)}
@@ -102,17 +117,6 @@ export class HUDApp extends Roact.Component {
 						Position={new UDim2(0.5, 2, 0.5, 0)}
 						Size={new UDim2(0, 2, 0.8, 0)}
 					/>
-				</frame>
-				<frame
-					Key="Dot"
-					AnchorPoint={new Vector2(0.5, 0.5)}
-					BackgroundColor3={Color3.fromRGB(255, 255, 255)}
-					BorderSizePixel={0}
-					Position={new UDim2(0.5, 0, 0.5, 0)}
-					Size={new UDim2(0, 4, 0, 4)}
-				>
-					<uicorner />
-					<uistroke Thickness={0.5} />
 				</frame>
 			</>
 		);
