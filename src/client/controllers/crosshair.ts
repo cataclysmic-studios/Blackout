@@ -77,10 +77,14 @@ export class CrosshairController {
       Size: UDim2.fromScale(this.size / 10, this.size / 10)
     });
 
-    for (const line of <Frame[]>frame.GetChildren().filter(c => c.IsA("Frame")))
+    for (const line of frame.GetChildren().filter((c): c is Frame => c.IsA("Frame"))) {
       tween(line, info, {
         BackgroundTransparency: this.size === 0 ? 1 : 0
       });
+      tween(line.FindFirstChildOfClass("UIStroke")!, info, {
+        Transparency: this.size === 0 ? 1 : 0
+      });
+    }
 
     return sizeTween;
   }
