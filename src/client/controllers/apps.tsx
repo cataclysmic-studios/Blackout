@@ -7,7 +7,7 @@ import { AppScene } from "shared/enums";
 import { SceneController } from "./scene";
 import RoactRodux, { StoreProvider } from "@rbxts/roact-rodux";
 import Rodux from "@rbxts/rodux";
-import Roact from "@rbxts/roact";
+import Roact, { createRef } from "@rbxts/roact";
 
 type StoreDispatch = Rodux.Dispatch<StoreActions>;
 
@@ -27,10 +27,11 @@ withHookDetection(Roact);
 
 @Controller({ loadOrder: 0 })
 export class AppController implements OnInit {
-	private apps = new Map<Constructor<Roact.Component>, AppConfig>;
-	private appHandles = new Map<Constructor<Roact.Component>, Roact.Tree>;
+	private readonly apps = new Map<Constructor<Roact.Component>, AppConfig>;
+	private readonly appHandles = new Map<Constructor<Roact.Component>, Roact.Tree>;
+	public readonly appRefs = new Map<Constructor<Roact.Component>, Roact.Ref<ScreenGui>>;
 
-	constructor(
+	public constructor(
 		private readonly scene: SceneController
 	) { }
 
@@ -94,9 +95,11 @@ export class AppController implements OnInit {
 			</StoreProvider>
 		);
 
+		const ref = createRef<ScreenGui>();
 		const handle = Roact.mount(
 			<screengui
 				Key={config.name}
+				Ref={ref}
 				ScreenInsets={config.ignoreGuiInset ? Enum.ScreenInsets.DeviceSafeInsets : Enum.ScreenInsets.CoreUISafeInsets}
 				ResetOnSpawn={false}
 				ZIndexBehavior={Enum.ZIndexBehavior.Sibling}
@@ -108,6 +111,7 @@ export class AppController implements OnInit {
 		);
 
 		this.appHandles.set(app, handle);
+		this.appRefs.set(app, ref);
 	}
 
 	/**
@@ -119,6 +123,7 @@ export class AppController implements OnInit {
 		if (handle) {
 			Roact.unmount(handle);
 			this.appHandles.delete(app);
+			this.appRefs.delete(app);
 		}
 	}
 }
