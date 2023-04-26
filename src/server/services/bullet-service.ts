@@ -6,7 +6,7 @@ import PartCacheModule from "@rbxts/partcache";
 import FastCast, { ActiveCast, Caster } from "@rbxts/fastcast";
 import { Janitor } from "@rbxts/janitor";
 import { Components } from "@flamework/components";
-import { Destructible } from "shared/components/destructible";
+import { Destructible } from "server/components/destructible";
 
 const { floor, clamp } = math;
 
