@@ -3,10 +3,9 @@ import { ReplicatedStorage as Replicated, SoundService as Sound } from "@rbxts/s
 import { AppScene } from "shared/enums";
 import { App } from "client/controllers/apps";
 import { MenuController } from "client/controllers/menu";
-import { PageName } from "client/ui/components/page-frame";
 import Roact from "@rbxts/roact";
 import MainPage from "./main-page";
-import LoadoutPage from "./loadout-page";
+import LoadoutSelectionPage from "./loadout-selection-page";
 import SettingsPage from "./settings-page";
 
 interface MenuState {
@@ -29,7 +28,7 @@ export class MenuApp extends Roact.Component<{}, MenuState> {
 			CurrentPage: pageName,
 		});
 
-		const menu = Dependency<MenuController>()
+		const menu = Dependency<MenuController>();
 		const baseCF = Replicated.MenuCameras[pageName].Value;
 		menu.setBaseCFrame(baseCF);
 	}
@@ -46,11 +45,11 @@ export class MenuApp extends Roact.Component<{}, MenuState> {
 		return (
 			<>
 				<MainPage App={this} CurrentPage={this.state.CurrentPage} />
-				<LoadoutPage App={this} CurrentPage={this.state.CurrentPage} />
+				<LoadoutSelectionPage App={this} CurrentPage={this.state.CurrentPage} />
 				<SettingsPage App={this} CurrentPage={this.state.CurrentPage} />
 				<frame
 					Key="Shadow"
-					BackgroundColor3={Color3.fromRGB(49, 49, 49)}
+					BackgroundColor3={Color3.fromRGB(50, 50, 50)}
 					BackgroundTransparency={0.1}
 					BorderSizePixel={0}
 					Position={new UDim2(-0.045, -7, 0, -50)}

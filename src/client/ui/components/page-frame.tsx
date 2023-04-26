@@ -1,6 +1,5 @@
 import Roact, { Children, PropsWithChildren } from "@rbxts/roact";
 
-export type PageName = "Main" | "Loadout" | "Settings";
 interface PageProps {
 	Title: PageName;
 	Visible: boolean;

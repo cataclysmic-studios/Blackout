@@ -1,4 +1,4 @@
-import { PageFrame, PageName } from "client/ui/components/page-frame";
+import { PageFrame } from "client/ui/components/page-frame";
 import { PageProps } from "./menu-app";
 import Roact from "@rbxts/roact";
 import Button from "client/ui/components/button";

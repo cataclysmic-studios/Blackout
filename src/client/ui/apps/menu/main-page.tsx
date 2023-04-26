@@ -1,6 +1,6 @@
 import { Dependency } from "@flamework/core";
 import { SceneController } from "client/controllers/scene";
-import { PageFrame, PageName } from "client/ui/components/page-frame";
+import { PageFrame } from "client/ui/components/page-frame";
 import { PageProps } from "./menu-app";
 import { AppScene } from "shared/enums";
 import Roact from "@rbxts/roact";
