@@ -297,7 +297,7 @@ export class BulletService implements OnStart {
 
     const rayParams = new RaycastParams;
     rayParams.FilterDescendantsInstances = [World.CurrentCamera!, player.Character!, player.Character!.PrimaryPart!];
-    rayParams.FilterType = Enum.RaycastFilterType.Blacklist;
+    rayParams.FilterType = Enum.RaycastFilterType.Exclude;
 
     const behavior = FastCast.newBehavior();
     behavior.Acceleration = new Vector3(0, -World.Gravity, 0);

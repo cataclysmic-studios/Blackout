@@ -38,6 +38,12 @@ export function waitFor<T extends Instance>(instance: Instance, childName: strin
  */
 export function isNaN(x: number) { return x !== x }
 
+/*
+  If delta time in the spring class is lower than this value,
+  it will split up the update into multiple smaller updates
+*/
+const MAX_SPRING_DELTA = 1 / 30;
+
 /**
  * Simple Hooke's spring implementation
  */
@@ -78,6 +84,14 @@ export class Spring {
    * @returns New value
    */
   public update(dt: number): Vector3 {
+    if (dt > MAX_SPRING_DELTA) {
+      const iter = math.ceil(dt / MAX_SPRING_DELTA);
+      for (let i = 0; i < iter; i++) {
+        this.update(dt / iter);
+      }
+      return this.position;
+    }
+
     const scaledDt: number = min(dt, 1) * this.speed / Spring.iterations;
     for (let i = 0; i < Spring.iterations; i++) {
       const force: Vector3 = this.target.sub(this.position);
