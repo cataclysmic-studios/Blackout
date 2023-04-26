@@ -1,9 +1,12 @@
-import { OnStart, Service } from "@flamework/core";
+import { Dependency, OnStart, Service } from "@flamework/core";
 import { Debris, Players, ReplicatedStorage as Replicated, Workspace as World } from "@rbxts/services";
 import { WeaponData } from "../../shared/interfaces/game-types";
 import { Events } from "server/network";
 import PartCacheModule from "@rbxts/partcache";
 import FastCast, { ActiveCast, Caster } from "@rbxts/fastcast";
+import { Janitor } from "@rbxts/janitor";
+import { Components } from "@flamework/components";
+import { Destructible } from "shared/components/destructible";
 
 const { floor, clamp } = math;
 
@@ -147,15 +150,25 @@ export class BulletService implements OnStart {
    * @param material Material
    * @param color Color
    */
-  private createImpactVFX(origin: Vector3, normal: Vector3, material: Enum.Material, color: Color3): void {
+  private createImpactVFX(origin: Vector3, normal: Vector3, part: BasePart, bullet: Bullet): void {
+    const components = Dependency<Components>();
+    const destructible = components.getComponent<Destructible>(part);
+    destructible?.addBulletHole(new CFrame(origin, normal), bullet.Size);
+
+    const dustParticles = this.createDustParticles(normal, origin, part.Material, part.Color);
+    task.delay(5, () => dustParticles.Destroy());
+  }
+
+  private createDustParticles(normal: Vector3, origin: Vector3, material: Enum.Material, color: Color3) {
+    const janitor = new Janitor;
     const fixedNormal = new Vector3(clamp(normal.X, 0, 1), clamp(normal.Y, 0, 1), clamp(normal.Z, 0, 1));
     const dustContainer = this.createContainer();
-    dustContainer.Name = "Dust"
+    dustContainer.Name = "Dust";
     dustContainer.CFrame = new CFrame(origin, origin.add(fixedNormal));
 
     const dust = <Folder>Replicated.VFX.BulletImpacts.FindFirstChild(material.Name) ?? Replicated.VFX.BulletImpacts.Default;
     for (let particle of <ParticleEmitter[]>dust.GetChildren()) {
-      particle = particle.Clone()
+      particle = particle.Clone();
       if (particle.Name === "Smoke") {
         const damp = 1.1;
         const dampenedColor = new Color3(color.R / damp, color.G / damp, color.B / damp);
@@ -174,6 +187,7 @@ export class BulletService implements OnStart {
       holeContainer.Size = new Vector3(z, size, size);
     else if (fixedNormal.Y !== 0)
       holeContainer.Size = new Vector3(size, size, z);
+
     else
       holeContainer.Size = new Vector3(size, z, size);
 
@@ -189,12 +203,9 @@ export class BulletService implements OnStart {
     holeBack.Face = Enum.NormalId.Back;
     holeBack.Parent = holeContainer;
 
-    const cleanup = () => {
-      dustContainer.Destroy();
-      holeContainer.Destroy();
-    }
-
-    task.delay(5, cleanup);
+    janitor.Add(dustContainer);
+    janitor.Add(holeContainer);
+    return janitor;
   }
 
   /**
@@ -316,25 +327,25 @@ export class BulletService implements OnStart {
     const cast = caster.Fire(origin.add(new Vector3(0, .05, 0)), dir, weaponData.stats.muzzleVelocity, behavior);
     const bullet = <Bullet>cast.RayInfo.CosmeticBulletObject!;
     bullet.SetAttribute("InUse", true);
-    const hit = caster.RayHit.Connect((_, { Instance, Position, Normal, Material }) => {
+    const hit = caster.RayHit.Connect((_, { Instance, Position, Normal }) => {
       if (!bullet.GetAttribute("InUse")) return;
       if (this.hasHumanoid(Instance)) {
-        this.renderHit(player, this.getVictim(Instance)!, Instance, bullet as Bullet, origin, weaponData);
+        this.renderHit(player, this.getVictim(Instance)!, Instance, bullet, origin, weaponData);
         this.createBloodVFX(Position, Normal);
       } else
-        this.createImpactVFX(Position, Normal, Material, Instance.Color);
+        this.createImpactVFX(Position, Normal, Instance, bullet);
 
       this.resetBullet(bullet);
     });
     const pierced = caster.RayPierced.Connect((cast, { Instance, Position, Normal, Material }, segVelocity, _) => {
       if (!bullet.GetAttribute("InUse")) return;
       if (this.hasHumanoid(Instance)) {
-        this.renderHit(player, this.getVictim(Instance)!, Instance, bullet as Bullet, origin, weaponData);
+        this.renderHit(player, this.getVictim(Instance)!, Instance, bullet, origin, weaponData);
         this.createBloodVFX(Position, Normal);
         this.createBloodVFX(Position, Normal.mul(-1));
       } else {
-        this.createImpactVFX(Position, Normal, Material, Instance.Color);
-        this.createImpactVFX(Position, Normal.mul(-1), Material, Instance.Color);
+        this.createImpactVFX(Position, Normal, Instance, bullet);
+        this.createImpactVFX(Position, Normal.mul(-1), Instance, bullet);
       }
 
       let size: number;

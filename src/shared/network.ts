@@ -17,6 +17,7 @@ export interface ServerEvents {
 export interface ClientEvents {
 	ammoChanged(ammo: { mag: number; reserve: number; }): void;
 	playerDataChanged(newPlayerData: Partial<PlayerData>): void;
+	replicateBulletHole(hit: CFrame, material: Enum.Material, color: Color3, bulletSize: Vector3): void;
 }
 
 export interface ServerFunctions {
