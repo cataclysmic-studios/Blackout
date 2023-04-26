@@ -39,7 +39,7 @@ export class MovementController {
     this.fps.state.lean = leanState;
     const leanInfo = new TweenInfo(0.25, Enum.EasingStyle.Quad);
     tween(this.fps.leanOffset, leanInfo, {
-      Value: new CFrame(leanState, 0, 0).mul(CFrame.Angles(0, 0, math.rad(-25 * leanState)))
+      Value: new CFrame(leanState, 0, 0).mul(CFrame.Angles(0, 0, math.rad(-20 * leanState)))
     });
   }
 }
