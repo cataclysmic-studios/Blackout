@@ -1,5 +1,4 @@
 import { Component, BaseComponent } from "@flamework/components";
-import { Events } from "server/network";
 
 interface Attributes { }
 
