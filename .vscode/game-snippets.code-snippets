@@ -1,0 +1,30 @@
+{
+  "Roact App": {
+		"prefix":[ "app", "roactapp"],
+		"description": "Create a Roact app",
+		"body": [
+      "import { AppScene } from \"shared/enums\";",
+      "import { App } from \"client/controllers/apps\";",
+			"import Roact from \"@rbxts/roact\";",
+			"",
+			"@App({",
+        "\tname: \"HUD\",",
+        "\trequiredScene: AppScene.Game,",
+        "\tignoreGuiInset: true",
+      "})",
+			"export class ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/g} extends Roact.Component {",
+        "\tprotected didMount(): void {",
+        "",
+        "\t}",
+        "",
+				"\tpublic render() {",
+					"\t\treturn (",
+          "\t\t\t<>",
+          "",
+          "\t\t\t</>",
+          "\t\t);",
+				"\t}",
+			"}",
+		]
+	},
+}
