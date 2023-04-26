@@ -11,6 +11,9 @@ export class Destructible extends BaseComponent<Attributes, BasePart> implements
   }
 
   private replicateBulletHole(hit: CFrame, bulletSize: Vector3): void {
-
+    const negative = new Instance("NegateOperation");
+    negative.CFrame = hit;
+    negative.Size = bulletSize.mul(2);
+    this.instance.UnionAsync([negative], Enum.CollisionFidelity.Hull);
   }
 }
