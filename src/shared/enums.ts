@@ -22,14 +22,10 @@ export const enum KickReason {
 
 export const enum AppScene {
   Menu,
-<<<<<<< HEAD
   Loading,
   Game
-=======
-  Game,
 }
 
 export const enum Tag {
   Penetratable = "Penetratable",
->>>>>>> 4c57ccf38db1d0e0be99b8014e6f2520b7ccf13b
 }
