@@ -15,6 +15,8 @@ interface AppConfig {
 	name: string;
 	requiredScene?: AppScene;
 	ignoreGuiInset?: boolean;
+	zIndex?: number;
+	zIndexBehavior?: Enum.ZIndexBehavior;
 	mapStateToProps?: (state: ClientStore) => unknown;
 	mapDispatchToProps?: (dispatch: StoreDispatch) => unknown;
 }
@@ -100,9 +102,10 @@ export class AppController implements OnInit {
 			<screengui
 				Key={config.name}
 				Ref={ref}
+				DisplayOrder={config.zIndex ?? 0}
 				ScreenInsets={config.ignoreGuiInset ? Enum.ScreenInsets.DeviceSafeInsets : Enum.ScreenInsets.CoreUISafeInsets}
 				ResetOnSpawn={false}
-				ZIndexBehavior={Enum.ZIndexBehavior.Sibling}
+				ZIndexBehavior={config.zIndexBehavior ?? Enum.ZIndexBehavior.Sibling}
 			>
 				{content}
 			</screengui>,
