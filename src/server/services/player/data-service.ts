@@ -50,7 +50,7 @@ export class PlayerDataService {
 		profile.Reconcile();
 		profile.ListenToRelease(() => {
 			if (!player.IsDescendantOf(game)) return;
-			this.discord.log(player, "", "Data Saved");
+			// this.discord.log(player, "", "Data Saved");
 		});
 
 		this.profiles.set(dataKey, profile);
