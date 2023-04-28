@@ -7,7 +7,7 @@ const ubuntu = new Font("rbxasset://fonts/families/Ubuntu.json", FontWeight.Medi
 
 @App({
 	name: "LoadScreen",
-	requiredScene: AppScene.Game,
+	requiredScene: AppScene.Loading,
 	ignoreGuiInset: true,
 	zIndex: 2
 })

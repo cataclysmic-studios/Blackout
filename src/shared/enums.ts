@@ -22,5 +22,6 @@ export const enum KickReason {
 
 export const enum AppScene {
   Menu,
-  Game,
+  Loading,
+  Game
 }
