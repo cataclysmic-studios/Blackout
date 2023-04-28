@@ -24,3 +24,7 @@ export const enum AppScene {
   Menu,
   Game,
 }
+
+export const enum Tag {
+  Penetratable = "Penetratable",
+}
