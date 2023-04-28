@@ -1,6 +1,7 @@
 type PageName =
   "Main" |
   "Loadout" | "EditLoadout" | "Gunsmith" |
+  "Operators" |
   "Settings" | "GraphicsSettings" | "AudioSettings" | "Controls";
 
 // from https://github.com/grilme99/tabletop-island/blob/main/src/types/util/readonly.d.ts
