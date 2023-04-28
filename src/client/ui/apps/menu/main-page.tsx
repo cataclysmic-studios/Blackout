@@ -14,6 +14,7 @@ export default function MainPage(props: PageProps) {
       <ButtonContainer>
         <Button Text="Play" OnClick={() => Dependency<SceneController>().swapScene(AppScene.Game)} />
         <Button Text="Loadout" OnClick={() => props.App.setPage("Loadout")} />
+        <Button Text="Operators" OnClick={() => props.App.setPage("Operators")} />
         <Button Text="Settings" OnClick={() => props.App.setPage("Settings")} />
       </ButtonContainer>
       <imagelabel

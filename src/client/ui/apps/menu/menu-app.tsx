@@ -5,8 +5,9 @@ import { App } from "client/controllers/apps";
 import { MenuController } from "client/controllers/menu";
 import Roact from "@rbxts/roact";
 import MainPage from "./main-page";
-import LoadoutSelectionPage from "./loadout-selection-page";
+import LoadoutSelectionPage from "./edit-loadout-page";
 import SettingsPage from "./settings-page";
+import EditLoadoutPage from "./edit-loadout-page";
 
 interface MenuState {
 	CurrentPage: PageName;
@@ -46,6 +47,7 @@ export class MenuApp extends Roact.Component<{}, MenuState> {
 			<>
 				<MainPage App={this} CurrentPage={this.state.CurrentPage} />
 				<LoadoutSelectionPage App={this} CurrentPage={this.state.CurrentPage} />
+				<EditLoadoutPage App={this} CurrentPage={this.state.CurrentPage} />
 				<SettingsPage App={this} CurrentPage={this.state.CurrentPage} />
 				<frame
 					Key="Shadow"
