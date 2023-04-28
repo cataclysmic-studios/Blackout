@@ -29,23 +29,25 @@ export default class Recoil extends BaseComponent<{}, Model | Camera> {
   public update(dt: number, aimed: boolean, leanOffset: CFrame): void {
     const torqueMult = 12;
     const springDamp = 80;
-    const ocf = this.springs.camera.update(dt).div(springDamp);
-    const tcf = this.springs.cameraTorque.update(dt).div(springDamp);
-    const coffset = new CFrame(0, 0, ocf.Z * 2.5);
-    const cvertClimb = CFrame.Angles(ocf.X, 0, 0);
-    const ctorque = CFrame.Angles(0, tcf.Y, tcf.Y * torqueMult)
-    const crecoil = coffset.mul(cvertClimb).mul(ctorque);
 
-    const omf = this.springs.model.update(dt).div(springDamp);
-    const tmf = this.springs.modelTorque.update(dt).div(springDamp);
-    const moffset = new CFrame(0, 0, -omf.Z);
-    const mvertClimb = new CFrame(0, -omf.X * 4, 0).mul(CFrame.Angles(omf.X * 2, 0, 0));
-    const mtorque = CFrame.Angles(0, tmf.Y, tmf.Y * torqueMult); // * (aimed ? 1.25 : 1)
-    const mrecoil = moffset.mul(mvertClimb).mul(mtorque);
 
     if (this.instance.IsA("Camera")) {
+      const ocf = this.springs.camera.update(dt).div(springDamp);
+      const tcf = this.springs.cameraTorque.update(dt).div(springDamp);
+      const coffset = new CFrame(0, 0, ocf.Z * 2.5);
+      const cvertClimb = CFrame.Angles(ocf.X, 0, 0);
+      const ctorque = CFrame.Angles(0, tcf.Y, tcf.Y * torqueMult)
+      const crecoil = coffset.mul(cvertClimb).mul(ctorque);
+
       this.instance.CFrame = this.instance.CFrame.mul(leanOffset).mul(crecoil);
     } else {
+      const omf = this.springs.model.update(dt).div(springDamp);
+      const tmf = this.springs.modelTorque.update(dt).div(springDamp);
+      const moffset = new CFrame(0, 0, -omf.Z);
+      const mvertClimb = new CFrame(0, -omf.X * 4, 0).mul(CFrame.Angles(omf.X * 2, 0, 0));
+      const mtorque = CFrame.Angles(0, tmf.Y, tmf.Y * torqueMult); // * (aimed ? 1.25 : 1)
+      const mrecoil = moffset.mul(mvertClimb).mul(mtorque);
+
       const vm = Dependency<Components>().getComponent<ViewModel>(this.instance)!;
       vm.syncCameraBone();
       vm.setCFrame(vm.getCFrame(dt, aimed, leanOffset).mul(mrecoil));
