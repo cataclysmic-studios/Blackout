@@ -1,11 +1,11 @@
 import { OnStart, Service } from "@flamework/core";
 import { CollectionService, ReplicatedStorage, Workspace } from "@rbxts/services";
-import { WeaponData } from "../../shared/interfaces/game-types";
-import FastCast, { ActiveCast, Caster } from "@rbxts/fastcast";
-import { OnPlayerAdded, OnPlayerRemoving } from "shared/meta/player-lifecycle-hooks";
 import { Janitor } from "@rbxts/janitor";
-import { Tag } from "shared/enums";
 import { Events } from "server/network";
+import { OnPlayerAdded, OnPlayerRemoving } from "shared/meta/player-lifecycle-hooks";
+import { WeaponData } from "shared/interfaces/game-types";
+import { Tag } from "shared/enums";
+import FastCast, { ActiveCast, Caster } from "@rbxts/fastcast";
 
 type Bullet = typeof ReplicatedStorage.VFX.Bullet;
 
@@ -28,24 +28,22 @@ fastCastBehavior.CanPierceFunction = (cast, result, segmentVelocity) => {
 
 @Service({})
 export class BulletService implements OnStart, OnPlayerAdded, OnPlayerRemoving {
-  private playerCasters = new Map<Player, Caster>();
-  private playerCasterJanitors = new Map<Player, Janitor>();
-  private playerJanitors = new Map<Player, Janitor>();
+  private playerCasters = new Map<Player, Caster>;
+  private playerCasterJanitors = new Map<Player, Janitor>;
+  private playerJanitors = new Map<Player, Janitor>;
 
-  onStart(): void {
+  public onStart(): void {
     Events.createBullet.connect((player, origin, direction, weaponData) => {
       this.createBullet(player, origin, direction, weaponData);
     });
   }
 
-  onPlayerAdded(player: Player): void {
-    const caster = new FastCast();
-
-    const playerJanitor = new Janitor();
-    const casterJanitor = new Janitor(); // Janitor to cleanup caster's stuff on CastTerminating
+  public onPlayerAdded(player: Player): void {
+    const caster = new FastCast;
+    const playerJanitor = new Janitor;
+    const casterJanitor = new Janitor; // Janitor to cleanup caster's stuff on CastTerminating
 
     playerJanitor.Add(casterJanitor);
-
     playerJanitor.Add(caster.LengthChanged.Connect(
       (caster, lastPoint, rayDir, displacement, segmentVelocity, cosmeticBulletObject) => this.playerRayLengthChanged(player, caster, lastPoint, rayDir, displacement, segmentVelocity, cosmeticBulletObject)
     ));
@@ -67,18 +65,18 @@ export class BulletService implements OnStart, OnPlayerAdded, OnPlayerRemoving {
     this.playerJanitors.set(player, playerJanitor);
   }
 
-  onPlayerRemoving(player: Player): void {
+  public onPlayerRemoving(player: Player): void {
     const janitor = this.playerJanitors.get(player);
     if (janitor === undefined) return;
 
     janitor.Destroy();
   }
 
-  private createBullet(player: Player, origin: Vector3, direction: Vector3, weaponData: WeaponData): ActiveCast | undefined {
+  private createBullet(player: Player, origin: Vector3, direction: Vector3, weaponData: WeaponData): Maybe<ActiveCast> {
     const caster = this.playerCasters.get(player);
     if (caster === undefined) return undefined;
 
-    const raycastParams = new RaycastParams();
+    const raycastParams = new RaycastParams;
     raycastParams.FilterDescendantsInstances = [player.Character!];
     raycastParams.FilterType = Enum.RaycastFilterType.Exclude;
 
@@ -100,26 +98,26 @@ export class BulletService implements OnStart, OnPlayerAdded, OnPlayerRemoving {
     displacement: number,
     segmentVelocity: Vector3,
     cosmeticBulletObject?: Instance
-  ) {
+  ): void {
     if (cosmeticBulletObject === undefined || !cosmeticBulletObject.IsA("BasePart")) return;
 
     const currentPoint = lastPoint.add(rayDir.mul(displacement));
     cosmeticBulletObject.Position = currentPoint;
   }
 
-  private playerRayHit(player: Player, casterThatFired: ActiveCast, result: RaycastResult, segmentVelocity: Vector3, cosmeticBulletObject?: Instance) {
+  private playerRayHit(player: Player, casterThatFired: ActiveCast, result: RaycastResult, segmentVelocity: Vector3, cosmeticBulletObject?: Instance): void {
     if (cosmeticBulletObject === undefined || !cosmeticBulletObject.IsA("BasePart")) return;
 
     const characterModel = result.Instance.FindFirstAncestorOfClass("Model");
-    if (characterModel === undefined) return undefined;
+    if (characterModel === undefined) return;
 
     const humanoid = characterModel.FindFirstChildOfClass("Humanoid");
-    if (humanoid === undefined) return undefined; // TODO: Add effect to non-humanoid characters
+    if (humanoid === undefined) return; // TODO: Add effect to non-humanoid characters
 
     humanoid.Health -= 10; // TODO: Calculate damage
   }
 
-  private playerRayPierced(player: Player, casterThatFired: ActiveCast, result: RaycastResult, segmentVelocity: Vector3, cosmeticBulletObject?: Instance) {
+  private playerRayPierced(player: Player, casterThatFired: ActiveCast, result: RaycastResult, segmentVelocity: Vector3, cosmeticBulletObject?: Instance): void {
 
   }
 }
