@@ -12,10 +12,15 @@ import Roact, { createRef } from "@rbxts/roact";
 type StoreDispatch = Rodux.Dispatch<StoreActions>;
 
 interface AppConfig {
+	/** The debug name of the app */
 	name: string;
+	/** The scene that the app is required to be mounted in */
 	requiredScene?: AppScene;
+	/** Whether or not to ignore the gui inset */
 	ignoreGuiInset?: boolean;
+	/** A function that maps the store state to the props of the app */
 	mapStateToProps?: (state: ClientStore) => unknown;
+	/** A function that maps the store dispatch to the props of the app */
 	mapDispatchToProps?: (dispatch: StoreDispatch) => unknown;
 }
 
