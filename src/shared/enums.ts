@@ -29,3 +29,15 @@ export const enum AppScene {
 export const enum Tag {
   Penetratable = "Penetratable",
 }
+
+export const enum MenuPage {
+  Main = "Main",
+  Loadout = "Loadout",
+  EditLoadout = "EditLoadout",
+  Gunsmith = "Gunsmith",
+  Operators = "Operators",
+  Settings = "Settings",
+  GraphicsSettings = "GraphicsSettings",
+  AudioSettings = "AudioSettings",
+  Controls = "Controls"
+}

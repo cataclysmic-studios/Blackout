@@ -8,7 +8,7 @@ import { MenuPage } from "shared/enums";
 
 export default function SettingsPage(props: PageProps) {
   return (
-    <PageFrame Title={MenuPage.Settings} Visible={props.CurrentPage === MenuPage.Settings}>
+    <PageFrame Title={MenuPage.Operators} Visible={props.CurrentPage === MenuPage.Operators}>
       <ButtonContainer>
         <Button Text="Graphics" LayoutOrder={0} OnClick={(b) => b} />
         <Button Text="Audio" LayoutOrder={1} OnClick={(b) => b} />
