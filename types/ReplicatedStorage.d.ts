@@ -1,5 +1,7 @@
+import { MenuPage } from "shared/enums";
+
 interface ReplicatedStorage extends Instance {
-	MenuCameras: Folder & { [key in PageName]: CFrameValue };
+	MenuCameras: Folder & { [key in MenuPage]: CFrameValue };
 	TS: Folder & {
 		modules: Folder & {
 			Enums: ModuleScript;
@@ -392,7 +394,7 @@ interface ReplicatedStorage extends Instance {
 		};
 	};
 	Weapons: Folder & {
-		HK416: Folder & {
+		HK416: Model & {
 			["Forward Assist"]: MeshPart;
 			TriggerMesh: MeshPart & {
 				TriggerMesh: Motor6D;
