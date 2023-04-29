@@ -1,6 +1,6 @@
 import { Controller, OnStart } from "@flamework/core";
 import { Players, UserInputService as UIS } from "@rbxts/services";
-import { FPSController } from "./fps";
+// import { FPSController } from "./fps";
 import { MovementController } from "./movement";
 
 @Controller()
@@ -8,24 +8,24 @@ export class InputController implements OnStart {
   public mouseDown = false;
 
   public constructor(
-    private readonly fps: FPSController,
+    // private readonly fps: FPSController,
     private readonly movement: MovementController
   ) { }
 
   public onStart(): void {
     const mouse = Players.LocalPlayer.GetMouse();
-    mouse.Button1Down.Connect(() => {
-      this.fps.mouseDown = true;
-      this.fps.toggleTriggerPull(true);
-      this.fps.shoot();
-    });
-    mouse.Button1Up.Connect(() => {
-      this.fps.toggleTriggerPull(false);
-      this.fps.mouseDown = false;
-    });
+    // mouse.Button1Down.Connect(() => {
+    // this.fps.mouseDown = true;
+    // this.fps.toggleTriggerPull(true);
+    // this.fps.shoot();
+    // });
+    // mouse.Button1Up.Connect(() => {
+    // this.fps.toggleTriggerPull(false);
+    // this.fps.mouseDown = false;
+    // });
 
-    mouse.Button2Down.Connect(() => this.fps.aim(true));
-    mouse.Button2Up.Connect(() => this.fps.aim(false));
+    // mouse.Button2Down.Connect(() => this.fps.aim(true));
+    // mouse.Button2Up.Connect(() => this.fps.aim(false));
 
     let cHeld = false;
     let timeCHeld = 0;
@@ -41,57 +41,57 @@ export class InputController implements OnStart {
     UIS.InputBegan.Connect(({ KeyCode: key }) => {
       switch (key.Name) {
         case "One":
-          if (this.fps.state.currentSlot === 1)
-            this.fps.unequip();
-          else
-            this.fps.equip(1);
+          // if (this.fps.state.currentSlot === 1)
+          // this.fps.unequip();
+          // else
+          // this.fps.equip(1);
           break;
         case "Two":
-          if (this.fps.state.currentSlot === 2)
-            this.fps.unequip();
-          else
-            this.fps.equip(2);
+          // if (this.fps.state.currentSlot === 2)
+          // this.fps.unequip();
+          // else
+          // this.fps.equip(2);
           break;
         case "Three":
-          if (this.fps.state.currentSlot === 3)
-            this.fps.unequip();
-          else
-            this.fps.equip(3);
+          // if (this.fps.state.currentSlot === 3)
+          // this.fps.unequip();
+          // else
+          // this.fps.equip(3);
           break;
 
         case "F":
-          this.fps.melee();
+          // this.fps.melee();
           break
 
         case "R":
-          this.fps.reload();
+          // this.fps.reload();
           break;
         case "H":
-          this.fps.inspect();
+          // this.fps.inspect();
           break;
 
         case "X": {
-          if (this.fps.state.proned) {
-            this.movement.prone(false);
-            this.movement.crouch(true);
-          } else
-            this.movement.crouch();
+          // if (this.fps.state.proned) {
+          //   this.movement.prone(false);
+          //   this.movement.crouch(true);
+          // } else
+          //   this.movement.crouch();
           break;
         }
         case "C": {
-          if (this.fps.state.proned) {
-            this.movement.prone(false);
-            this.movement.crouch(true);
-          } else
-            this.movement.crouch();
+          // if (this.fps.state.proned) {
+          //   this.movement.prone(false);
+          //   this.movement.crouch(true);
+          // } else
+          //   this.movement.crouch();
 
           task.spawn(() => {
             cHeld = true;
             while (cHeld) {
               task.wait();
               timeCHeld += 1 / 60;
-              if (timeCHeld > 2.5 && this.fps.state.crouched)
-                this.movement.prone(true);
+              // if (timeCHeld > 2.5 && this.fps.state.crouched)
+              // this.movement.prone(true);
             }
           });
           break;

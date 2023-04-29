@@ -3,7 +3,7 @@ import { Players } from "@rbxts/services";
 import { AppScene } from "shared/enums";
 import { App } from "client/controllers/apps";
 import { CrosshairController } from "client/controllers/crosshair";
-import { FPSController } from "client/controllers/fps";
+// import { FPSController } from "client/controllers/fps";
 import { Crosshair } from "client/ui/components/crosshair";
 import Roact, { createRef } from "@rbxts/roact";
 import AmmoText from "client/ui/components/ammo-text";
@@ -41,9 +41,9 @@ export class HUDApp extends Roact.Component {
 		task.spawn(() => {
 			Players.LocalPlayer.CameraMode = Enum.CameraMode.LockFirstPerson;
 			const crosshair = Dependency<CrosshairController>();
-			const fps = Dependency<FPSController>();
+			// const fps = Dependency<FPSController>();
 			crosshair.toggleMouseIcon();
-			fps.addWeapon("HK416", 1);
+			// fps.addWeapon("HK416", 1);
 		});
 	}
 
