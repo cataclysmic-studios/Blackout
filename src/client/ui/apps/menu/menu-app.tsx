@@ -8,6 +8,7 @@ import MainPage from "./main-page";
 import LoadoutSelectionPage from "./edit-loadout-page";
 import SettingsPage from "./settings-page";
 import EditLoadoutPage from "./edit-loadout-page";
+import OperatorsPage from "./operators-page";
 
 interface MenuState {
 	CurrentPage: MenuPage;
@@ -49,6 +50,7 @@ export class MenuApp extends Roact.Component<{}, MenuState> {
 				<LoadoutSelectionPage App={this} CurrentPage={this.state.CurrentPage} />
 				<EditLoadoutPage App={this} CurrentPage={this.state.CurrentPage} />
 				<SettingsPage App={this} CurrentPage={this.state.CurrentPage} />
+				<OperatorsPage App={this} CurrentPage={this.state.CurrentPage} />
 				<frame
 					Key="Shadow"
 					BackgroundColor3={Color3.fromRGB(50, 50, 50)}

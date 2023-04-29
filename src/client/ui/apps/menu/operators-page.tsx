@@ -6,13 +6,11 @@ import ButtonContainer from "client/ui/components/button-container";
 import BackButton from "client/ui/components/back-button";
 import { MenuPage } from "shared/enums";
 
-export default function SettingsPage(props: PageProps) {
+export default function OperatorsPage(props: PageProps) {
   return (
     <PageFrame Title={MenuPage.Operators} Visible={props.CurrentPage === MenuPage.Operators}>
       <ButtonContainer>
-        <Button Text="Graphics" LayoutOrder={0} OnClick={(b) => b} />
-        <Button Text="Audio" LayoutOrder={1} OnClick={(b) => b} />
-        <Button Text="Controls" LayoutOrder={2} OnClick={(b) => b} />
+        <Button Text="Operator One" LayoutOrder={0} OnClick={(b) => b} />
       </ButtonContainer>
       <BackButton App={props.App} />
     </PageFrame>
