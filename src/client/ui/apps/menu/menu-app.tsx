@@ -39,7 +39,7 @@ export class MenuApp extends Roact.Component<{}, MenuState> {
 	}
 
 	protected willUnmount(): void {
-    Sound.Music.Menu.Stop();
+		Sound.Music.Menu.Stop();
 	}
 
 	public render() {
