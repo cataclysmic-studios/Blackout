@@ -1,7 +1,8 @@
 import Roact, { Children, PropsWithChildren } from "@rbxts/roact";
+import { MenuPage } from "shared/enums";
 
 interface PageProps {
-	Title: PageName;
+	Title: MenuPage;
 	Visible: boolean;
 };
 

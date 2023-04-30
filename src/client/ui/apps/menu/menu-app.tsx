@@ -25,13 +25,19 @@ export interface PageProps {
 	ignoreGuiInset: true
 })
 export class MenuApp extends Roact.Component<{}, MenuState> {
+	private menuCameras = Replicated.WaitForChild("MenuCameras") as Folder;
+	
 	public setPage(pageName: MenuPage): void {
 		this.setState({
 			CurrentPage: pageName,
 		});
 
+		// const baseCF = Replicated.MenuCameras[pageName].Value;
+		const baseCFrameValue = this.menuCameras.FindFirstChild(pageName) as CFrameValue | undefined;
+		if (baseCFrameValue === undefined) return;
+		const baseCF = baseCFrameValue.Value;
+		
 		const menu = Dependency<MenuController>();
-		const baseCF = Replicated.MenuCameras[pageName].Value;
 		menu.setBaseCFrame(baseCF);
 	}
 
