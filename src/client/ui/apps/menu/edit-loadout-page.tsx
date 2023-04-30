@@ -1,10 +1,10 @@
+import { MenuPage } from "shared/enums";
 import { PageFrame } from "client/ui/components/page-frame";
 import { PageProps } from "./menu-app";
 import Roact from "@rbxts/roact";
 import Button from "client/ui/components/button";
 import BackButton from "client/ui/components/back-button";
 import ButtonContainer from "client/ui/components/button-container";
-import { MenuPage } from "shared/enums";
 
 export default function EditLoadoutPage(props: PageProps) {
   return (
