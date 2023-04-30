@@ -1,20 +1,14 @@
-import { OnStart } from "@flamework/core";
+import { OnRender, OnStart } from "@flamework/core";
 import { BaseComponent, Component } from "@flamework/components";
 import { UserInputService as UIS, Workspace as World } from "@rbxts/services";
+import { LeanState, WeaponData, WeaponModel } from "shared/interfaces/game-types";
 import { waitFor, Spring } from "shared/utility";
-import { LeanState, WeaponData, WeaponModel } from "../../shared/interfaces/game-types";
 
 const camera = World.CurrentCamera!;
 const { sin, clamp } = math;
 
-interface CameraOffset {
-  readonly CFrame: CFrame;
-  readonly Lerp: boolean;
-  readonly LerpAlpha: number;
-}
-
 @Component()
-export default class ViewModel extends BaseComponent<{}, Model> implements OnStart {
+export default class ViewModel extends BaseComponent<{}, Model> implements OnStart, OnRender {
   private prevCamCF?: CFrame;
   private springs = {
     mouseSway: new Spring
@@ -26,6 +20,13 @@ export default class ViewModel extends BaseComponent<{}, Model> implements OnSta
 
   public onStart(): void {
     this.instance.Parent = World.CurrentCamera!;
+  }
+
+  public onRender(dt: number): void {
+    const cameraPart = waitFor<Maybe<Part>>(this.instance, "Camera");
+    if (!cameraPart) return;
+
+    cameraPart.CFrame = camera.CFrame;
   }
 
   /**

@@ -23,8 +23,8 @@ export function tween<T extends Instance = Instance>(object: T, info: TweenInfo,
  * @param instanceName Child name
  * @returns Child
  */
-export function waitFor<T extends Instance>(instance: Instance, childName: string): T
-export function waitFor<T extends Instance>(instance: Instance, childName: string, timeout?: number): Maybe<T> {
+export function waitFor<T extends Maybe<Instance> = Instance>(instance: Instance, childName: string): T
+export function waitFor<T extends Instance = Instance>(instance: Instance, childName: string, timeout?: number): Maybe<T> {
   if (!instance) throw $error("Instance is undefined", 2);
   if (!childName) throw $error("Child instance name is undefined", 2);
   return <T>instance.WaitForChild(childName, timeout ?? 6);

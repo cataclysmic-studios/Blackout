@@ -1,7 +1,5 @@
-import { MenuPage } from "shared/enums";
-
 interface ReplicatedStorage extends Instance {
-	MenuCameras: Folder & { [key in MenuPage]: CFrameValue };
+	MenuCameras: Folder; // & { [key in MenuPage]: CFrameValue };
 	TS: Folder & {
 		modules: Folder & {
 			Enums: ModuleScript;
