@@ -1,20 +1,5 @@
 interface ReplicatedStorage extends Instance {
-	MenuCameras: Folder & { [key in PageName]: CFrameValue };
-	TS: Folder & {
-		modules: Folder & {
-			Enums: ModuleScript;
-			Types: ModuleScript;
-			utility: Folder & {
-				Tween: ModuleScript;
-				WaitFor: ModuleScript;
-				Spring: ModuleScript;
-				IsNaN: ModuleScript;
-				Wave: ModuleScript;
-			};
-		};
-		components: Folder;
-		network: ModuleScript;
-	};
+	MenuCameras: Folder;
 	Character: Folder & {
 		ViewModel: Model & {
 			AnimationController: AnimationController & {

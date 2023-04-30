@@ -46,19 +46,19 @@ export class BulletService implements OnStart, OnPlayerAdded, OnPlayerRemoving {
     playerJanitor.Add(casterJanitor);
     playerJanitor.Add(caster.LengthChanged.Connect(
       (caster, lastPoint, rayDir, displacement, segmentVelocity, cosmeticBulletObject) => this.playerRayLengthChanged(player, caster, lastPoint, rayDir, displacement, segmentVelocity, cosmeticBulletObject)
-    ));
+    ), "Disconnect");
 
     playerJanitor.Add(caster.RayHit.Connect(
       (caster, result, segmentVelocity, cosmeticBulletObject) => this.playerRayHit(player, caster, result, segmentVelocity, cosmeticBulletObject)
-    ));
+    ), "Disconnect");
 
     playerJanitor.Add(caster.RayPierced.Connect(
       (caster, result, segmentVelocity, cosmeticBulletObject) => this.playerRayPierced(player, caster, result, segmentVelocity, cosmeticBulletObject)
-    ));
+    ), "Disconnect");
 
     playerJanitor.Add(caster.CastTerminating.Connect(() => {
       casterJanitor.Cleanup();
-    }));
+    }), "Disconnect");
 
     this.playerCasters.set(player, caster);
     this.playerCasterJanitors.set(player, casterJanitor);
