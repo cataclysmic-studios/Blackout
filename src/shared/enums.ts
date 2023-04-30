@@ -22,9 +22,22 @@ export const enum KickReason {
 
 export const enum AppScene {
   Menu,
-  Game,
+  Loading,
+  Game
 }
 
 export const enum Tag {
   Penetratable = "Penetratable",
+}
+
+export const enum MenuPage {
+  Main = "Main",
+  Loadout = "Loadout",
+  EditLoadout = "EditLoadout",
+  Gunsmith = "Gunsmith",
+  Operators = "Operators",
+  Settings = "Settings",
+  GraphicsSettings = "GraphicsSettings",
+  AudioSettings = "AudioSettings",
+  Controls = "Controls"
 }
