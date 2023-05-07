@@ -1,17 +1,14 @@
-import { MenuApp } from "../apps/menu/menu-app";
 import Roact from "@rbxts/roact";
-import Button from "./button";
 import { MenuPage } from "shared/enums";
+import { useMenuApp } from "../apps/contexts/menu-app";
+import Button from "./button";
 
-interface BackButtonProps {
-	App: MenuApp;
-}
-
-export default function BackButton(props: BackButtonProps) {
+export default function BackButton() {
+	const { app } = useMenuApp();
 	return <Button 
 		Text="Back"
 		Position={UDim2.fromScale(0.006, 0.85)}
 		Rotation={-2}
-		OnClick={() => props.App.setPage(MenuPage.Main)} 
+		OnClick={() => app.setPage(MenuPage.Main)} 
 	/>;
 }
