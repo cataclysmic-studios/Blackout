@@ -2,12 +2,12 @@ export const enum Firemode {
   Auto,
   Semi,
   Burst,
-  Bolt
+  Bolt,
 }
 
 export const enum BanReason {
   Unbanned,
-  Exploiting
+  Exploiting,
 }
 
 export const enum KickReason {
@@ -17,13 +17,13 @@ export const enum KickReason {
   // Player data related
   PlayerProfileUndefined,
 
-  Banned
+  Banned,
 }
 
 export const enum AppScene {
   Menu,
   Loading,
-  Game
+  Game,
 }
 
 export const enum Tag {
@@ -39,5 +39,5 @@ export const enum MenuPage {
   Settings = "Settings",
   GraphicsSettings = "GraphicsSettings",
   AudioSettings = "AudioSettings",
-  Controls = "Controls"
+  Controls = "Controls",
 }

@@ -33,7 +33,7 @@ export class MenuApp extends Roact.Component<{}, MenuState> {
 		const baseCFrameValue = this.menuCameras.FindFirstChild(pageName) as CFrameValue | undefined;
 		if (baseCFrameValue === undefined) return;
 		const baseCF = baseCFrameValue.Value;
-		
+
 		const menu = Dependency<MenuController>();
 		menu.setBaseCFrame(baseCF);
 	}

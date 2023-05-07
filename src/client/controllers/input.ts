@@ -10,7 +10,7 @@ export class InputController implements OnStart {
   public constructor(
     private readonly fps: FPSController,
     private readonly movement: MovementController
-  ) { }
+  ) {}
 
   public onStart(): void {
     const mouse = Players.LocalPlayer.GetMouse();
@@ -36,32 +36,26 @@ export class InputController implements OnStart {
           timeCHeld = 0;
           break;
       }
-    })
+    });
 
     UIS.InputBegan.Connect(({ KeyCode: key }) => {
       switch (key.Name) {
         case "One":
-          if (this.fps.state.currentSlot === 1)
-            this.fps.unequip();
-          else
-            this.fps.equip(1);
+          if (this.fps.state.currentSlot === 1) this.fps.unequip();
+          else this.fps.equip(1);
           break;
         case "Two":
-          if (this.fps.state.currentSlot === 2)
-            this.fps.unequip();
-          else
-            this.fps.equip(2);
+          if (this.fps.state.currentSlot === 2) this.fps.unequip();
+          else this.fps.equip(2);
           break;
         case "Three":
-          if (this.fps.state.currentSlot === 3)
-            this.fps.unequip();
-          else
-            this.fps.equip(3);
+          if (this.fps.state.currentSlot === 3) this.fps.unequip();
+          else this.fps.equip(3);
           break;
 
         case "F":
           this.fps.melee();
-          break
+          break;
 
         case "R":
           this.fps.reload();
@@ -74,20 +68,18 @@ export class InputController implements OnStart {
           if (this.fps.state.proned) {
             this.movement.prone(false);
             this.movement.crouch(true);
-          } else
-            this.movement.crouch();
+          } else this.movement.crouch();
           break;
         }
         case "C": {
           if (this.fps.state.proned) {
             this.movement.prone(false);
             this.movement.crouch(true);
-          } else
-            this.movement.crouch();
+          } else this.movement.crouch();
 
           task.spawn(() => {
-            cHeld = true;
-            while (cHeld) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-constant-condition
+            while (true) {
               task.wait();
               timeCHeld += 1 / 60;
               if (timeCHeld > 2.5 && this.fps.state.crouched)
