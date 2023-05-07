@@ -8,8 +8,11 @@ const InitialState: DataReducer = DefaultPlayerData;
 
 export type DataActions = ActionSetPlayerData;
 
-export const dataReducer = Rodux.createReducer<DataReducer, DataActions>(InitialState, {
-	SetPlayerData: (state, action) => {
-		return { ...state, ...action.newPlayerData };
-	}
-});
+export const dataReducer = Rodux.createReducer<DataReducer, DataActions>(
+  InitialState,
+  {
+    SetPlayerData: (state, action) => {
+      return { ...state, ...action.newPlayerData };
+    },
+  }
+);

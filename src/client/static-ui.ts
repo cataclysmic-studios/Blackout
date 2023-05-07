@@ -3,11 +3,14 @@ import { waitFor } from "shared/utility";
 // import { HUD } from "client/components/heads-up-display";
 
 export class StaticUI {
-  public static readonly container = waitFor<PlayerGui>(Players.LocalPlayer, "PlayerGui");
+  public static readonly container = waitFor<PlayerGui>(
+    Players.LocalPlayer,
+    "PlayerGui"
+  );
 
   /**
    * Function to get the HUD component
-   * 
+   *
    * @returns HUD component
    */
   public static getHUD() {
@@ -19,11 +22,13 @@ export class StaticUI {
 
   /**
    * Returns a ScreenGui inside of PlayerGui
-   * 
+   *
    * @param name ScreenGui name
    * @returns ScreenGui with the given name
    */
-  public static getScreen<T extends Exclude<keyof PlayerGui, Instance>>(name: T): PlayerGui[T] {
-    return <PlayerGui[T]>this.container.WaitForChild(name);
+  public static getScreen<T extends Exclude<keyof PlayerGui, Instance>>(
+    name: T
+  ): PlayerGui[T] {
+    return this.container.WaitForChild(name) as PlayerGui[T];
   }
 }

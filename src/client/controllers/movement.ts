@@ -5,13 +5,11 @@ import { FPSController } from "./fps";
 
 @Controller()
 export class MovementController {
-  public constructor(
-    private readonly fps: FPSController
-  ) { }
+  public constructor(private readonly fps: FPSController) {}
 
   /**
    * Toggle/set crouching status
-   * 
+   *
    * @param on Whether or not to crouch
    */
   public crouch(on?: boolean): void {
@@ -20,7 +18,7 @@ export class MovementController {
 
   /**
    * Set proning status
-   * 
+   *
    * @param on Whether or not to prone
    */
   public prone(on: boolean): void {
@@ -31,7 +29,7 @@ export class MovementController {
 
   /**
    * Set the lean state
-   * 
+   *
    * @param leanState Desired lean state
    */
   public lean(leanState: LeanState): void {
@@ -39,7 +37,9 @@ export class MovementController {
     this.fps.state.lean = leanState;
     const leanInfo = new TweenInfo(0.25, Enum.EasingStyle.Quad);
     tween(this.fps.leanOffset, leanInfo, {
-      Value: new CFrame(leanState, 0, 0).mul(CFrame.Angles(0, 0, math.rad(-20 * leanState)))
+      Value: new CFrame(leanState, 0, 0).mul(
+        CFrame.Angles(0, 0, math.rad(-20 * leanState))
+      ),
     });
   }
 }

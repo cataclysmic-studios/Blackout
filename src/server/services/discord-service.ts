@@ -8,12 +8,14 @@ export class DiscordService implements OnInit {
   private readonly url = $env.string("LOG_WEBHOOK")!;
 
   public onInit(): void {
-    Events.discordLog.connect((plr, msg, logType) => this.log(plr, msg, logType));
+    Events.discordLog.connect((plr, msg, logType) =>
+      this.log(plr, msg, logType)
+    );
   }
 
   /**
    * Log to Discord
-   * 
+   *
    * @param player Player
    * @param message Message
    * @param logType Log type
@@ -28,13 +30,13 @@ export class DiscordService implements OnInit {
           author: {
             name: player.Name + (Runtime.IsStudio() ? " (Studio)" : ""),
             //icon_url: thumb,
-            url: "https://www.roblox.com/users/" + player.UserId + "/profile"
+            url: "https://www.roblox.com/users/" + player.UserId + "/profile",
           },
           description: message,
           timestamp: DateTime.now().ToIsoDate(),
-          color: 0xE09F36
-        }
-      ]
+          color: 0xe09f36,
+        },
+      ],
     });
     xpcall(() => HTTP.PostAsync(this.url, data), warn);
   }

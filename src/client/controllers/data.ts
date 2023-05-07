@@ -5,11 +5,11 @@ import { PlayerData } from "shared/meta/default-player-data";
 
 @Controller()
 export class DataController implements OnStart {
-	public onStart(): void {
-		Events.playerDataChanged.connect((data) => this.onReceivedNewData(data));
-	}
+  public onStart(): void {
+    Events.playerDataChanged.connect((data) => this.onReceivedNewData(data));
+  }
 
-	private onReceivedNewData(newPlayerData: Partial<PlayerData>) {
-		ClientStore.dispatch({ type: "SetPlayerData", newPlayerData })
-	}
+  private onReceivedNewData(newPlayerData: Partial<PlayerData>) {
+    ClientStore.dispatch({ type: "SetPlayerData", newPlayerData });
+  }
 }

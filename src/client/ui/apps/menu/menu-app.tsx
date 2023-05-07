@@ -1,14 +1,13 @@
 import { Dependency } from "@flamework/core";
+import Roact from "@rbxts/roact";
 import { ReplicatedStorage as Replicated, SoundService as Sound } from "@rbxts/services";
-import { AppScene, MenuPage } from "shared/enums";
 import { App } from "client/controllers/apps";
 import { MenuController } from "client/controllers/menu";
-import Roact from "@rbxts/roact";
+import { AppScene, MenuPage } from "shared/enums";
+import { default as EditLoadoutPage, default as LoadoutSelectionPage } from "./edit-loadout-page";
 import MainPage from "./main-page";
-import LoadoutSelectionPage from "./edit-loadout-page";
-import SettingsPage from "./settings-page";
-import EditLoadoutPage from "./edit-loadout-page";
 import OperatorsPage from "./operators-page";
+import SettingsPage from "./settings-page";
 
 interface MenuState {
 	CurrentPage: MenuPage;
@@ -36,7 +35,7 @@ export class MenuApp extends Roact.Component<{}, MenuState> {
 		const baseCFrameValue = this.menuCameras.FindFirstChild(pageName) as CFrameValue | undefined;
 		if (baseCFrameValue === undefined) return;
 		const baseCF = baseCFrameValue.Value;
-		
+
 		const menu = Dependency<MenuController>();
 		menu.setBaseCFrame(baseCF);
 	}

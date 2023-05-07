@@ -3,17 +3,20 @@ import Rodux from "@rbxts/rodux";
 import { AppScene } from "shared/enums";
 
 export interface GameReducer {
-	currentScene: AppScene;
+  currentScene: AppScene;
 }
 
 const InitialState = {
-	currentScene: AppScene.Menu,
+  currentScene: AppScene.Menu,
 };
 
 export type GameActions = ActionSetScene;
 
-export const gameReducer = Rodux.createReducer<GameReducer, GameActions>(InitialState, {
-	SetScene: (state, action) => {
-		return { ...state, currentScene: action.newScene };
-	}
-});
+export const gameReducer = Rodux.createReducer<GameReducer, GameActions>(
+  InitialState,
+  {
+    SetScene: (state, action) => {
+      return { ...state, currentScene: action.newScene };
+    },
+  }
+);

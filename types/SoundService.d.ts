@@ -1,5 +1,5 @@
 interface SoundService extends Instance {
-	Music: SoundGroup & {
-		Menu: Sound;
-	};
+  Music: SoundGroup & {
+    Menu: Sound;
+  };
 }

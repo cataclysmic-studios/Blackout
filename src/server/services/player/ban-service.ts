@@ -11,12 +11,16 @@ export class BanService implements OnPlayerAdded {
     private readonly playerData: PlayerDataService,
     private readonly playerRemoval: PlayerRemovalService,
     private readonly discord: DiscordService
-  ) { }
+  ) {}
 
   public onPlayerAdded(player: Player): void {
     const profile = this.playerData.getProfile(player.UserId);
     if (!profile) return;
-    if (!profile.Data.banInfo.banned && profile.Data.banInfo.reason === BanReason.Unbanned) return;
+    if (
+      !profile.Data.banInfo.banned &&
+      profile.Data.banInfo.reason === BanReason.Unbanned
+    )
+      return;
     this.playerRemoval.removeDueToBan(player, profile.Data.banInfo.reason);
   }
 
@@ -26,7 +30,11 @@ export class BanService implements OnPlayerAdded {
     profile.Data.banInfo.banned = true;
     profile.Data.banInfo.reason = reason;
     this.playerRemoval.removeDueToBan(player, reason);
-    this.discord.log(player, "Player was banned.\nBan Reason: " + reason, "Player Banned")
+    this.discord.log(
+      player,
+      "Player was banned.\nBan Reason: " + reason,
+      "Player Banned"
+    );
   }
 
   public async unban(userID: number): Promise<void> {
