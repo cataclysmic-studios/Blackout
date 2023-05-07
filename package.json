@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "rbxtsc",
-    "watch": "rbxtsc -w"
+    "watch": "rbxtsc -w",
+    "lint": "eslint --fix src/**/*.ts types/**/*.d.ts"
   },
   "keywords": [],
   "author": "",
