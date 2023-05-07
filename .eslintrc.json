@@ -18,6 +18,8 @@
     "plugin:prettier/recommended"
   ],
   "rules": {
-    "prettier/prettier": "warn"
+    "prettier/prettier": "warn",
+    "@typescript-eslint/no-invalid-void-type": "off",
+    "@typescript-eslint/require-await": "off"
   }
 }
