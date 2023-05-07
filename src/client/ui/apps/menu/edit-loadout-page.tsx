@@ -1,21 +1,22 @@
-import { MenuPage } from "shared/enums";
-import { PageFrame } from "client/ui/components/page-frame";
-import { PageProps } from "./menu-app";
 import Roact from "@rbxts/roact";
-import Button from "client/ui/components/button";
 import BackButton from "client/ui/components/back-button";
+import Button from "client/ui/components/button";
 import ButtonContainer from "client/ui/components/button-container";
+import { PageFrame } from "client/ui/components/page-frame";
+import { MenuPage } from "shared/enums";
+import { useMenuApp } from "../contexts/menu-app";
 
-export default function EditLoadoutPage(props: PageProps) {
+export default function EditLoadoutPage() {
+	const { app, currentPage } = useMenuApp();
   return (
-    <PageFrame Title={MenuPage.EditLoadout} Visible={props.CurrentPage === MenuPage.EditLoadout}>
+    <PageFrame Title={MenuPage.EditLoadout} Visible={currentPage === MenuPage.EditLoadout}>
       <ButtonContainer>
-        <Button Text="Primary" OnClick={() => props.App.setPage(MenuPage.Gunsmith)} />
-        <Button Text="Secondary" OnClick={() => props.App.setPage(MenuPage.Gunsmith)} />
+        <Button Text="Primary" OnClick={() => app.setPage(MenuPage.Gunsmith)} />
+        <Button Text="Secondary" OnClick={() => app.setPage(MenuPage.Gunsmith)} />
         <Button Text="Grenade" OnClick={(b) => b} />
         <Button Text="Equipment" OnClick={(b) => b} />
       </ButtonContainer>
-      <BackButton App={props.App} />
+      <BackButton />
     </PageFrame>
   );
 }
