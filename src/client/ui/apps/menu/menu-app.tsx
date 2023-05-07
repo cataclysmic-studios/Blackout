@@ -4,6 +4,7 @@ import { ReplicatedStorage as Replicated, SoundService as Sound } from "@rbxts/s
 import { App } from "client/controllers/apps";
 import { MenuController } from "client/controllers/menu";
 import { AppScene, MenuPage } from "shared/enums";
+import { MenuAppProvider } from "../contexts/menu-app";
 import { default as EditLoadoutPage, default as LoadoutSelectionPage } from "./edit-loadout-page";
 import MainPage from "./main-page";
 import OperatorsPage from "./operators-page";
@@ -11,11 +12,6 @@ import SettingsPage from "./settings-page";
 
 interface MenuState {
 	CurrentPage: MenuPage;
-}
-
-export interface PageProps {
-  App: MenuApp;
-  CurrentPage: MenuPage;
 }
 
 @App({
@@ -26,6 +22,8 @@ export interface PageProps {
 export class MenuApp extends Roact.Component<{}, MenuState> {
 	private menuCameras = Replicated.WaitForChild("MenuCameras") as Folder;
 	
+	public CurrentPage = this.state.CurrentPage;
+
 	public setPage(pageName: MenuPage): void {
 		this.setState({
 			CurrentPage: pageName,
@@ -50,12 +48,12 @@ export class MenuApp extends Roact.Component<{}, MenuState> {
 
 	public render() {
 		return (
-			<>
-				<MainPage App={this} CurrentPage={this.state.CurrentPage} />
-				<LoadoutSelectionPage App={this} CurrentPage={this.state.CurrentPage} />
-				<EditLoadoutPage App={this} CurrentPage={this.state.CurrentPage} />
-				<SettingsPage App={this} CurrentPage={this.state.CurrentPage} />
-				<OperatorsPage App={this} CurrentPage={this.state.CurrentPage} />
+			<MenuAppProvider app={this} currentPage={this.state.CurrentPage}>
+				<MainPage />
+				<LoadoutSelectionPage />
+				<EditLoadoutPage />
+				<SettingsPage />
+				<OperatorsPage />
 				<frame
 					Key="Shadow"
 					BackgroundColor3={Color3.fromRGB(50, 50, 50)}
@@ -74,7 +72,7 @@ export class MenuApp extends Roact.Component<{}, MenuState> {
 						}
 					/>
 				</frame>
-			</>
+			</MenuAppProvider>
 		);
 	}
 }
