@@ -1,18 +1,18 @@
 import { OnStart, Service } from "@flamework/core";
+import FastCast, { ActiveCast, Caster } from "@rbxts/fastcast";
+import { Janitor } from "@rbxts/janitor";
 import {
   CollectionService,
   ReplicatedStorage,
   Workspace,
 } from "@rbxts/services";
-import { Janitor } from "@rbxts/janitor";
 import { Events } from "server/network";
+import { Tag } from "shared/enums";
+import { WeaponData } from "shared/interfaces/game-types";
 import {
   OnPlayerAdded,
   OnPlayerRemoving,
 } from "shared/meta/player-lifecycle-hooks";
-import { WeaponData } from "shared/interfaces/game-types";
-import { Tag } from "shared/enums";
-import FastCast, { ActiveCast, Caster } from "@rbxts/fastcast";
 
 type Bullet = typeof ReplicatedStorage.VFX.Bullet;
 
@@ -27,6 +27,7 @@ fastCastBehavior.CosmeticBulletContainer = bulletFolder;
 fastCastBehavior.AutoIgnoreContainer = true;
 fastCastBehavior.CanPierceFunction = (cast, result, segmentVelocity) => {
   const part = result.Instance;
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (part === undefined) return false;
 
   return CollectionService.HasTag(part, Tag.Penetratable);

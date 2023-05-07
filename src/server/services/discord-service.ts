@@ -1,7 +1,7 @@
 import { OnInit, Service } from "@flamework/core";
 import { HttpService as HTTP, RunService as Runtime } from "@rbxts/services";
-import { Events } from "server/network";
 import { $env } from "rbxts-transform-env";
+import { Events } from "server/network";
 
 @Service()
 export class DiscordService implements OnInit {
@@ -30,7 +30,7 @@ export class DiscordService implements OnInit {
           author: {
             name: player.Name + (Runtime.IsStudio() ? " (Studio)" : ""),
             //icon_url: thumb,
-            url: "https://www.roblox.com/users/" + player.UserId + "/profile",
+            url: `https://www.roblox.com/users/${player.UserId}/profile`,
           },
           description: message,
           timestamp: DateTime.now().ToIsoDate(),

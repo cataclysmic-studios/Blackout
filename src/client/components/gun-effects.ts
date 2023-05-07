@@ -1,15 +1,15 @@
-import { Dependency } from "@flamework/core";
 import { BaseComponent, Component } from "@flamework/components";
+import { Dependency } from "@flamework/core";
 import {
   Debris,
   Players,
   ReplicatedStorage as Replicated,
   Workspace as World,
 } from "@rbxts/services";
+import { SoundController } from "client/controllers/sound-player";
 import { Events } from "client/network";
 import { WeaponData, WeaponModel } from "shared/interfaces/game-types";
 import { waitFor } from "shared/utility";
-import { SoundController } from "client/controllers/sound-player";
 
 @Component()
 export default class GunEffects extends BaseComponent<{}, WeaponModel> {
@@ -76,9 +76,8 @@ export default class GunEffects extends BaseComponent<{}, WeaponModel> {
     );
 
     let db = false;
-    let conn: RBXScriptConnection;
     const sound = Dependency<SoundController>();
-    conn = shell.Touched.Connect((hit) => {
+    const conn = shell.Touched.Connect((hit) => {
       if (!hit.CanCollide) return;
       if (db) return;
       db = true;

@@ -1,6 +1,6 @@
 import { Service } from "@flamework/core";
-import { GAME_NAME } from "shared/shared-constants";
 import { BanReason, KickReason } from "shared/enums";
+import { GAME_NAME } from "shared/shared-constants";
 import { DiscordService } from "../discord-service";
 
 @Service()
@@ -8,13 +8,13 @@ export class PlayerRemovalService {
   public constructor(private readonly discord: DiscordService) {}
 
   private remove(player: Player, message: string, reason: KickReason): void {
-    player.Kick(message + "\nKick Reason: " + reason);
+    player.Kick(`${message}\nKick Reason: ${reason}`);
   }
 
   public removeDueToBan(player: Player, reason: BanReason): void {
     this.remove(
       player,
-      "You have been banned.\nBan Reason: " + reason,
+      `You have been banned.\nBan Reason: ${reason}`,
       KickReason.Banned
     );
   }

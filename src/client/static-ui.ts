@@ -2,6 +2,7 @@ import { Players } from "@rbxts/services";
 import { waitFor } from "shared/utility";
 // import { HUD } from "client/components/heads-up-display";
 
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class StaticUI {
   public static readonly container = waitFor<PlayerGui>(
     Players.LocalPlayer,

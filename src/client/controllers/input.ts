@@ -78,8 +78,8 @@ export class InputController implements OnStart {
           } else this.movement.crouch();
 
           task.spawn(() => {
-            cHeld = true;
-            while (cHeld) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-constant-condition
+            while (true) {
               task.wait();
               timeCHeld += 1 / 60;
               if (timeCHeld > 2.5 && this.fps.state.crouched)

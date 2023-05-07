@@ -32,12 +32,12 @@ export function waitFor<T extends Instance>(
   childName: string
 ): T;
 export function waitFor<T extends Instance>(
-  instance: Instance,
-  childName: string,
+  instance: Instance | undefined,
+  childName: string | undefined,
   timeout?: number
 ): Maybe<T> {
-  if (!instance) throw $error("Instance is undefined", 2);
-  if (!childName) throw $error("Child instance name is undefined", 2);
+  if (!instance) $error("Instance is undefined", 2);
+  if (childName === undefined) $error("Child instance name is undefined", 2);
   return instance.WaitForChild(childName, timeout ?? 6) as T;
 }
 

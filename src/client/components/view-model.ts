@@ -1,12 +1,8 @@
-import { OnStart } from "@flamework/core";
 import { BaseComponent, Component } from "@flamework/components";
+import { OnStart } from "@flamework/core";
 import { UserInputService as UIS, Workspace as World } from "@rbxts/services";
-import { waitFor, Spring } from "shared/utility";
-import {
-  LeanState,
-  WeaponData,
-  WeaponModel,
-} from "../../shared/interfaces/game-types";
+import { Spring, waitFor } from "shared/utility";
+import { WeaponData, WeaponModel } from "../../shared/interfaces/game-types";
 
 const camera = World.CurrentCamera!;
 const { sin, clamp } = math;
@@ -141,6 +137,7 @@ export default class ViewModel
         )) as WeaponData;
       } catch (e) {
         warn(
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           `Weapon data for "${this.weapon.Name}" failed to load. Stack trace:\n${e}`
         );
       }

@@ -1,27 +1,27 @@
-import { Controller, Dependency, OnRender, OnStart } from "@flamework/core";
 import { Components } from "@flamework/components";
+import { Controller, Dependency, OnRender, OnStart } from "@flamework/core";
+import { Janitor } from "@rbxts/janitor";
 import {
   ReplicatedStorage as Replicated,
   Workspace as World,
 } from "@rbxts/services";
-import { Janitor } from "@rbxts/janitor";
-import { waitFor, tween } from "shared/utility";
+import { $error } from "rbxts-transform-debug";
+import { Firemode } from "shared/enums";
 import {
   FPSState,
   Slot,
   WeaponData,
   WeaponModel,
 } from "shared/interfaces/game-types";
-import { Firemode } from "shared/enums";
-import { $error } from "rbxts-transform-debug";
+import { tween, waitFor } from "shared/utility";
 
-import { CrosshairController } from "./crosshair";
-import { SoundController } from "./sound-player";
-import { AppController } from "./apps";
 import Signal from "@rbxts/signal";
-import ViewModel from "client/components/view-model";
 import GunEffects from "client/components/gun-effects";
 import Recoil from "client/components/recoil";
+import ViewModel from "client/components/view-model";
+import { AppController } from "./apps";
+import { CrosshairController } from "./crosshair";
+import { SoundController } from "./sound-player";
 
 @Controller()
 export class FPSController implements OnStart, OnRender {
@@ -172,7 +172,7 @@ export class FPSController implements OnStart, OnRender {
     if (apps.isShowing("Menu")) return;
 
     const weaponName = this.state.weapons[slot - 1];
-    if (!weaponName) return;
+    if (weaponName === undefined) return;
 
     this.crosshair.toggle();
     this.crosshair.toggleDot();
@@ -215,8 +215,7 @@ export class FPSController implements OnStart, OnRender {
       .GetMarkerReachedSignal("BoltClosed")
       .Once(() => this.currentWeapon?.model.Sounds.SlideRelease.Play());
 
-    let conn: RBXScriptConnection;
-    conn = equipAnim.Stopped.Connect(() => {
+    const conn = equipAnim.Stopped.Connect(() => {
       this.state.equipped = true;
       conn.Disconnect();
     });
@@ -247,12 +246,11 @@ export class FPSController implements OnStart, OnRender {
       task.wait(0.1);
     }
 
-    let conn: RBXScriptConnection;
     this.currentWeapon.anims.inspect = this.viewModel!.playAnimation(
       "Inspect",
       false
     )!;
-    conn = this.currentWeapon.anims.inspect.Stopped.Connect(() => {
+    const conn = this.currentWeapon.anims.inspect.Stopped.Connect(() => {
       this.state.inspecting = false;
       conn.Disconnect();
     });
@@ -435,17 +433,19 @@ export class FPSController implements OnStart, OnRender {
         } while (this.mouseDown);
         break;
       case Firemode.Burst:
-        const burstCount = this.currentWeapon.data.stats.burstCount ?? 3;
-        for (let i = 0; i <= burstCount && this.mouseDown; i++) {
+        for (
+          let i = 0;
+          i <= (this.currentWeapon.data.stats.burstCount ?? 3) &&
+          this.mouseDown;
+          i++
+        ) {
           pew();
           task.wait(fireSpeed);
         }
         break;
 
       default:
-        throw $error(
-          "Invalid firemode: " + tostring(this.state.weapon.firemode)
-        );
+        $error("Invalid firemode: " + tostring(this.state.weapon.firemode));
     }
 
     this.state.shooting = false;
